@@ -59,3 +59,37 @@ Si on une détection de cycle dans le graphe représentant la TM, on peut identi
 ## 26/06/24
 
 On tente d'implémenter le langage qui sera converti en machine de turing ainsi qu'un interpréteur en ocaml
+
+Interpréteur de machine de turing fonctionne bien yessssss
+Il faudrait maintenant définir notre nouveau langage ainsi qu'un syntaxe pour écrire des machines de turing dans des fichiers tm 
+
+En l'occurrence, on définit un fichier tm comme il suit (avec un compteur binaire pour exemple):
+
+```text
+4
+2
+-1
+0
+2,3
+0,0,0,0,R
+0,1,0,1,R
+0,-1,1,-1,L
+1,0,2,1,L
+1,1,1,0,L
+1,-1,2,1,L
+```
+
+- La première ligne est le nombre d'états de notre machine de turing
+- La seconde ligne est le nombre de symboles de notre machine de turing (sans le caractère blanc)
+- La troisième ligne est le caractère blanc
+- La quatrième ligne est l'état initial
+- La cinquième ligne est la liste des états finaux/acceptants
+- Toutes les autres lignes décrivent les transitions :
+  - Une ligne est de la forme "q1,c1,q2,c2,M" où
+    - `q1` est l'état d'où la transition commence
+    - `c1` est le caractère lut sur la transition
+    - `q2` est l'état d'arrivé
+    - `c2` est le caractère écrit
+    - `M` est le déplacement du curseur, il peut être de deux formes : L (Left) ou R (Right)
+  
+_Dans cet exemple, l'état `3` ne sert à rien, il n'a que pour but de montrer une liste d'état finaux._

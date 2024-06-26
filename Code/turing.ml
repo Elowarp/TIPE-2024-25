@@ -13,7 +13,7 @@
 type 'a tape = (int, 'a) Hashtbl.t 
 type move = LEFT | RIGHT
 type 'a turing_machine = {
-    nb_state: int; (* Nombres d'états : 0, 1, ..., n-1*)
+    nb_states: int; (* Nombres d'états : 0, 1, ..., n-1*)
     sigma: 'a array;
     blank: 'a;
     i: int;
@@ -127,10 +127,10 @@ let print_tape (tape: 'a tape) (blank: 'a) ?(show_cursor=false) ?(cursor=0) (pri
 (*** Fonctions de manipulation des machines de turing ***)
 let add_transition (tm: 'a turing_machine) (q1: int) (read_letter: 'a) (q2: int)
   (write_letter: 'a) (shift: move): unit = 
-    assert((q1 >= 0) && (q1 < tm.nb_state));
-    assert((q2 >= 0) && (q2 < tm.nb_state));
-	assert(Array.mem read_letter (tm.sigma) || read_letter = tm.blank);
-	assert(Array.mem write_letter (tm.sigma) || write_letter = tm.blank);
+    assert((q1 >= 0) && (q1 < tm.nb_states));
+    assert((q2 >= 0) && (q2 < tm.nb_states));
+	(* assert(Array.mem read_letter (tm.sigma) || read_letter = tm.blank); *)
+	(* assert(Array.mem write_letter (tm.sigma) || write_letter = tm.blank); *)
 
     match Hashtbl.find_opt (tm.delta) (q1, read_letter) with
         | None -> Hashtbl.add (tm.delta) (q1, read_letter) (q2, write_letter, shift)
@@ -153,7 +153,7 @@ let print_transition (q1: int) (read_letter: 'a) (q2: int) (write_letter: 'a)
 
 
 let print_transitions (tm: 'a turing_machine) (print_letter: 'a -> unit): unit = 
-    for i=0 to tm.nb_state - 1 do 
+    for i=0 to tm.nb_states - 1 do 
         for j=0 to (Array.length tm.sigma) - 1 do
             match Hashtbl.find_opt tm.delta (i, tm.sigma.(j)) with
             | None -> ()
@@ -213,6 +213,92 @@ let run_turing (tm: 'a turing_machine) ?(print_step=false)
 
     working_tape
 
+let load_turing (filename: string): string turing_machine = 
+    let ic = open_in filename in 
+    let nb_states = ref 0 in
+    let nb_symboles = ref 0 in
+    let blank = ref "_" in
+    let initial_state = ref 0 in
+    let final_states = ref [] in
+    let delta = Hashtbl.create 36 in
+
+    (* Enlève le \n à la fin de la ligne qui fait planter int_of_string *)
+    let input_line_formated ic = 
+        let str = input_line ic in 
+        String.sub str 0 (String.length str - 1) in
+
+    let line_to_trans_infos str = 
+        let l = String.split_on_char ',' str in 
+        (
+            int_of_string (List.nth l 0),
+            List.nth l 1,
+            int_of_string (List.nth l 2),
+            List.nth l 3,
+            if List.nth l 4 = "R" then RIGHT else LEFT
+        )
+    in
+
+    (
+        try
+            nb_states := int_of_string (input_line_formated ic);
+            nb_symboles := int_of_string (input_line_formated ic);
+            blank := input_line_formated ic; 
+            initial_state := int_of_string (input_line_formated ic);
+            final_states := 
+                List.map (fun x -> int_of_string x) 
+                    (String.split_on_char ',' (input_line_formated ic));
+
+        with Failure _ -> 
+            Printf.printf "Problèmes avec les entiers donnés en début de fichier\n"
+    );
+
+    let (tm_temp: string turing_machine) = {
+        nb_states = !nb_states;
+        sigma = [||];
+        blank = !blank;
+        i = !initial_state; 
+        f = !final_states; 
+        delta = delta
+    } in
+
+    let symbols = Hashtbl.create 36 in (* Hashtbl caractère -> indice *)
+    let indice = ref 0 in
+    try
+        while true do 
+            let q1, read_letter, q2, write_letter, shift = line_to_trans_infos(input_line_formated ic) in 
+            add_transition tm_temp q1 read_letter q2 write_letter shift;
+
+            if read_letter <> !blank then
+                match Hashtbl.find_opt symbols read_letter with 
+                    | None -> Hashtbl.add symbols read_letter !indice; incr indice
+                    | Some _ -> ();
+
+            if write_letter <> !blank then
+                match Hashtbl.find_opt symbols write_letter with 
+                    | None -> Hashtbl.add symbols write_letter !indice; incr indice
+                    | Some _ -> ()
+        done
+    with 
+        | Failure _ -> 
+            Printf.printf "Problèmes avec des transitions\n"; exit(1)
+        | End_of_file -> 
+            let sigma = Array.of_list (
+                        Hashtbl.fold (
+                        fun k v acc -> 
+                            k::acc
+                    ) symbols []
+                )
+            in
+            
+            {
+                nb_states = !nb_states;
+                sigma = sigma;
+                blank = !blank;
+                i = !initial_state; 
+                f = !final_states; 
+                delta = delta
+            }
+
 
 (*** Tests ***)
 let _ = (* Tests des bandes *)
@@ -254,7 +340,7 @@ let _ = (* Tests des machines de Turing *)
     let blank = -1 in
 
     let (tm1: int turing_machine) = {
-        nb_state = 3;
+        nb_states = 3;
         sigma = [|0; 1|];
         blank = blank;
         i=0;
@@ -279,4 +365,6 @@ let _ = (* Tests des machines de Turing *)
 
     print_string "Bande obtenue : ";
     print_tape final_tape blank print_int;
-    assert (tape_to_array final_tape blank = [|0; 1; 1; 1; 0|])
+    assert (tape_to_array final_tape blank = [|0; 1; 1; 1; 0|]);
+
+    print_turing (load_turing "turing_machines/increase_counter.tm") print_string
