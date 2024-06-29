@@ -13,11 +13,11 @@
 type 'a tape = (int, 'a) Hashtbl.t 
 type move = LEFT | RIGHT
 type 'a turing_machine = {
-    nb_states: int; (* Nombres d'états : 0, 1, ..., n-1*)
+    mutable nb_states: int; (* Nombres d'états : 0, 1, ..., n-1*)
     sigma: 'a array;
     blank: 'a;
     i: int;
-    f: int list;
+    mutable f: int list;
     delta: (int * 'a, int * 'a * move) Hashtbl.t;
 } 
 
@@ -40,6 +40,7 @@ let write_tape (tape: 'a tape) (blank: 'a) (cursor: int) (write_letter: 'a): uni
         | Some c -> if write_letter = blank then Hashtbl.remove tape cursor
         else Hashtbl.replace tape cursor write_letter
 
+(* Prend un tableau et le caractère blanc et créer une bande *)
 let array_to_tape (a: 'a array) (blank: 'a): 'a tape = 
     let tape = init_tape () in 
     for i=0 to Array.length a - 1 do
@@ -91,9 +92,14 @@ let tape_to_array_with_offset (tape: 'a tape) (blank: 'a): ('a array * int) =
 let tape_to_array (tape: 'a tape) (blank: 'a) = 
     let a, _ = tape_to_array_with_offset tape blank in a
 
-let print_tape (tape: 'a tape) (blank: 'a) ?(show_cursor=false) ?(cursor=0) (print_letter: 'a -> unit): unit = 
+let print_tape (tape: 'a tape) (blank: 'a) ?(show_cursor=false) ?(cursor=0)
+  ?(state=(-1)) (print_letter: 'a -> unit): unit = 
     let a, offset = tape_to_array_with_offset tape blank in 
-    print_string "[ ... ";
+    if state != -1 then (
+        print_string "Etat : ";
+        print_int state
+    );
+    print_string " [ ... ";
 
     Array.iteri (
         fun i x -> 
@@ -135,7 +141,8 @@ let add_transition (tm: 'a turing_machine) (q1: int) (read_letter: 'a) (q2: int)
     match Hashtbl.find_opt (tm.delta) (q1, read_letter) with
         | None -> Hashtbl.add (tm.delta) (q1, read_letter) (q2, write_letter, shift)
         | Some q -> (
-            failwith "Indéterminisation de la machine de turing !"
+            Printf.printf "Etat %d vers %d\n" q1 q2;
+            failwith "Indeterminisation de la machine de turing !"
         )
 
 let print_transition (q1: int) (read_letter: 'a) (q2: int) (write_letter: 'a) 
@@ -189,23 +196,26 @@ let run_turing (tm: 'a turing_machine) ?(print_step=false)
     let working_tape = copy_tape tape in 
     let break = ref false in 
 
+    print_tape working_tape ~show_cursor:true ~cursor:!cursor 
+        ~state:!state tm.blank print_letter;
+
     while not (List.mem !state tm.f) && not !break do
         let read_letter = read_tape working_tape tm.blank !cursor in
         
         (* Une étape d'avancement *)
         match Hashtbl.find_opt tm.delta (!state, read_letter) with
-            | None -> break := true (* Pas de quoi avancer, on s'arrête *)
+            | None -> failwith "Erreur execution, symbole de la bande non reconnu"
             | Some(q2, write_letter, shift) -> 
                 state := q2;
                 write_tape working_tape tm.blank !cursor write_letter; 
 
+                if shift = LEFT then decr cursor
+                else incr cursor;
+
                 (* Affichage étape par étape *)
                 if print_step then 
                     print_tape working_tape ~show_cursor:true ~cursor:!cursor 
-                                tm.blank print_letter;
-
-                if shift = LEFT then decr cursor
-                else incr cursor
+                        ~state:!state tm.blank print_letter;
     done;
 
     if print_step then 
@@ -301,7 +311,7 @@ let load_turing (filename: string): string turing_machine =
 
 
 (*** Tests ***)
-let _ = (* Tests des bandes *)
+(* let _ = (* Tests des bandes *)
     let init_array = [||] in 
     let blank = '_' in
     let tape = array_to_tape init_array blank in
@@ -367,4 +377,4 @@ let _ = (* Tests des machines de Turing *)
     print_tape final_tape blank print_int;
     assert (tape_to_array final_tape blank = [|0; 1; 1; 1; 0|]);
 
-    print_turing (load_turing "turing_machines/increase_counter.tm") print_string
+    print_turing (load_turing "turing_machines/increase_counter.tm") print_string *)

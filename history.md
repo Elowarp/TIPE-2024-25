@@ -93,3 +93,88 @@ En l'occurrence, on définit un fichier tm comme il suit (avec un compteur binai
     - `M` est le déplacement du curseur, il peut être de deux formes : L (Left) ou R (Right)
   
 _Dans cet exemple, l'état `3` ne sert à rien, il n'a que pour but de montrer une liste d'état finaux._
+
+Pour définir notre langage _Luring_ (Language-Turing), on utilise le cours : https://web.stanford.edu/class/archive/cs/cs103/cs103.1132/lectures/19/Small19.pdf (langage_TM.pdf)
+
+On a en premier lieu 5 commandes :
+
+- `Move` `dir` : Déplace la tête de lecture sur la bande (`right` ou `left`)
+- `Write` `s` : Ecrit le symbole `s` à l'endroit de la tête de lecture
+- `Goto` `n` : Va à la ligne `n`
+- `If` `s` `Go` `n` : Si le symbole `s` est lu alors aller à la ligne `n`
+- `Nothing` : Ne fait rien
+- `End` : Fini le programme
+
+Chaque exécution est réalisé l'une à la suite de l'autre si aucune ligne ne le contredit
+
+> ça ressemble quand même bcp à de l'assembleur
+
+On veut ainsi démontrer qu'un langage est récursivement énumérable si et seulement s'il existe un programme en Luring le modélisant (sachange qu'un langage est récursivement énumérable ssi il existe une machine de turing le modélisant)
+
+Pour ça, on va faire par double inclusion :
+
+### Depuis une machine de turing vers du Luring
+Construire un programme en Luring pour chaque état qui simule un état
+
+Typiquement, un état final sera converti en le code `End`
+Ensuite, pour les autres états, on procède dans cet ordre :
+
+- Lire le symbole
+- Ecrire le symbole qu'il faut selon la transition donnée
+- Aller à l'état demandé
+
+Pour la machine de turing à deux état (q0 et q1) tel que q1 est acceptant
+et que lire un a depuis q0 envoie sur q1 avec écriture de b et déplacement à droite
+et que lire un b depuis q0 envoie sur q0 avec écriture de a et déplacement à gauche
+
+Code exemple
+
+```
+// q0
+0 : If a Go 2
+1 : If b Go 5
+
+// Si a vient d'être lu depuis l'état q0
+2 : Write b 
+3 : Move Right
+4 : Goto 8
+
+// Si b vient d'être lu depuis l'état q0
+5 : Write a
+6 : Move left 
+7 : Goto 0
+
+// q1
+8 : End
+```
+
+### Depuis le Luring vers une machine de turing 
+On va construire des machines de turing pour chaque action puis les relier entre elle pour construire la machine finale
+
+Pour plus de commodité, on appelle $q_n$ l'état depuis lequel la TM commence pour la commande à la ligne $n$
+
+Par exemple, on a le cas trivial de l'instruction `End` qui se traduit par le lien vers un état acceptant
+
+Ensuite on a le cas de `Move` :
+Simplement on fait un deplacement dans la direction indiquée en copiant le caractère que l'on vient de lire
+
+Pour `n : Goto k` :
+On crée un état intermédiaire pour lequel on le relie depuis $q_n$ par un deplacement vers la droite en copiant le même caractère, puis on relie cet état intermédiaire à $q_k$ en copiant le même caractère mais en se déplacant à gauche (comme ça la tête de lecture ne se déplace pas)
+
+Pour `n : Write s` :
+Idem sauf que la premiere transition se fait en écrivant s et que k = n+1
+
+Pour `n : If s Go k` :
+Idem que goto, seulement là on veut que seul la transition qui lit s passe à l'état intermédiaire puis l'etat k et que toutes les autres aillent dans un autre état intermediaire pour ensuite aller à l'état $q_{n+1}$ en n'écrivant rien
+
+Maintenant Implémentons ça !
+
+Il faut un analyseur syntaxique du Luring et un arbre syntaxique ? Utilisation d'un ancien tp sur les grammaires etc : Le numerix
+
+## 29/06/24
+
+Pour expliquer le fonctionnement du parseur, il faut bien dire qu'on utilise des grammaires et les développer
+
+Le problème que je rencontre c'est comment depuis des instructions on peut créer un automate, plus en particulier je sais comment créer les modules unitaires (par exemple pour `move`) mais pas comment les merge ensemble sans que les numéros se chevauchent
+
+on crée n(= nb de lignes) états puis on crée les modules relativement à l'état de départ
