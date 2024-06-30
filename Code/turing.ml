@@ -12,7 +12,7 @@
 
 type 'a tape = (int, 'a) Hashtbl.t 
 type move = LEFT | RIGHT
-type 'a turing_machine = {
+type 'a t = { (* Type d'une machine de turing *)
     mutable nb_states: int; (* Nombres d'états : 0, 1, ..., n-1*)
     sigma: 'a array;
     blank: 'a;
@@ -131,7 +131,7 @@ let print_tape (tape: 'a tape) (blank: 'a) ?(show_cursor=false) ?(cursor=0)
     print_newline ()
 
 (*** Fonctions de manipulation des machines de turing ***)
-let add_transition (tm: 'a turing_machine) (q1: int) (read_letter: 'a) (q2: int)
+let add_transition (tm: 'a t) (q1: int) (read_letter: 'a) (q2: int)
   (write_letter: 'a) (shift: move): unit = 
     assert((q1 >= 0) && (q1 < tm.nb_states));
     assert((q2 >= 0) && (q2 < tm.nb_states));
@@ -159,7 +159,7 @@ let print_transition (q1: int) (read_letter: 'a) (q2: int) (write_letter: 'a)
     print_newline ()
 
 
-let print_transitions (tm: 'a turing_machine) (print_letter: 'a -> unit): unit = 
+let print_transitions (tm: 'a t) (print_letter: 'a -> unit): unit = 
     for i=0 to tm.nb_states - 1 do 
         for j=0 to (Array.length tm.sigma) - 1 do
             match Hashtbl.find_opt tm.delta (i, tm.sigma.(j)) with
@@ -177,7 +177,7 @@ let print_transitions (tm: 'a turing_machine) (print_letter: 'a -> unit): unit =
 
     done
 
-let print_turing (tm: 'a turing_machine) (print_letter: 'a -> unit): unit = 
+let print_turing (tm: 'a t) (print_letter: 'a -> unit): unit = 
     print_string "Affichage d'une machine de turing : \n";
     Printf.printf "Initial : %d\n" tm.i;
     print_string "Finaux : ";
@@ -189,7 +189,7 @@ let print_turing (tm: 'a turing_machine) (print_letter: 'a -> unit): unit =
     print_transitions tm print_letter;
     print_newline ()
 
-let run_turing (tm: 'a turing_machine) ?(print_step=false) 
+let run_turing (tm: 'a t) ?(print_step=false) 
   ?(print_letter= fun _ -> ()) (tape: 'a tape): 'a tape =
     let cursor = ref 0 in 
     let state = ref tm.i in  
@@ -223,7 +223,7 @@ let run_turing (tm: 'a turing_machine) ?(print_step=false)
 
     working_tape
 
-let load_turing (filename: string): string turing_machine = 
+let load_turing (filename: string): string t = 
     let ic = open_in filename in 
     let nb_states = ref 0 in
     let nb_symboles = ref 0 in
@@ -250,19 +250,19 @@ let load_turing (filename: string): string turing_machine =
 
     (
         try
-            nb_states := int_of_string (input_line_formated ic);
-            nb_symboles := int_of_string (input_line_formated ic);
-            blank := input_line_formated ic; 
-            initial_state := int_of_string (input_line_formated ic);
+            nb_states := int_of_string (String.trim (input_line ic));
+            nb_symboles := int_of_string (String.trim (input_line ic));
+            blank := String.trim (input_line ic); 
+            initial_state := int_of_string (String.trim (input_line ic));
             final_states := 
                 List.map (fun x -> int_of_string x) 
-                    (String.split_on_char ',' (input_line_formated ic));
+                    (String.split_on_char ',' (String.trim (input_line ic)));
 
         with Failure _ -> 
             Printf.printf "Problèmes avec les entiers donnés en début de fichier\n"
     );
 
-    let (tm_temp: string turing_machine) = {
+    let (tm_temp: string t) = {
         nb_states = !nb_states;
         sigma = [||];
         blank = !blank;
@@ -275,7 +275,7 @@ let load_turing (filename: string): string turing_machine =
     let indice = ref 0 in
     try
         while true do 
-            let q1, read_letter, q2, write_letter, shift = line_to_trans_infos(input_line_formated ic) in 
+            let q1, read_letter, q2, write_letter, shift = line_to_trans_infos(String.trim (input_line ic)) in 
             add_transition tm_temp q1 read_letter q2 write_letter shift;
 
             if read_letter <> !blank then
@@ -290,7 +290,7 @@ let load_turing (filename: string): string turing_machine =
         done
     with 
         | Failure _ -> 
-            Printf.printf "Problèmes avec des transitions\n"; exit(1)
+            Printf.printf "Problemes avec des transitions\n"; exit(1)
         | End_of_file -> 
             let sigma = Array.of_list (
                         Hashtbl.fold (

@@ -9,5 +9,8 @@ lexer: lexer.ml
 parser: turing.ml parser.ml lexer.ml
 	ocamlc -g turing.ml lexer.ml parser.ml -o parser
 
+compiler: turing.ml parser.ml lexer.ml compiler.ml
+	ocamlc -g turing.ml lexer.ml parser.ml compiler.ml -o compiler
+
 clean: 
 	rm -r *.cmi *.cmo turing lexer parser

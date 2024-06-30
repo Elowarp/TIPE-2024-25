@@ -177,4 +177,9 @@ Pour expliquer le fonctionnement du parseur, il faut bien dire qu'on utilise des
 
 Le problème que je rencontre c'est comment depuis des instructions on peut créer un automate, plus en particulier je sais comment créer les modules unitaires (par exemple pour `move`) mais pas comment les merge ensemble sans que les numéros se chevauchent
 
-on crée n(= nb de lignes) états puis on crée les modules relativement à l'état de départ
+on crée n(= nb de lignes) états puis on crée les modules relativement à l'état de départ et l'état d'arrivé de la commande
+
+Maintenant que la partie Luring into TM est faite, il faut faire la réciproque
+
+## 30/06/24
+J'ai fait le lien Luring -> Turing machine file (.tm) 

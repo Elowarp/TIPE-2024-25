@@ -24,8 +24,6 @@ type program =
 | Goto of int * exp_arith
 | End of int
 
-let blank = "_"
-
 (* Construit les instructions en suivant les règles de dérivation des 
    grammaires A S et P *)
 let rec parse_A (l: lexem list) : exp_arith * lexem list = 
@@ -99,7 +97,7 @@ let get_symb (prgm: program list) (blank: string): string list =
         )
     in aux prgm []
 
-let add_move_tm (start_state: int) (end_state: int) (tm: string turing_machine)
+let add_move_tm (start_state: int) (end_state: int) (tm: string Turing.t)
   (shift: shift) = 
     match shift with
         | Left -> (
@@ -119,7 +117,7 @@ let add_move_tm (start_state: int) (end_state: int) (tm: string turing_machine)
                 tm.blank Turing.LEFT
         )
 
-let add_write_tm (start_state: int) (end_state: int) (tm: string turing_machine)
+let add_write_tm (start_state: int) (end_state: int) (tm: string Turing.t)
   (write_letter: string) =
     tm.nb_states <- tm.nb_states + 1;
     for i=0 to Array.length (tm.sigma) - 1 do
@@ -131,7 +129,7 @@ let add_write_tm (start_state: int) (end_state: int) (tm: string turing_machine)
     add_transition tm start_state tm.blank (tm.nb_states-1) write_letter Turing.RIGHT;
     add_transition tm (tm.nb_states-1) tm.blank end_state tm.blank Turing.LEFT
     
-let add_goto_tm (start_state: int) (end_state: int) (tm: string turing_machine) = 
+let add_goto_tm (start_state: int) (end_state: int) (tm: string Turing.t) = 
     tm.nb_states <- tm.nb_states + 1;
     for i=0 to Array.length (tm.sigma) - 1 do
         add_transition tm start_state tm.sigma.(i) (tm.nb_states-1) tm.sigma.(i) Turing.RIGHT;
@@ -142,7 +140,7 @@ let add_goto_tm (start_state: int) (end_state: int) (tm: string turing_machine) 
     add_transition tm start_state tm.blank (tm.nb_states-1) tm.blank Turing.RIGHT;
     add_transition tm (tm.nb_states-1) tm.blank end_state tm.blank Turing.LEFT
 
-let add_if_tm (start_state: int) (end_state: int) (tm: string turing_machine) 
+let add_if_tm (start_state: int) (end_state: int) (tm: string Turing.t) 
   (read_letter: string) = 
     tm.nb_states <- tm.nb_states + 2;
     
@@ -164,45 +162,3 @@ let add_if_tm (start_state: int) (end_state: int) (tm: string turing_machine)
             
     add_transition tm (tm.nb_states-1) tm.blank end_state tm.blank Turing.LEFT;
     add_transition tm (tm.nb_states-2) tm.blank (start_state+1) tm.blank Turing.LEFT
-
-let luring_to_turing (filename: string) : string turing_machine =
-    let prgm = parse filename in
-
-    (* On crée autant d'états que de ligne *)
-    let nb_states = ref (List.length prgm) in
-    let sigma = Array.of_list (get_symb prgm blank) in
-    let (tm: string turing_machine) = {
-        (* Toutes les lignes + l'état final de fin de prgm *)
-        nb_states = !nb_states + 1; 
-        sigma=sigma; 
-        blank=blank; 
-        i=0; 
-
-        (* On termine le programme quoi qu'il arrive à la fin du prgm *)
-        f=[!nb_states];  
-
-        delta=Hashtbl.create 36
-    } in
-    
-    (* Convertit la liste de commandes en états et transitions *)
-    (* Les états commençant à 0, on doit soustraire 1 au nombre de lignes *)
-    let rec build_program code = match code with 
-        | [] -> tm
-        | Move (line, shift) :: q -> 
-            add_move_tm (line-1) line tm shift; build_program q
-        | Write (line, Symb(letter)) :: q -> 
-            add_write_tm (line-1) line tm letter; build_program q
-        | Goto (line, Cst(line_moving)) :: q -> 
-            add_goto_tm (line-1) line_moving tm; build_program q
-        | If (line, Symb(letter), Cst(line_moving)) :: q -> 
-            add_if_tm (line-1) (line_moving-1) tm letter; build_program q
-        | End (line) :: q -> tm.f <- (line-1)::(tm.f) ; build_program q
-        | Nothing (line) :: q -> build_program q
-        | _ -> failwith "Erreur création machine de turing : code programme non attendu" 
-    in build_program prgm
-
-let _ = 
-    let tm = luring_to_turing "luring_programs/ex1.lu" in 
-    Turing.print_turing tm print_string;
-    let tape = Turing.run_turing tm ~print_step:true ~print_letter:print_string
-        (Turing.array_to_tape [|"a"; "_"; "b"|] blank) in ()
