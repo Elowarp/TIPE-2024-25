@@ -73,7 +73,7 @@ let turing_to_tm_file (filename: string) (tm: 'a Turing.t) (repr_letter: 'a -> s
 
     close_out oc
 
-let _ = 
+(* let _ = 
     let tm = luring_to_turing "luring_programs/ex1.lu" in
     turing_to_tm_file "ex1.tm" tm (fun e -> e); 
     let tm2 = load_turing "ex1.tm" in 
@@ -81,4 +81,4 @@ let _ =
     let tape = Turing.run_turing tm ~print_step:true ~print_letter:print_string
         (Turing.array_to_tape [|"a"; "_"; "b"|] blank) in 
     let tape2 = Turing.run_turing tm2 ~print_step:true ~print_letter:print_string
-        (Turing.array_to_tape [|"a"; "_"; "b"|] blank) in ()
+        (Turing.array_to_tape [|"a"; "_"; "b"|] blank) in (tape, tape2) *)

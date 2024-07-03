@@ -26,19 +26,19 @@ type program =
 
 (* Construit les instructions en suivant les règles de dérivation des 
    grammaires A S et P *)
-let rec parse_A (l: lexem list) : exp_arith * lexem list = 
+let rec parse_A (l: Lexer.t list) : exp_arith * Lexer.t list = 
   match l with 
     | (_, LCst(i))::q -> (Cst(i), q)
     | (_, LSymb(s))::q -> (Symb(s), q)
     | _ -> failwith "Erreur parsing, expression arithmétique attendue"
 
-and parse_S (l: lexem list) : shift * lexem list = 
+and parse_S (l: Lexer.t list) : shift * Lexer.t list = 
     match l with 
         | (_, LLeft)::q -> (Left, q)
         | (_, LRight)::q -> (Right, q)
         | _ -> failwith "Erreur parsing, expression de direction attendue"
 
-and parse_P (l: lexem list) : program list = 
+and parse_P (l: Lexer.t list) : program list = 
     let code, q = 
         match l with 
             | (code_line, LIf)::q -> (
@@ -162,3 +162,6 @@ let add_if_tm (start_state: int) (end_state: int) (tm: string Turing.t)
             
     add_transition tm (tm.nb_states-1) tm.blank end_state tm.blank Turing.LEFT;
     add_transition tm (tm.nb_states-2) tm.blank (start_state+1) tm.blank Turing.LEFT
+
+let _ = 
+    Lexer.init() (* Initialise l'analyse lexicale *)

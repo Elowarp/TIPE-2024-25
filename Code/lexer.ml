@@ -16,7 +16,7 @@ type lexem_type =
   | LNothing
   | LSemiColon
 
-type lexem = int * lexem_type (* Le num de ligne et le lexem *)
+type t = int * lexem_type (* Le num de ligne et le lexem *)
 
 let motcles = [
   LLeft; LRight;
@@ -121,8 +121,10 @@ let plus_long_lexem (s:string) (i:int): (lexem_type * int) option =
           )
   in pll i 0
 
-let analyse (s: string) (line: int): lexem list =
+let analyse (s: string) (line: int): t list =
   let n = String.length s in
+
+  (*A commenter*)
   let rec aux i acc = match i with 
     | i when i < n -> 
       (
@@ -135,7 +137,7 @@ let analyse (s: string) (line: int): lexem list =
     | _ -> acc
   in aux 0 []
 
-let analyse_fichier (filename:string): lexem list = 
+let analyse_fichier (filename:string): t list = 
   let ic = open_in_bin filename in
 
   (* Itère sur toutes les lignes *)

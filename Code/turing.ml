@@ -196,8 +196,9 @@ let run_turing (tm: 'a t) ?(print_step=false)
     let working_tape = copy_tape tape in 
     let break = ref false in 
 
-    print_tape working_tape ~show_cursor:true ~cursor:!cursor 
-        ~state:!state tm.blank print_letter;
+    if print_step then
+        print_tape working_tape ~show_cursor:true ~cursor:!cursor 
+          ~state:!state tm.blank print_letter;
 
     while not (List.mem !state tm.f) && not !break do
         let read_letter = read_tape working_tape tm.blank !cursor in
@@ -231,11 +232,6 @@ let load_turing (filename: string): string t =
     let initial_state = ref 0 in
     let final_states = ref [] in
     let delta = Hashtbl.create 36 in
-
-    (* Enlève le \n à la fin de la ligne qui fait planter int_of_string *)
-    let input_line_formated ic = 
-        let str = input_line ic in 
-        String.sub str 0 (String.length str - 1) in
 
     let line_to_trans_infos str = 
         let l = String.split_on_char ',' str in 
@@ -273,6 +269,8 @@ let load_turing (filename: string): string t =
 
     let symbols = Hashtbl.create 36 in (* Hashtbl caractère -> indice *)
     let indice = ref 0 in
+
+    (* Parcours de toutes les transitions *)
     try
         while true do 
             let q1, read_letter, q2, write_letter, shift = line_to_trans_infos(String.trim (input_line ic)) in 
@@ -287,7 +285,8 @@ let load_turing (filename: string): string t =
                 match Hashtbl.find_opt symbols write_letter with 
                     | None -> Hashtbl.add symbols write_letter !indice; incr indice
                     | Some _ -> ()
-        done
+        done;
+        let (tm: string t) = {nb_states=0; sigma=[||]; blank="_"; i=0; f=[]; delta=Hashtbl.create 36} in tm
     with 
         | Failure _ -> 
             Printf.printf "Problemes avec des transitions\n"; exit(1)

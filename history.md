@@ -182,4 +182,7 @@ on crée n(= nb de lignes) états puis on crée les modules relativement à l'é
 Maintenant que la partie Luring into TM est faite, il faut faire la réciproque
 
 ## 30/06/24
-J'ai fait le lien Luring -> Turing machine file (.tm) 
+J'ai fait le lien Luring -> Turintape_strg machine file (.tm) 
+
+## 03/07/24
+Pour l'instant on se base que sur des symboles de 1 caractère, et donc j'ai fait un interpréteur de fichier Luring 
