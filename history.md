@@ -186,3 +186,48 @@ J'ai fait le lien Luring -> Turintape_strg machine file (.tm)
 
 ## 03/07/24
 Pour l'instant on se base que sur des symboles de 1 caractère, et donc j'ai fait un interpréteur de fichier Luring 
+
+Maintenant on se se focus sur la transformation turing into luring
+
+### Convertir des états turing en code luring
+
+Déjà d'un état acceptant on met juste un `End`
+
+On va alors décomposer le code en plusieurs segments basés sur le nombre de lettres possible
+On note n le nombre de symboles sans compter le symbole blanc donc pour un état q on va avoir
+
+- n+1 lignes pour demander quel est le symbole lu et à quelle ligne on doit renvoyer
+- n+1 blocs de 3 lignes : `Write`; `Move` puis `Goto`
+
+Donc pour aller à un état en particulier on va devoir retenir à quelle ligne les n+1 lignes commencent
+
+Si on a moins de n+1 transitions depuis un état on enleve juste les lignes correspondantes
+
+On prend les p = nb d'états premieres lignes pour faire des goto 
+
+**Comment montrer faire un luring prgm qui prend en compte qu'un état peut être acceptant et avoir des transitions sortantes ???**
+
+**Théorème de rice pour montrer qu'on ne peut pas faire un programme qui comprend ce que dit la machine de turing**
+
+
+Structure du code crée 
+
+Goto etat initial
+Goto q1
+Goto q2
+...
+Goto qn
+Write s
+Move dir
+Goto (n+1 +1) // Ici on ne connait pas la ligne où on veut aller pour toucher l'état n+1 alors on va à la ligne dans notre "sommaire" qui nous redirige vers la bonne ligne.
+Par exemple à la ligne 2, on a la direction pour trouver l'état 1 etc
+
+
+Le code produit par uncompiler est un code bon, alors que devrait faire des tests pour tous mes fichiers aifn de trouver d'ou vient le bug tel que quand je l'interprete avec interpreter, le code d'ajout binaire ne foncitonne pas
+
+## 06/07/24
+Je viens de realiser les tests pour les fichiers Turing/Lexer/Parser (aka les plus importants) et j'ai trouvé le problème qui faisait que je n'avais pas la même sémantique quand je faisais TM -> Luring -> TM.
+
+Maintenant on observe que (via `Ressource\compteur_binaire_export_av_opti.pdf`) on a une explosion des états (de 3 on est passé à plus de 50 !). Mais la bonne nouvelle c'est que si on regarde plus en détail, nous avons beaucoup de suite d'états avec les mêmes transitions (tout l'alphabet + la caractère blanc), donc il serait simple de le réduire. A faire. Apres, à quoi ça servirait ? hein
+
+Donc on sait que le décompileur fonctionne si no arrive a avoir la même sémantique. enft jsp si sémantique cest le bon mot mais en tt cas ils ont les memes résultats.

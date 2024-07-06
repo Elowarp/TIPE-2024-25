@@ -2,7 +2,7 @@
  *  Name : Elowan
  *  Creation : 26-06-2024 10:59:40
  *  Last modified : 26-06-2024 11:15:40
- *  File : turgin.ml
+ *  File : turing.ml
  *)
 
 (*
@@ -189,6 +189,22 @@ let print_turing (tm: 'a t) (print_letter: 'a -> unit): unit =
     print_transitions tm print_letter;
     print_newline ()
 
+let duplicate_turing (tm: 'a t): 'a t = 
+    let tm_new = {
+        nb_states = tm.nb_states;
+        sigma = Array.copy tm.sigma;
+        blank=tm.blank;
+        i=tm.i;
+        f=tm.f;
+        delta = Hashtbl.create 36
+    } in 
+
+    Hashtbl.iter (fun k v -> 
+        Hashtbl.add tm_new.delta k v   
+    ) tm.delta;
+
+    tm_new
+
 let run_turing (tm: 'a t) ?(print_step=false) 
   ?(print_letter= fun _ -> ()) (tape: 'a tape): 'a tape =
     let cursor = ref 0 in 
@@ -205,7 +221,14 @@ let run_turing (tm: 'a t) ?(print_step=false)
         
         (* Une étape d'avancement *)
         match Hashtbl.find_opt tm.delta (!state, read_letter) with
-            | None -> failwith "Erreur execution, symbole de la bande non reconnu"
+            | None -> (
+                print_string "Erreur : Etat ";
+                print_int !state;
+                print_string " avec le symbole ";
+                print_letter read_letter;
+                print_newline ();
+                failwith "Erreur execution, aucune transition à suivre !"
+            )
             | Some(q2, write_letter, shift) -> 
                 state := q2;
                 write_tape working_tape tm.blank !cursor write_letter; 
@@ -308,72 +331,31 @@ let load_turing (filename: string): string t =
                 delta = delta
             }
 
+let turing_to_pdf (tm: 'a t) (repr_letter: 'a -> string): unit = 
+    let oc = open_out "export.dot" in 
+    output_string oc "digraph G {\n"; 
+    Hashtbl.iter (fun k v -> 
+        let q1, read_letter = k in 
+        let q2, write_letter, shift = v in
+        let shift_str = match shift with RIGHT -> "R" | LEFT -> "L" in
+        output_string oc (string_of_int q1);
+        output_string oc " -> ";    
+        output_string oc (string_of_int q2);
+        output_string oc "[ label = \"";
 
-(*** Tests ***)
-(* let _ = (* Tests des bandes *)
-    let init_array = [||] in 
-    let blank = '_' in
-    let tape = array_to_tape init_array blank in
-    
-    assert(tape = init_tape ()); (* Test si la bande est bien vide *)
-    
-    (* Tests de Write et Read tape *)
-    write_tape tape blank 0 'a';
-    write_tape tape blank 1 'b';
-    write_tape tape blank (-2) 'a';
-    write_tape tape blank 4 'c';
-    write_tape tape blank 0 'b';
-    assert(read_tape tape blank 0 = 'b');
-    assert(read_tape tape blank (-2) = 'a');
-    assert(read_tape tape blank 1 = 'b');
-    assert(read_tape tape blank 25 = blank);
-    assert(read_tape tape blank (-1) = blank);
-    
-    (* Tests de la conversion en tableau *)
-    assert(tape_to_array_with_offset tape blank = (
-        [|'a'; blank; 'b'; 'b'; blank; blank; 'c'|], -2));
-    
-    (* Tests de la reconversion en bande (avec l'offset qui a changé) *)
-    let tape2 = array_to_tape [|'a'; blank; 'b'; 'b'; blank; blank; 'c'|] blank in
-    assert(read_tape tape2 blank 0 = 'a');
-    assert(read_tape tape2 blank 2 = 'b');
-    assert(read_tape tape2 blank 3 = 'b');
-    assert(read_tape tape2 blank 27 = blank);
-    assert(read_tape tape2 blank 1 = blank);
-    assert(read_tape tape2 blank 6 = 'c')
+        if read_letter = tm.blank then 
+            output_string oc "_"
+        else output_string oc (repr_letter read_letter);
 
+        output_string oc " -> ";
+        if write_letter = tm.blank then 
+            output_string oc "_"
+        else output_string oc (repr_letter write_letter);
 
-let _ = (* Tests des machines de Turing *)
-    (* Exemple de machine de turing qui ajoute 1 à un compteur binaire *)
-    let init_number = [|0; 1; 1; 0; 1|] in
-    let blank = -1 in
+        output_string oc (","^shift_str^"\" ]\n")
+    ) tm.delta;
 
-    let (tm1: int turing_machine) = {
-        nb_states = 3;
-        sigma = [|0; 1|];
-        blank = blank;
-        i=0;
-        f=[2];
-        delta = Hashtbl.create 36
-    } in 
-
-    add_transition tm1 0 0 0 0 RIGHT;
-    add_transition tm1 0 1 0 1 RIGHT;
-    add_transition tm1 0 blank 1 blank LEFT;
-    add_transition tm1 1 0 2 1 LEFT;
-    add_transition tm1 1 1 1 0 LEFT;
-    add_transition tm1 1 blank 2 1 LEFT;
-    print_turing tm1 print_int;
-
-    print_string "Affichage de l'exécution d'un compteur binaire en machine de turing\n";
-    print_string "Bande de départ : ";
-    print_tape (array_to_tape init_number blank) blank print_int;
-
-    let final_tape = run_turing tm1 ~print_step:true ~print_letter:print_int 
-        (array_to_tape init_number blank) in 
-
-    print_string "Bande obtenue : ";
-    print_tape final_tape blank print_int;
-    assert (tape_to_array final_tape blank = [|0; 1; 1; 1; 0|]);
-
-    print_turing (load_turing "turing_machines/increase_counter.tm") print_string *)
+    output_string oc "}";
+    close_out oc;
+    let _ = Sys.command "neato -Tpdf export.dot > export.pdf" in 
+    Sys.remove "export.dot"

@@ -34,16 +34,16 @@ let luring_to_turing (filename: string) : string Turing.t =
     let rec build_program code = match code with 
         | [] -> tm
         | Parser.Move (line, shift) :: q -> 
-            add_move_tm (line-1) line tm shift; build_program q
+            add_move_tm tm (line-1) line shift; build_program q
         | Parser.Write (line, Symb(letter)) :: q -> 
-            add_write_tm (line-1) line tm letter; build_program q
+            add_write_tm tm (line-1) line letter; build_program q
         | Parser.Goto (line, Cst(line_moving)) :: q -> 
-            add_goto_tm (line-1) line_moving tm; build_program q
+            add_goto_tm tm (line-1) (line_moving-1); build_program q
         | Parser.If (line, Symb(letter), Cst(line_moving)) :: q -> 
-            add_if_tm (line-1) (line_moving-1) tm letter; build_program q
+            add_if_tm tm (line-1) (line_moving-1) letter; build_program q
         | Parser.End (line) :: q -> tm.f <- (line-1)::(tm.f) ; build_program q
-        | Parser.Nothing (line) :: q -> build_program q
-        | _ -> failwith "Erreur création machine de turing : code programme non attendu" 
+        | Parser.Nothing (line) :: q -> add_nothing_tm tm (line-1) line; build_program q
+        | _ -> failwith "Erreur creation machine de turing : code programme non attendu" 
     in build_program prgm
 
 let transition_to_string (q1: int) (read_letter: 'a) (q2: int) (write_letter: 'a)
@@ -72,13 +72,3 @@ let turing_to_tm_file (filename: string) (tm: 'a Turing.t) (repr_letter: 'a -> s
     ) tm.delta;
 
     close_out oc
-
-(* let _ = 
-    let tm = luring_to_turing "luring_programs/ex1.lu" in
-    turing_to_tm_file "ex1.tm" tm (fun e -> e); 
-    let tm2 = load_turing "ex1.tm" in 
-    Turing.print_turing tm print_string;
-    let tape = Turing.run_turing tm ~print_step:true ~print_letter:print_string
-        (Turing.array_to_tape [|"a"; "_"; "b"|] blank) in 
-    let tape2 = Turing.run_turing tm2 ~print_step:true ~print_letter:print_string
-        (Turing.array_to_tape [|"a"; "_"; "b"|] blank) in (tape, tape2) *)
