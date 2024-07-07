@@ -1,31 +1,11 @@
-Goto 2
-Goto 6
-Goto 18
-Goto 30
-Goto 31
-If 0 Go 9
-If 1 Go 12
-If _ Go 15
-Write 0
+If _ Go 4
 Move Right
-Goto 2
-Write 1
-Move Right
-Goto 2
-Write _
+Goto 1
 Move Left
-Goto 3
-If 0 Go 21
-If 1 Go 24
-If _ Go 27
-Write 1
-Move Left
-Goto 4
+If 0 Go 10
+If _ Go 10
 Write 0
 Move Left
-Goto 3
+Goto 5
 Write 1
-Move Left
-Goto 4
-End
 End

@@ -231,3 +231,11 @@ Je viens de realiser les tests pour les fichiers Turing/Lexer/Parser (aka les pl
 Maintenant on observe que (via `Ressource\compteur_binaire_export_av_opti.pdf`) on a une explosion des états (de 3 on est passé à plus de 50 !). Mais la bonne nouvelle c'est que si on regarde plus en détail, nous avons beaucoup de suite d'états avec les mêmes transitions (tout l'alphabet + la caractère blanc), donc il serait simple de le réduire. A faire. Apres, à quoi ça servirait ? hein
 
 Donc on sait que le décompileur fonctionne si no arrive a avoir la même sémantique. enft jsp si sémantique cest le bon mot mais en tt cas ils ont les memes résultats.
+
+Essayons de démontrer par le th de rice que ce que j'essaye de faire n'est pas possible, sachant que je veux faire un programme qui a une machine de turing, donne un programme en Luring (Turing complet ?)
+
+Th de rice : Pour toute fonction f et tout programme prog, il n'existe pas de programme pour vérifier que prog est une implantation de f.
+
+**On peut utiliser le Th de Rice pour montrer que je ne peux pas assurer que ce que j'ai fait est tjrs bon**
+
+On peut à la limite utiliser les mêmes techniques qu'utilisent les dèsobscurcissement de programme 
