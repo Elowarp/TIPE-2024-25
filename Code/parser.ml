@@ -15,6 +15,8 @@ type exp_arith =
 | Cst of int
 | Symb of string
 
+type exp_list = exp_arith list 
+
 type program =
 | Nothing of int
 | Sequence of program list (* Sequence pas encore pris en charge *)
@@ -23,6 +25,7 @@ type program =
 | Move of int * shift
 | Goto of int * exp_arith
 | End of int
+| MoveUntil of int * shift * exp_list
 
 (* Construit les instructions en suivant les règles de dérivation des 
    grammaires A S et P *)
@@ -38,6 +41,20 @@ and parse_S (l: Lexer.t list) : shift * Lexer.t list =
         | (_, LRight)::q -> (Right, q)
         | _ -> failwith "Erreur parsing, expression de direction attendue"
 
+and parse_L (l: Lexer.t list) : exp_list * Lexer.t list = 
+    let rec aux l acc = 
+        match l with 
+            | (_, LCst(c))::q -> aux q (Symb(string_of_int c)::acc)
+            | (_, LSymb(s))::q -> aux q (Symb(s)::acc)
+            | (_, LSemiColon)::q -> aux q acc
+            | (_, LEndList)::q -> (List.rev acc, q)
+            | _ -> failwith "Erreur parsing, expression de liste de symboles attendue"
+    in 
+    
+    match l with 
+        | (code_line, LStartList)::q -> aux q []
+        | _ -> failwith "Erreur parsing, début de liste attendu"
+
 and parse_P (l: Lexer.t list) : program list = 
     let code, q = 
         match l with 
@@ -48,8 +65,10 @@ and parse_P (l: Lexer.t list) : program list =
                         let (line, q') = parse_A q' in (
                             match symb, line with 
                                 | Symb(_), Cst(_) -> (If(code_line, symb, line), q')
-                                | Cst(s), Cst(_) -> (If(code_line, Symb(string_of_int s), line), q')
-                                | _, _-> failwith "Erreur parsing, symbole et/ou ligne attendu"
+                                | Cst(s), Cst(_) -> 
+                                    (If(code_line, Symb(string_of_int s), line), q')
+                                | _, _-> 
+                                    failwith "Erreur parsing, symbole et/ou ligne attendu"
                         )
                         
                     | _ -> failwith "Erreur parsing, Go attendue"
@@ -60,7 +79,16 @@ and parse_P (l: Lexer.t list) : program list =
                         | Symb(s) -> (Write(code_line, Symb(s)), q')
                         | Cst(s) -> (Write(code_line, Symb(string_of_int s)), q')
                 )
-            | (code_line, LMove)::q -> let dir, q' = parse_S q in (Move(code_line, dir), q')
+            | (code_line, LMove)::q -> 
+                let dir, q' = parse_S q in (
+                    match q' with 
+                        | (_, LUntil)::q' -> let symb_list, q' = parse_L q' in (
+                            match symb_list with 
+                                | [] -> failwith "Erreur parsing, liste de symboles vide"
+                                | _ -> (MoveUntil(code_line, dir, symb_list), q')
+                        )
+                        | _ -> (Move(code_line, dir), q')
+                )
             | (code_line, LGoto)::q -> let symb, q' = parse_A q in (
                 match symb with
                     | Cst(c) -> (Goto(code_line, Cst(c)), q')
@@ -98,6 +126,17 @@ let get_symb (prgm: program list) (blank: string): string list =
                 if s <> blank then aux q (add_unique s acc) else aux q acc
             | Write(_, Symb(s)) -> 
                 if s <> blank then aux q (add_unique s acc) else aux q acc
+            | MoveUntil(_, _, l) ->
+                let rec aux_list l acc = match l with 
+                    | [] -> acc
+                    | h::q -> (
+                        match h with 
+                            | Symb(s) -> 
+                                if s <> blank then aux_list q (add_unique s acc) 
+                                else aux_list q acc
+                            | _ -> aux_list q acc
+                    )
+                in aux q (aux_list l acc)
             | _ -> aux q acc
         )
     in aux prgm []
@@ -190,3 +229,41 @@ let add_if_tm (tm: string Turing.t) (start_state: int) (end_state: int)
 
 let add_nothing_tm (tm: string Turing.t) (start_state: int) (end_state: int): unit =
     add_goto_tm tm start_state end_state
+
+(*Affiche program list*)
+let rec print_program_list (prgm: program list): unit = 
+    match prgm with 
+        | [] -> ()
+        | h::q -> (
+            match h with 
+                | Nothing(i) -> Printf.printf "Nothing(%d)\n" i
+                | Sequence(l) -> Printf.printf "Sequence\n"; print_program_list l
+                | If(i, e1, e2) -> Printf.printf "If(%d, %s, %s)\n" 
+                    i (string_of_exp_arith e1) (string_of_exp_arith e2)
+                | Write(i, e) -> Printf.printf "Write(%d, %s)\n" i (string_of_exp_arith e)
+                | Move(i, s) -> Printf.printf "Move(%d, %s)\n" i (string_of_shift s)
+                | Goto(i, e) -> Printf.printf "Goto(%d, %s)\n" i (string_of_exp_arith e)
+                | End(i) -> Printf.printf "End(%d)\n" i
+                | MoveUntil(i, shift, l) -> Printf.printf "MoveUntil(%d, %s,%s)\n" 
+                    i (string_of_shift shift) (string_of_exp_list l)
+        ); print_program_list q
+
+(*Affiche exp_arith*)
+and string_of_exp_arith (e: exp_arith): string = 
+    match e with 
+        | Cst(i) -> string_of_int i
+        | Symb(s) -> s
+
+(*Affiche shift*)
+and string_of_shift (s: shift): string = 
+    match s with 
+        | Left -> "Left"
+        | Right -> "Right"
+
+(*Affiche exp_list*)
+and string_of_exp_list (l: exp_list): string = 
+    let rec aux l acc = 
+        match l with 
+            | [] -> acc
+            | h::q -> aux q (acc^" "^string_of_exp_arith h)
+    in aux l ""

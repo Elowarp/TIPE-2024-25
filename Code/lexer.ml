@@ -15,6 +15,8 @@ type lexem_type =
   | LIf | LGo
   | LNothing
   | LSemiColon
+  | LUntil
+  | LStartList | LEndList
 
 type t = int * lexem_type (* Le num de ligne et le lexem *)
 
@@ -27,6 +29,8 @@ let lex_words = [
   LIf; LGo;
   LNothing;
   LSemiColon;
+  LUntil;
+  LStartList; LEndList;
 ]
 
 let str_words = [
@@ -37,7 +41,9 @@ let str_words = [
   "Move";
   "If"; "Go";
   "Nothing";
-  ";"
+  ";";
+  "Until";
+  "["; "]";
 ]
 
 let minuscules = "_abcdefghijklmnopqrstuvwxyz"

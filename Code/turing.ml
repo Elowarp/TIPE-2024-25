@@ -131,20 +131,6 @@ let print_tape (tape: 'a tape) (blank: 'a) ?(show_cursor=false) ?(cursor=0)
     print_newline ()
 
 (*** Fonctions de manipulation des machines de turing ***)
-let add_transition (tm: 'a t) (q1: int) (read_letter: 'a) (q2: int)
-  (write_letter: 'a) (shift: move): unit = 
-    assert((q1 >= 0) && (q1 < tm.nb_states));
-    assert((q2 >= 0) && (q2 < tm.nb_states));
-	(* assert(Array.mem read_letter (tm.sigma) || read_letter = tm.blank); *)
-	(* assert(Array.mem write_letter (tm.sigma) || write_letter = tm.blank); *)
-
-    match Hashtbl.find_opt (tm.delta) (q1, read_letter) with
-        | None -> Hashtbl.add (tm.delta) (q1, read_letter) (q2, write_letter, shift)
-        | Some q -> (
-            Printf.printf "Etat %d vers %d\n" q1 q2;
-            failwith "Indeterminisation de la machine de turing !"
-        )
-
 let print_transition (q1: int) (read_letter: 'a) (q2: int) (write_letter: 'a) 
   (shift: move) (print_letter: 'a -> unit): unit = 
     print_int q1;
@@ -157,6 +143,53 @@ let print_transition (q1: int) (read_letter: 'a) (q2: int) (write_letter: 'a)
     if shift = LEFT then print_string ";Left"
     else print_string ";Right";
     print_newline ()
+
+let turing_to_pdf (tm: 'a t) (repr_letter: 'a -> string): unit = 
+    let oc = open_out "export.dot" in 
+    output_string oc "digraph G {\n"; 
+    Hashtbl.iter (fun k v -> 
+        let q1, read_letter = k in 
+        let q2, write_letter, shift = v in
+        let shift_str = match shift with RIGHT -> "R" | LEFT -> "L" in
+        output_string oc (string_of_int q1);
+        output_string oc " -> ";    
+        output_string oc (string_of_int q2);
+        output_string oc "[ label = \"";
+
+        if read_letter = tm.blank then 
+            output_string oc "_"
+        else output_string oc (repr_letter read_letter);
+
+        output_string oc " -> ";
+        if write_letter = tm.blank then 
+            output_string oc "_"
+        else output_string oc (repr_letter write_letter);
+
+        output_string oc (","^shift_str^"\" ]\n")
+    ) tm.delta;
+
+    output_string oc "}";
+    close_out oc;
+    let _ = Sys.command "neato -Tpdf export.dot > export.pdf" in 
+    Sys.remove "export.dot"
+
+let add_transition (tm: 'a t) (q1: int) (read_letter: 'a) (q2: int)
+  (write_letter: 'a) (shift: move): unit = 
+    assert((q1 >= 0) && (q1 < tm.nb_states));
+    assert((q2 >= 0) && (q2 < tm.nb_states));
+	(* assert(Array.mem read_letter (tm.sigma) || read_letter = tm.blank); *)
+	(* assert(Array.mem write_letter (tm.sigma) || write_letter = tm.blank); *)
+
+    match Hashtbl.find_opt (tm.delta) (q1, read_letter) with
+        | None -> Hashtbl.add (tm.delta) (q1, read_letter) (q2, write_letter, shift)
+        | Some (q2', write_letter', shift') -> (
+            (* Test de si une transition identique n'existe déjà pas *)
+            if (q2' <> q2 || write_letter' <> write_letter || shift' <> shift) then
+                begin
+                    Printf.printf "Etat %d vers %d \n" q1 q2;
+                    failwith "Indeterminisation de la machine de turing !"
+                end
+        )
 
 
 let print_transitions (tm: 'a t) (print_letter: 'a -> unit): unit = 
@@ -330,32 +363,3 @@ let load_turing (filename: string): string t =
                 f = !final_states; 
                 delta = delta
             }
-
-let turing_to_pdf (tm: 'a t) (repr_letter: 'a -> string): unit = 
-    let oc = open_out "export.dot" in 
-    output_string oc "digraph G {\n"; 
-    Hashtbl.iter (fun k v -> 
-        let q1, read_letter = k in 
-        let q2, write_letter, shift = v in
-        let shift_str = match shift with RIGHT -> "R" | LEFT -> "L" in
-        output_string oc (string_of_int q1);
-        output_string oc " -> ";    
-        output_string oc (string_of_int q2);
-        output_string oc "[ label = \"";
-
-        if read_letter = tm.blank then 
-            output_string oc "_"
-        else output_string oc (repr_letter read_letter);
-
-        output_string oc " -> ";
-        if write_letter = tm.blank then 
-            output_string oc "_"
-        else output_string oc (repr_letter write_letter);
-
-        output_string oc (","^shift_str^"\" ]\n")
-    ) tm.delta;
-
-    output_string oc "}";
-    close_out oc;
-    let _ = Sys.command "neato -Tpdf export.dot > export.pdf" in 
-    Sys.remove "export.dot"

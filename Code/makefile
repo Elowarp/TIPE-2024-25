@@ -1,4 +1,4 @@
-all: parser
+all: interpreter
 
 turing: turing.ml
 	ocamlc -g turing.ml -o turing

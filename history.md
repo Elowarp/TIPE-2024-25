@@ -238,4 +238,32 @@ Th de rice : Pour toute fonction f et tout programme prog, il n'existe pas de pr
 
 **On peut utiliser le Th de Rice pour montrer que je ne peux pas assurer que ce que j'ai fait est tjrs bon**
 
-On peut à la limite utiliser les mêmes techniques qu'utilisent les dèsobscurcissement de programme 
+On peut à la limite utiliser les mêmes techniques qu'utilisent les dèsobscurcissement de programme
+
+## 17/07/2024
+Pour le luring2 on implémente `Move` `dir` `Until` `{s1, s2, s3}`
+luring3 : variables
+luring4 : Multiple piste dans une bande
+luring5 : Multiple piles
+luring6 : Multiple bandes
+
+## 20/07/2024
+On implémente MoveUntil par du luring 1, par les commandes : 
+
+Luring 2 :
+```
+n : Move Right Until [s1; s2; s3; ...; sN]
+```
+
+Conversion en luring 1 :
+```
+n : If s1 Go n+N+2
+n+1 : If s2 Go n+N+2
+...
+n+N-1 : If sN Go n+N+2
+n+N : Move Right 
+n+N+1 : Goto n
+n+N+2 : ....
+```
+
+Puis convertir de luring 1 en luring 2 est assez direct vu que toutes les opérations précédentes sont toujours valides.

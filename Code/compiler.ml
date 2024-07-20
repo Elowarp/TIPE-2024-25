@@ -10,8 +10,37 @@ open Parser
 
 let blank = "_"
 
+(* Ajoute add_nb_lines à tous les numéros de lignes *)
+(* Attention, potentiel probleme si on référence une ligne qui 
+   est après le début de l'ajout *)
+let update_lines (prgm: program list) (add_nb_lines: int): program list = 
+    let rec aux code = match code with 
+        | [] -> []
+        | Move (line, shift) :: q -> Move (line+add_nb_lines, shift) :: aux q
+        | Write (line, s) :: q -> Write (line+add_nb_lines, s) :: aux q
+        | Goto (line, k) :: q -> Goto (line+add_nb_lines, k) :: aux q
+        | If (line, s, k) :: q -> If (line+add_nb_lines, s, k) :: aux q
+        | End (line) :: q -> End (line+add_nb_lines) :: aux q
+        | Nothing (line) :: q -> Nothing (line+add_nb_lines) :: aux q
+        | MoveUntil (line, shift, l) :: q -> MoveUntil (line+add_nb_lines, shift, l) :: aux q
+        | _ -> failwith "Erreur compiler, code programme non attendu"
+    in aux prgm
+
+(* Convertit le move until en programme luring 1*)
+let luring2_to_luring1 (prgm: program list): program list = 
+    let rec aux code = match code with 
+        | [] -> []
+        | MoveUntil (line, shift, l) :: q -> 
+            let n = List.length l in (*Nombre de symboles*)
+            let rec create_instruct l acc  i = match l with 
+                | [] -> (Goto(line+n+1, Cst(line)))::(Move(line+n, shift))::acc
+                | e :: q -> create_instruct q (If(line+i, e, Cst(line+n+2))::acc) (i+1)
+            in aux (List.rev (create_instruct l [] 0) @ (update_lines q (n+1)))
+        | e :: q -> e :: aux q
+    in aux prgm
+
 let luring_to_turing (filename: string) : string Turing.t =
-    let prgm = Parser.parse filename in
+    let prgm = luring2_to_luring1 (Parser.parse filename) in
 
     (* On crée autant d'états que de ligne *)
     let nb_states = ref (List.length prgm) in
