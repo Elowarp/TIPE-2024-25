@@ -1,7 +1,7 @@
 (*
  *  Name : Elowan
  *  Creation : 26-06-2024 10:59:40
- *  Last modified : 26-06-2024 11:15:40
+ *  Last modified : 09-08-2024 17:26:47
  *  File : turing.ml
  *)
 
@@ -9,6 +9,8 @@
     Note : Afin d'avoir une meilleure visibilité, dans tous les affichages, le 
     caractère blanc est affiché _ à la place de celui mis au départ
 *)
+
+open Automaton
 
 type 'a tape = (int, 'a) Hashtbl.t 
 type move = LEFT | RIGHT
@@ -131,19 +133,6 @@ let print_tape (tape: 'a tape) (blank: 'a) ?(show_cursor=false) ?(cursor=0)
     print_newline ()
 
 (*** Fonctions de manipulation des machines de turing ***)
-let print_transition (q1: int) (read_letter: 'a) (q2: int) (write_letter: 'a) 
-  (shift: move) (print_letter: 'a -> unit): unit = 
-    print_int q1;
-    print_string ";"; 
-    print_letter read_letter;
-    print_string " -> ";
-    print_int q2;
-    print_string ";"; 
-    print_letter write_letter;
-    if shift = LEFT then print_string ";Left"
-    else print_string ";Right";
-    print_newline ()
-
 let turing_to_pdf (tm: 'a t) (repr_letter: 'a -> string): unit = 
     let oc = open_out "export.dot" in 
     output_string oc "digraph G {\n"; 
@@ -191,6 +180,18 @@ let add_transition (tm: 'a t) (q1: int) (read_letter: 'a) (q2: int)
                 end
         )
 
+let print_transition (q1: int) (read_letter: 'a) (q2: int) (write_letter: 'a) 
+  (shift: move) (print_letter: 'a -> unit): unit = 
+    print_int q1;
+    print_string ";"; 
+    print_letter read_letter;
+    print_string " -> ";
+    print_int q2;
+    print_string ";"; 
+    print_letter write_letter;
+    if shift = LEFT then print_string ";Left"
+    else print_string ";Right";
+    print_newline ()
 
 let print_transitions (tm: 'a t) (print_letter: 'a -> unit): unit = 
     for i=0 to tm.nb_states - 1 do 
@@ -363,3 +364,137 @@ let load_turing (filename: string): string t =
                 f = !final_states; 
                 delta = delta
             }
+
+(* Transformation de machines de turing en automates *)
+
+(* Fonctions de création des lettres depuis une machine de turing et l'opération inverse *)
+let merge_letters (l1: 'a) (l2: 'a) (k: move) (repr: 'a -> string): string = 
+    match k with 
+        | RIGHT -> (repr l1) ^ "R" ^ (repr l2) 
+        | LEFT -> (repr l1) ^ "L" ^ (repr l2)
+
+let unmerge_letters (s: string) (unrepr: string -> 'a): ('a * 'a * move) = 
+    let n = String.length s in 
+    match String.index_opt s 'R' with 
+    | Some i -> 
+        let l1 = unrepr (String.sub s 0 i) in 
+        let l2 = unrepr (String.sub s (i+1) (n-i-1)) in 
+        (l1, l2, RIGHT)
+    | None ->
+        match String.index_opt s 'L' with
+        | None -> failwith ("Lettre non conformes " ^ s)
+        | Some i -> 
+            let l1 = unrepr (String.sub s 0 i) in 
+            let l2 = unrepr (String.sub s (i+1) (n-i-1)) in 
+            (l1, l2, LEFT)
+
+let turing_to_automaton (tm: 'a t) (repr_letter: 'a -> string): string Automaton.t =
+    (* 
+    Pour deux lettres a et b ainsi qu'une direction K, on ajoute au nouvel 
+    alphabet la lettre aKb, soit pour |sigma| = n, |sigma'| = 2((n+1)^2) + 1 
+    (en comptant le blanc, et qu'on stock tel quel est en derniere position)
+    *)
+    let n = Array.length tm.sigma in
+    let sigma' = Array.make (2*(n+1)*(n+1) + 1) (repr_letter tm.blank) in
+
+    let count = ref 0 in 
+    for i=0 to n-1 do
+        for j=0 to n-1 do
+            sigma'.(!count) <- merge_letters tm.sigma.(i) tm.sigma.(j) LEFT repr_letter;
+            incr count;
+            sigma'.(!count) <- merge_letters tm.sigma.(i) tm.sigma.(j) RIGHT repr_letter;
+            incr count;
+        done;
+
+        sigma'.(!count) <- merge_letters tm.sigma.(i) tm.blank RIGHT repr_letter;
+        incr count;
+        sigma'.(!count) <- merge_letters tm.blank tm.sigma.(i) RIGHT repr_letter;
+        incr count;
+
+        sigma'.(!count) <- merge_letters tm.sigma.(i) tm.blank LEFT repr_letter;
+        incr count;
+        sigma'.(!count) <- merge_letters tm.blank tm.sigma.(i) LEFT repr_letter;
+        incr count;
+    done;
+
+    sigma'.(!count) <- merge_letters tm.blank tm.blank RIGHT repr_letter;
+    incr count;
+    sigma'.(!count) <- merge_letters tm.blank tm.blank LEFT repr_letter;
+    incr count;
+
+    let a = {
+        nb_states = tm.nb_states;
+        sigma = sigma';
+        i = tm.i;
+        f = tm.f;
+        delta = Hashtbl.create 36;
+    } in 
+
+    Hashtbl.iter (fun (k: int* 'a) (v: int * 'a * move) -> 
+        let q1, read_letter = k in 
+        let q2, write_letter, shift = v in
+        let read_letter' = merge_letters read_letter write_letter shift repr_letter in
+        Automaton.add_transition a q1 read_letter' q2 
+    ) tm.delta;
+    a
+
+(* Convertit un automate en machine de turing *)
+let automaton_to_turing (a: string Automaton.t) (unrepr_letter: string -> 'a): 'a t =
+    let blank = unrepr_letter (a.sigma.(Array.length a.sigma - 1)) in
+    
+    (* Récupère toutes les lettres utilisées dans l'automate *)
+    let sigma_tmp = Hashtbl.create 36 in
+    let rec get_letters l acc = match l with 
+        | [] -> ()
+        | x::q -> 
+            (* Passe le cas du symbole juste blanc *)
+            if x = blank then get_letters q acc else 
+
+            (* Ajout des deux lettres dans la hashtable *)
+            let l1, l2, k = unmerge_letters x unrepr_letter in 
+            let count = ref 0 in
+            if l1 <> blank then (match Hashtbl.find_opt sigma_tmp l1 with 
+                | None -> (Hashtbl.add sigma_tmp l1 acc; incr count)
+                | Some _ -> ());
+
+            if l2 <> blank then (match Hashtbl.find_opt sigma_tmp l2 with 
+                | None -> (Hashtbl.add sigma_tmp l2 (acc + !count); incr count)
+                | Some _ -> ());
+
+            get_letters q (acc + !count)
+    in get_letters (Array.to_list a.sigma) 0;
+
+    (* Création de l'alphabet de la machine de turing *)
+    let sigma = Array.make (Hashtbl.length sigma_tmp) 
+        (unrepr_letter (a.sigma.(Array.length a.sigma - 1))) in
+    Hashtbl.iter (fun k v -> sigma.(v) <- unrepr_letter k) sigma_tmp;
+
+    let t = {
+        nb_states = a.nb_states;
+        sigma = sigma;
+        blank = unrepr_letter (a.sigma.(Array.length a.sigma - 1));
+        i = a.i;
+        f = a.f;
+        delta = Hashtbl.create 36
+    } in
+
+    (* Ajout des transitions de la machine de turing *)
+    Hashtbl.iter (fun k v -> 
+        let q1, read_letter = k in 
+        let q2 = v in
+        let l1, l2, k = unmerge_letters read_letter unrepr_letter in 
+        let read_letter' = l1 in 
+        let write_letter' = l2 in 
+        let shift = k in 
+        add_transition t q1 read_letter' q2 write_letter' shift
+    ) a.delta;
+
+    t
+
+let _ = 
+    let tm = load_turing "turing_machines/increase_counter.tm" in 
+    print_turing tm (fun x -> print_string x);
+    let a = turing_to_automaton tm (fun x -> x) in 
+    print_automaton a (fun x -> print_string x);
+    let tm' = automaton_to_turing a (fun x -> x) in 
+    print_turing tm' (fun x -> print_string x);

@@ -1,42 +1,31 @@
-all: interpreter
+all: tests
 
-turing: turing.ml
-	ocamlc -g turing.ml -o turing
+dlist: dlist.ml
+	ocamlc -g dlist.ml -o dlist
 
-lexer: lexer.ml
-	ocamlc -g lexer.ml -o lexer
+automaton: automaton.ml
+	ocamlc -g automaton.ml -o automaton
 
-parser: turing.ml parser.ml lexer.ml
-	ocamlc -g turing.ml lexer.ml parser.ml -o parser
+turing: turing.ml automaton.ml
+	ocamlc -g automaton.ml turing.ml -o turing
 
-compiler: turing.ml parser.ml lexer.ml compiler.ml
-	ocamlc -g turing.ml lexer.ml parser.ml compiler.ml -o compiler
+minimisation: minimisation.ml dlist.ml
+	ocamlc -g automaton.ml dlist.ml minimisation.ml -o minimisation
 
-interpreter: turing.ml lexer.ml parser.ml compiler.ml interpreter.ml
-	ocamlc -g turing.ml lexer.ml parser.ml compiler.ml interpreter.ml -o interpreter
+turing_tests: turing.ml automaton.ml tests/turing_tests.ml
+	ocamlc -g automaton.ml turing.ml tests/turing_tests.ml -o turing_tests
 
-uncompiler: turing.ml uncompiler.ml
-	ocamlc -g turing.ml uncompiler.ml -o uncompiler
-
-
-turing_tests: turing
-	ocamlc -g turing.ml tests/turing_tests.ml -o turing_tests
-
-lexer_tests: lexer
-	ocamlc -g lexer.ml tests/lexer_tests.ml -o lexer_tests
-
-parser_tests: lexer parser turing
-	ocamlc -g lexer.ml turing.ml parser.ml tests/parser_tests.ml -o parser_tests
+minimisation_tests: minimisation.ml dlist.ml tests/minimisation_tests.ml
+	ocamlc -g automaton.ml dlist.ml minimisation.ml tests/minimisation_tests.ml -o minimisation_tests
 
 
-tests: turing_tests lexer_tests parser_tests
-	./turing_tests && ./lexer_tests && ./parser_tests
+tests: turing_tests minimisation_tests
+	./turing_tests && ./minimisation_tests
 	echo "Tests OK"
 
 clean: 
 	rm -r *.cmi *.cmo tests/*.cmi tests/*.cmo *.dot *.pdf
 
 cleanall: 
-	rm -r *.cmi *.cmo tests/*.cmi tests/*.cmo turing lexer parser interpreteur \
-	compiler interpreter uncompiler lexer_tests turing_tests \
-	parser_tests *.dot *.pdf
+	rm -r *.cmi *.cmo tests/*.cmi tests/*.cmo turing turing_tests \
+	minimisation_tests minimisation dlist automaton *.dot *.pdf

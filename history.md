@@ -267,3 +267,92 @@ n+N+2 : ....
 ```
 
 Puis convertir de luring 1 en luring 2 est assez direct vu que toutes les opérations précédentes sont toujours valides.
+
+Pour les variables (donc le luring3), on va devoir créer une syntaxe pour différentier les variables des symboles. On décide de mettre des "" autour des symboles, pour garder les lettres minuscules pour les variables.
+
+Les variables ne vont que contenir des symboles, et on va pouvoir les utiliser dans les commandes `Write` et `If`
+
+On va donc rajouter les instructions 
+
+- `Load "s" into x` : Charge le symbole `s` dans la variable `x`
+- `Load Current into x` : Charge le symbole actuellement lu dans la variable `x`
+- `If x = "s" Go n` : Si la variable `x` est égale à `s` alors aller à la ligne `n`
+- `If x != "s" Go n` : Si la variable `x` est différente de `s` alors aller à la ligne `n`
+- `Write x` : Ecrit le contenu de la variable `x` à l'endroit de la tête de lecture
+
+## 27/07/24
+On change de sujet, la création d'un langage n'est pas vrmt intéressant (selon prof d'info) donc on part, selon ces conseils, sur un sujet du type : "Optimisation de machine de Turing, application à une suite de réduction"
+
+Simplifier des expressions est un problème indécidable selon la source 6 de [ce site](https://www.cas.mcmaster.ca/~carette/publications/simplification.pdf)
+
+La question qu'on doit se poser c'est optimisation de QUOI, optimisation de la taille de la machine de turing OU optimisation du temps d'exécution ? [pcq ce truc est surement intéressant](https://arxiv.org/pdf/1102.5389) en gros c'est pas un truc qui dit que comment optimiser le tps d'execution ni la taille mais qui regarde la diff entre les deux 
+
+Il faudrait donc trouver un moyen de réduire la taille d'une machine de turing et voir comment ça impacte le temps d'exécution + l'appliquer à un pb concret
+
+Par le th de rice il n'existe pas de programme qui peut donner le plus optimisé pour un problème donné
+
+Une optimisation possible c'est clairement transformer une suite d'état où on fait la même chose en une seule transition (see ressources/compteur_bianires_export_av_opti.pdf)
+
+Trouver des schemas d'états à réduire peut être une piste intéressante
+
+On peut minimiser les tables de transitions en utilisant Karnaugh map analysis ou Reachability Tree analysis
+
+mistral m'a donné ces pistes :
+
+> develop the simplifications techniques
+
+ Simplification techniques aim to eliminate unnecessary states,
+transitions, or other elements in a Turing machine while preserving
+its computational power as much as possible. Here are some common
+methods for simplifying a Turing machine:
+
+1. Eliminating Unreachable States: A state is considered unreachable if there is no way to enter it from the initial state or any other reachable state through a sequence of valid transitions. Eliminating
+unreachable states does not affect the **computation** of the Turing machine, but it reduces its size and complexity.
+
+2. Merging Equivalent States: Two states are equivalent if they have identical next-state functions for all possible inputs. Merging these states means combining their contents into a single state and updating the control program accordingly. This simplification technique can reduce the number of distinct states in a Turing machine without affecting its computational power.
+
+3. Minimizing State Table: The state table is a tabular representation of a Turing machine's transition function, which lists the next-state and output for each combination of current state and input symbol. By applying various optimization techniques such as **Karnaugh map analysis** or **Reachability Tree analysis**, we can minimize the size of the state table while preserving its functionality.
+
+4. Simplifying Control Structures: Turing machines can include complex control structures like loops, conditional jumps, and nested if-else statements. Simplifying these structures by reducing redundancy or eliminating unnecessary complexity can result in a smaller representation of the machine without altering its computational power.
+
+5. Removing Redundant Transitions: A transition is considered redundant if it can be derived from other transitions through the application of simplification techniques like merging equivalent states, minimizing state tables, or eliminating unreachable states. By removing redundant transitions, we can reduce the size and complexity of a Turing machine without losing its computational power.
+
+6. Eliminating State-independent Transitions: State-independent transitions are those that do not depend on the current state for their execution. These transitions can be merged with the control structure of the machine or moved to the initial or final states without affecting the computation. This simplification technique can help reduce the number of distinct states in a Turing machine.
+
+7. Normal Forms: Converting a Turing machine into a simpler normal form, such as Greibach Normal Form (GNF) or Quadratic Normal Form (QNF), can help eliminate redundant transitions and simplify the control structure of the machine without altering its computational power for certain classes of languages.
+
+In summary, these techniques aim to eliminate unnecessary elements in a Turing machine while preserving its computational power as much as possible. They include eliminating unreachable states, merging equivalent states, minimizing state tables, simplifying control structures, removing redundant transitions, and converting the machine into simpler normal forms for specific classes of languages. These techniques can help reduce the size and complexity of a Turing machine representation without losing its fundamental computational capabilities.
+
+---
+
+Pour utiliser les karnaugh map, on peut dire que pour chaque transitions du type $(q_1,a)\to(q_2,b,D)$ où les $q_i$ sont des états, $a$ et $b$ des symboles et $D$ une direction, on a un état de Karnaugh (EK) qui vaut $q$ + $a$ + $D$ pour chaque symbole $a$ et direction $D$
+
+On met un 1 lorque il y a une transition, 0 sinon. Et pour chaque état de départ, on ne tient pas compte de la direction.
+
+On a donc un tableau du genre, où la direction vaut 0 si c'est la gauche, 1 si c'est la droite.
+(on se base sur ce [site](https://www.allaboutcircuits.com/textbook/digital/chpt-11/finite-state-machines/))
+
+| Etat actuel (p colonnes) | Entrée Lettre (m colonnes) | Etat suivant (p colonnes) | Sortie Lettre + Direction (m + 1 colonnes) |
+
+On prend $m$ comme le nombre de bits necessaires pour coder le nombre de symboles différents (avec le blanc) et $p$ le nb de bits necessaires pour coder le nombre d'états différents
+
+Il faut voir si après la reduction de cette table on garde la même sémantique.
+
+## 09/08/24
+
+Une facon de gerer plusieurs output d'une table de karnaugh https://highered.mheducation.com/sites/dl/free/0072865164/147282/mar65164_ch03A.pdf
+
+Mais il faut alors trouver un moyen de trouver une facon de transformer une une produit/somme de variables de karnaugh en une table de transition
+
+Les tables de karnaugh je vois pas comment remonter à une table de transition alors je pars plus sur une transformation d'une TM en automate puis une methode de remplissage de table (table-filling algorithm) avec l'algorithme de John Hopcroft [source](http://i.stanford.edu/pub/cstr/reports/cs/tr/71/190/CS-TR-71-190.pdf)
+
+Pour transformer une machine de turing en automate, soit un alphabet A sur lequel est def la TM, on def $A' = \{aKb, (a,b) \in A², K \in \{Right, Left\}\}$ et l'automate qui suit en est induit trivialement 
+
+La on vient de réussir à faire une bijection entre une machine de turing et un automate, l'automate tel quel n'est pas vraiment utilisable ou alors il faudrait savoir quelles sont les modifications à faire à l'avance
+
+On peut implementer l'algo de hopcroft dans minimisation.ml (Via Langages formels de carton et Eléments dalgorithmique (Beauquier Danièle) pages 330 dans ressources)
+
+## 18/08/24
+J'ai fini d'implémenter l'algorithme de minimisation de Hopcroft !!!!!! horrible le pire que j'ai jamais fait
+
+J'ai donc fait du nettoyage dans le code et j'ai rajouté quelques tests qu'il faut développer pour minimisation et les dlists et + tester avec des machines de turing 
