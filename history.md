@@ -356,3 +356,13 @@ On peut implementer l'algo de hopcroft dans minimisation.ml (Via Langages formel
 J'ai fini d'implémenter l'algorithme de minimisation de Hopcroft !!!!!! horrible le pire que j'ai jamais fait
 
 J'ai donc fait du nettoyage dans le code et j'ai rajouté quelques tests qu'il faut développer pour minimisation et les dlists et + tester avec des machines de turing 
+
+## 21/08/24
+
+J'ai ajouté des tests, il faudrait que j'ai une fonction pour tester si deux automates acceptes le même langage pour rendre les tests plus rapide + rajouter au moins un automate de test. (Update : Fait !)
+
+Puis essayer de minimiser des machines de turing pcq c'est qd meme ça le but.
+
+Il peut être intéressant de regarder la preuve de l'algorithme pour essayer d'adapter aux machines de turing et pas tant faire une bijection avec un automate comme j'ai fait. On ajouterait concrétement une plus value au tipe mais bon c'est déjà hardcore
+
+Il faudrait trouver des problèmes qui se reduisent par machines de turing et donc finir le tipe sur ça 
