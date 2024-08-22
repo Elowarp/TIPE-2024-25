@@ -1,12 +1,13 @@
 (*
  *  Name : Elowan
  *  Creation : 09-08-2024 15:31:23
- *  Last modified : 20-08-2024 20:36:20
+ *  Last modified : 22-08-2024 11:30:53
  *)
 
-open Automaton
-open Dlist
 open Partition
+open Dlist
+open Automaton
+open Turing
 
 (* Calcul du tableau des transitions inverses d'un automate *)
 let inv (a: 'a Automaton.t): int dlist array array =
@@ -228,3 +229,11 @@ let hopcroft_algo (a: 'a Automaton.t): 'a Automaton.t =
     done;
 
     min_automaton
+
+
+(* Minimisation d'une machine de turing *)
+let minimise_turing (tm : 'a Turing.t) (repr: 'a -> string)
+  (unrepr_letter: string -> 'a): 'a Turing.t = 
+    let equiv_automaton = Turing.turing_to_automaton tm repr in
+    let min_automaton = hopcroft_algo equiv_automaton in
+    Turing.automaton_to_turing min_automaton unrepr_letter

@@ -1,7 +1,7 @@
 (*
  *  Name : Elowan
  *  Creation : 26-06-2024 10:59:40
- *  Last modified : 09-08-2024 17:26:47
+ *  Last modified : 22-08-2024 11:33:43
  *  File : turing.ml
  *)
 
@@ -213,6 +213,7 @@ let print_transitions (tm: 'a t) (print_letter: 'a -> unit): unit =
 
 let print_turing (tm: 'a t) (print_letter: 'a -> unit): unit = 
     print_string "Affichage d'une machine de turing : \n";
+    Printf.printf "Nombre d'états %d\n" tm.nb_states;
     Printf.printf "Initial : %d\n" tm.i;
     print_string "Finaux : ";
     List.iter (fun x -> print_int x ; print_string " ") tm.f;
@@ -422,7 +423,7 @@ let turing_to_automaton (tm: 'a t) (repr_letter: 'a -> string): string Automaton
     sigma'.(!count) <- merge_letters tm.blank tm.blank LEFT repr_letter;
     incr count;
 
-    let a = {
+    let (a: 'a Automaton.t) = {
         nb_states = tm.nb_states;
         sigma = sigma';
         i = tm.i;
@@ -490,11 +491,3 @@ let automaton_to_turing (a: string Automaton.t) (unrepr_letter: string -> 'a): '
     ) a.delta;
 
     t
-
-let _ = 
-    let tm = load_turing "turing_machines/increase_counter.tm" in 
-    print_turing tm (fun x -> print_string x);
-    let a = turing_to_automaton tm (fun x -> x) in 
-    print_automaton a (fun x -> print_string x);
-    let tm' = automaton_to_turing a (fun x -> x) in 
-    print_turing tm' (fun x -> print_string x);

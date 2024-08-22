@@ -12,8 +12,8 @@ automaton: automaton.ml
 turing: turing.ml automaton.ml
 	ocamlc -g automaton.ml turing.ml -o turing
 
-minimisation: minimisation.ml partition dlist partition
-	ocamlc -g automaton.ml dlist.ml partition.ml minimisation.ml -o minimisation
+minimisation: minimisation.ml turing automaton partition dlist partition
+	ocamlc -g automaton.ml turing.ml dlist.ml partition.ml minimisation.ml -o minimisation
 
 automaton_tests: automaton tests/automaton_tests.ml
 	ocamlc -g automaton.ml tests/automaton_tests.ml -o automaton_tests
@@ -24,8 +24,8 @@ turing_tests: turing tests/turing_tests.ml
 partition_tests: partition tests/partition_tests.ml
 	ocamlc -g dlist.ml partition.ml tests/partition_tests.ml -o partition_tests
 
-minimisation_tests: automaton minimisation tests/minimisation_tests.ml
-	ocamlc -g automaton.ml dlist.ml partition.ml minimisation.ml tests/minimisation_tests.ml -o minimisation_tests
+minimisation_tests: minimisation tests/minimisation_tests.ml
+	ocamlc -g automaton.ml dlist.ml partition.ml turing.ml minimisation.ml tests/minimisation_tests.ml -o minimisation_tests
 
 
 tests: turing_tests minimisation_tests partition_tests automaton_tests

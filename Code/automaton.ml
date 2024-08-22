@@ -1,7 +1,7 @@
 (*
  *  Name : Elowan
  *  Creation : 09-08-2024 15:33:20
- *  Last modified : 09-08-2024 17:26:20
+ *  Last modified : 21-08-2024 20:32:27
  *)
 
 type 'a t = { (* Type d'un automate deterministe *)

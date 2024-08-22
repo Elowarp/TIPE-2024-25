@@ -1,13 +1,14 @@
 (*
 *  Name : Elowan
 *  Creation : 17-08-2024 19:36:14
-*  Last modified : 17-08-2024 20:50:42
+*  Last modified : 22-08-2024 11:33:03
 *)
 
 open Automaton
 open Dlist
 open Minimisation
 open Partition
+open Turing
 
 let _ = 
     (* Automate donné par Wikipédia en tant qu'exemple *)
@@ -159,6 +160,31 @@ let _ =
 
     let min2_automaton = Minimisation.hopcroft_algo test2_automaton in 
     assert(Automaton.are_equivalent test2_automaton min2_automaton);
+    print_string "Ok\n";
 
+    (* Test de la minimisation d'une machine de turing *)
+    print_string "--- Test de la minimisation d'une machine de turing ---\n";
+    let tm = Turing.load_turing "turing_machines/big_increase_counter.tm" in
+    let min_tm = Minimisation.minimise_turing tm (fun x -> x) (fun x -> x) in
 
-    print_string "Ok\n"
+    print_string "/!\\ Tester l'équivalence des machines de Turing est indécidable.\n";
+    print_string "Donc nous décidons de juste tester quelques valeurs et des les prendre \
+comme attestant de la validité de la minimisation. /!\\\n";
+
+    let returned_array (tm: 'a Turing.t) (array: 'a array): 'a array = 
+        let t = Turing.tape_to_array (
+            Turing.run_turing tm (Turing.array_to_tape array tm.blank)
+        ) tm.blank in t
+    in 
+
+    assert(min_tm.nb_states = 3);
+    assert(min_tm.sigma = [|"0"; "1"|]);
+    assert(returned_array tm [|"0"; "0"; "0"; "0"|] 
+            = returned_array min_tm [|"0"; "0"; "0"; "0"|]);
+    assert(returned_array tm [|"0"; "1"; "0"; "1"|] 
+            = returned_array min_tm [|"0"; "1"; "0"; "1"|]);
+    assert(returned_array tm [|"1"|] 
+            = returned_array min_tm [|"1"|]);
+    assert(returned_array tm [||] = returned_array min_tm [||]);
+    print_string "Ok\n";
+
