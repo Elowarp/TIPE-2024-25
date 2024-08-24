@@ -1,2 +1,9 @@
 *.cmi
 *.cmo
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb

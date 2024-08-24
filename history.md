@@ -361,8 +361,30 @@ J'ai donc fait du nettoyage dans le code et j'ai rajouté quelques tests qu'il f
 
 J'ai ajouté des tests, il faudrait que j'ai une fonction pour tester si deux automates acceptes le même langage pour rendre les tests plus rapide + rajouter au moins un automate de test. (Update : Fait !)
 
-Puis essayer de minimiser des machines de turing pcq c'est qd meme ça le but.
+Puis essayer de minimiser des machines de turing pcq c'est qd meme ça le but. (Update : Fait !)
 
 Il peut être intéressant de regarder la preuve de l'algorithme pour essayer d'adapter aux machines de turing et pas tant faire une bijection avec un automate comme j'ai fait. On ajouterait concrétement une plus value au tipe mais bon c'est déjà hardcore
 
-Il faudrait trouver des problèmes qui se reduisent par machines de turing et donc finir le tipe sur ça 
+Il faudrait trouver des problèmes qui se reduisent par machines de turing et donc finir le tipe sur ça
+
+## 22/08/24
+
+Focus sur la réduction de problèmes par machines de turing
+
+Technique : https://perso.eleves.ens-rennes.fr/people/Julie.Parreaux/fichiers_agreg/info_lecons/913_MachineTuring.pdf
+
+Bon il faut trouver des problèmes qui se réduisent par machines de turing, il faut que le problème auquel on réduit le tout soit DECIDABLE, sans quoi il existera pas de machine de turing mdr
+
+Typiquement là des idées : https://fr.wikipedia.org/wiki/D%C3%A9cidabilit%C3%A9#Th%C3%A9ories_d%C3%A9cidables
+
+On pourrait par exemple réduire le problème 2sat à 2color
+
+Bref j'ai commencé une ébauche de la construction de la machine de turing qui renvoit vrai si un graphe est 2-coloriable (voir `Ressources/V1 MT.png`)
+
+## 24/08/24
+
+J'ai fini la construction de la machine de turing qui renvoit une coloration de graphe 2-coloriable sil est possible, ou qui rejette sinon (voir `Ressources/Tous les états MT.pdf`)
+
+Parce que la machine est vraiment grosse et doit s'adapter en fonction des différentes tailles de graphes, je vais devoir faire une fonction qui génère la machine de turing en fonction d'une taille de graphe donnée, puis tester si effectivement elle fonctionne, et sinon la corriger.
+
+On s'en servira pour utiliser la minimisation dessus.

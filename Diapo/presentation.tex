@@ -1,0 +1,111 @@
+\documentclass{beamer}
+
+\usetheme{metropolis}
+
+\usepackage{minted}
+\title{Minimisation de machines de Turing, application au problème 2Color}
+\date{\today}
+\author{Elowan Harnisch}
+\begin{document}
+    \maketitle
+    \begin{frame}{Machine de Turing}
+        \begin{alert}{Définition}
+            Une machine de Turing est un sixtuplet $(Q, \Sigma, S, q_0, F, \delta)$ où:
+            \begin{itemize}
+                \item $Q$ est un ensemble fini d'états
+                \item $\Sigma$ est un ensemble fini de symboles
+                \item $S \notin \Sigma$ est le symbole blanc
+                \item $q_0 \in Q$ est l'état initial
+                \item $F \subseteq Q$ est l'ensemble des états acceptants
+                \item $\delta: Q \times \Sigma \rightarrow Q \times \Sigma \times \{L, R\}$ est la fonction de 
+                transition
+            \end{itemize}
+            Elle possède de plus une bande infinie sur laquelle elle peut
+            lire et écrire les symboles de $\Sigma \cup {S}$. Elle sert de 
+            modèle théorique de l'ordinateur.
+        \end{alert}
+    \end{frame}
+    \begin{frame}{Machine de Turing}
+        \begin{figure}
+            \includegraphics[width=0.5\textwidth]{images/turing_machine.png}
+            Schema d'execution de machine de Turing
+        \end{figure}
+    \end{frame}
+    \begin{frame}{Automate fini déterministe (DFA)}
+        \begin{alert}{Définition}
+            Un automate fini déterministe (DFA) est un quintuplet 
+            $(Q, \Sigma, q_0, F, \delta)$ où:
+            \begin{itemize}
+                \item $Q$ est un ensemble fini d'états
+                \item $\Sigma$ est un ensemble fini de symboles
+                \item $q_0 \in Q$ est l'état initial
+                \item $F \subseteq Q$ est l'ensemble des états finaux
+                \item $\delta: Q \times \Sigma \rightarrow Q$ est la 
+                fonction de transition
+            \end{itemize}
+            C'est un modèle qui permet grâce à une construction en graphe de 
+            reconnaitre l'appartenance de mots à un langage. 
+        \end{alert}
+    \end{frame}
+    \begin{frame}{Automate fini déterministe (DFA)}
+        \begin{figure}
+            \includegraphics[width=0.5\textwidth]{images/turing_machine.png}
+            Schema d'un automate reconnaissant le langage des mots de longueur 
+            paire
+        \end{figure}
+    \end{frame}
+    \begin{frame}{Minimisation d'un DFA}
+        \begin{alert}{Définition}
+            La minimisation d'un automate fini déterministe est le processus 
+            qui consiste à réduire le nombre d'états de l'automate tout en 
+            conservant le langage reconnu. 
+        \end{alert}
+        \begin{block}{Théorème}
+            L'algorithme de Hopcroft permet depuis un automate fini déterministe 
+            d'obtenir un automate minimal reconnaissant le même langage.
+        \end{block}
+    \end{frame}
+    \begin{frame}{Minimisation d'un automate fini déterministe}
+        % \begin{minted}{python}
+            Code de l'algorithme de Hopcroft
+        % \end{minted}
+    \end{frame}
+    \begin{frame}{Minimisation d'une machine de Turing}
+        \begin{alert}{Transformation d'une machine de Turing en DFA}
+            On en déduit son inverse trivialement. Celle ci ne forme en revanche pas 
+            une bijection.
+        \end{alert}
+        \begin{block}{Théorème}
+            La composition de la transformation d'une machine de Turing en DFA, de 
+            l'algorithme de minimisation de Hopcroft et de la transformation inverse
+            permet d'obtenir une machine de Turing de taille au plus égale à celle de
+            départ.
+        \end{block}
+    \end{frame}
+    \begin{frame}{Problème 2Color}
+        \begin{alert}{Définition}
+            Le problème 2Color est un problème de décision qui consiste à déterminer 
+            si un graphe est coloriable avec 2 couleurs. 
+        \end{alert}
+        \begin{block}{Théorème}
+            Le problème 2Color est décidable, donc il existe une machine de turing qui 
+            le calcule.
+        \end{block}
+    \end{frame}
+    \begin{frame}{Problème 2Color}
+        \begin{figure}
+            \includegraphics[width=0.5\textwidth]{images/2color.png}
+            Machine de Turing créee pour résoudre le problème 2Color
+        \end{figure}
+    \end{frame}
+    \begin{frame}{Conclusion}
+        Pour la suite j'aimerais :
+        \begin{itemize}
+            \item Bien comprendre la preuve de l'algorithme de Hopcroft et mieux 
+            l'adapter aux machines de Turing plutôt que mon bricolage actuel (même 
+            si je pense que ce n'est pas possible, dans ce cas démontrer que ce problème
+            n'est pas décidable mais qu'on peut essayer de s'en approcher par cette méthode)
+            \item Finir de créer la machine de Turing pour le problème 2Color 
+        \end{itemize}
+    \end{frame}
+\end{document}
