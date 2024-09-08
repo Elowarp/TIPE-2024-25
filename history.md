@@ -400,3 +400,47 @@ Bon j'ai démontré que ma transformation ne fonctionne PAS, ff on try de compre
 Finalité : Le tipe entier ne fonctionne pas, je dois changer de sujet.
 
 
+## 06/09/2024
+
+Code barre durée de vie de chaque niveau 
+
+1ere video
+https://youtu.be/hHNFuQuEoxU?si=JlCuJ_FDXt5jDRW4
+14:00 -> Exemple sur les avions, plutot cool pour comprendre 
+
+2eme video
+https://youtu.be/wvy0MoZv5KQ?si=u6eLjq70trTpMYLs
+
+3eme video
+https://www.youtube.com/watch?v=U-gdIxaG6PA&list=PLrRN3yszYHZkR9vyUeOVkcF6yy4FjgkMn&index=3
+
+Application à l'IA :
+https://youtu.be/Hro520ieHA8?si=f8FtrXvobeMg9YKf
+
+Utiliser stable topological data analysis pour classifier des parties de modèles 3D pour comparer des modèles 3D
+
+Découpage d'une scène en partie élémentaires pour essayer de voir a quel point on peut optimiser
+
+A partir d'un nuage ne point on reconstitue le truc
+
+scanner la chambre et dire que tel ou tel truc est tel objet 
+
+Geodesic : La plus petite distance entre deux points sur une surface tordue
+
+Des fichiers à download : https://segeval.cs.princeton.edu/
+
+Le sain papier https://www.lix.polytechnique.fr/~maks/papers/perslocsig.pdf et pour la segmentation : Learning 3D Mesh Segmentation and Labeling
+
+Utilisation sur les graphes : Décompositions en partie de chacune des parties d'un graphe
+
+Utiliser du machine learning basé sur la persistance homologique pour résoudre le problème du sac à dos 
+
+Persistance homologique pour la répartition de ressources : https://arxiv.org/pdf/2206.04834
+
+## 08/09/24
+
+TIPE : Utilisation de la persistance homologique (Analyse topologic) pour le developpement de lignes de metro
+
+Pour cela on va suivre la méthode du papier de recherche : https://arxiv.org/pdf/2206.04834 (PH FOR RESOURCE COVERAGE.pdf)
+
+Dans les trucs qui vont changer ya la facon de récuperer les données et définir les nouvelles distances
