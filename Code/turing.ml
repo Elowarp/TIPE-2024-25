@@ -133,33 +133,193 @@ let print_tape (tape: 'a tape) (blank: 'a) ?(show_cursor=false) ?(cursor=0)
     print_newline ()
 
 (*** Fonctions de manipulation des machines de turing ***)
-let turing_to_pdf (tm: 'a t) (repr_letter: 'a -> string): unit = 
-    let oc = open_out "export.dot" in 
-    output_string oc "digraph G {\n"; 
+
+(* Fonction qui créer une liste de transition a afficher dans le fichier 
+d'export. Elle merge les transitions qui partent/viennent des mêmes noeuds
+avec la même déplacement en une transition, affichant Sigma \ E avec E 
+l'ensemble des symboles ne faisant pas parties du merge *)
+let transition_listing (tm: 'a t) (repr_letter: 'a -> string): string list = 
+    let transitions = ref [] in 
+    let transitions_tmp = Hashtbl.create 36 in
+
+    (* Fonction qui produit un string qui affiche la bonne transition *)
+    let register_transition q1 q2 shift read_val write_val =
+        transitions := (string_of_int q1 ^ " -> " ^ string_of_int q2 ^ 
+            " [ label = \"" ^ read_val ^ " → " ^ write_val ^ " " ^ 
+            (match shift with LEFT -> "Left" | RIGHT -> "Right") ^ "\" ]\n") :: !transitions
+    in
+
+    (* Stockage dans transitions_tmp des lettres à écrire et lue pour un même
+    triplet d'état + déplacement *)
     Hashtbl.iter (fun k v -> 
         let q1, read_letter = k in 
         let q2, write_letter, shift = v in
-        let shift_str = match shift with RIGHT -> "R" | LEFT -> "L" in
-        output_string oc (string_of_int q1);
-        output_string oc " -> ";    
-        output_string oc (string_of_int q2);
-        output_string oc "[ label = \"";
 
-        if read_letter = tm.blank then 
-            output_string oc "_"
-        else output_string oc (repr_letter read_letter);
+        let key = (q1, q2, shift) in
+        let value = (read_letter, write_letter) in
 
-        output_string oc " -> ";
-        if write_letter = tm.blank then 
-            output_string oc "_"
-        else output_string oc (repr_letter write_letter);
-
-        output_string oc (","^shift_str^"\" ]\n")
+        match Hashtbl.find_opt transitions_tmp key with
+            | None -> Hashtbl.add transitions_tmp key [value]
+            | Some l -> Hashtbl.replace transitions_tmp key (value::l)
     ) tm.delta;
+
+    (* On merge une fois des transitions par état, et on merge les transtions 
+    qui ont quasi toutes la meme lettre à écrire ou qui quasi toutes ont la
+    même lettre lu et écrite *)
+    (* On veut sauvegarder celles non merged pour pouvoir l'indiquer dans 
+    la création de la transition, et de créer des transitions spéciales pour elles *)
+    Hashtbl.iter (fun k v -> 
+        let q1, q2, shift = k in 
+        let l = v in 
+
+        let read_letters = List.map (fun (x, _) -> x) l in 
+        let write_letters = List.map (fun (_, x) -> x) l in 
+
+        (* Fait la liste des transitions telles que on laisse la lettre écrite
+         invariante *)
+        let invariants = ref [] in
+        let variants = ref [] in
+        let rec aux l1 l2 = match l1, l2 with
+            | [], [] -> ()
+            | x::q, y::q' -> 
+                if x = y then invariants := (x,x)::!invariants
+                else variants := (x,y)::!variants;
+                aux q q'
+            | _, _ -> failwith "Erreur de taille"
+        in aux read_letters write_letters;
+
+        (* Si la liste des invariants est plus grande que la moitié des lettres 
+        on les merge toutes ensembles *)
+        if List.length !invariants > 1 then 
+            begin
+                let read_val = 
+                    if List.length !invariants = Array.length tm.sigma then 
+                        "Σ"
+                    else
+                        "[ " ^ 
+                            List.fold_left (fun acc (x, _) -> 
+                                if acc = "" then repr_letter x 
+                                else acc ^ ", " ^ repr_letter x
+                            ) "" !invariants 
+                        ^ " ]"
+                in 
+
+                let write_val = 
+                    if List.length !invariants = Array.length tm.sigma then 
+                        "Σ"
+                    else
+                        "[ " ^ 
+                            List.fold_left (fun acc (_, x) -> 
+                                if acc = "" then repr_letter x 
+                                else acc ^ ", " ^ repr_letter x
+                            ) "" !invariants 
+                        ^ " ]"
+                in
+
+                register_transition q1 q2 shift read_val write_val;
+
+                (* On garde les invariants et on crée une transition pour les autres *)
+                List.iter (fun (x, y) -> 
+                    register_transition q1 q2 shift (repr_letter x) (repr_letter y)
+                ) !variants
+            end
+        else
+            begin
+            (* Sinon on cherche les transitions telles quelles écrivent la même 
+                lettre *)
+            (* S'il y en a assez on les merge, sinon on ajoute les transitions 
+                telles quelle *)
+            (* Compte le nb d'occurrence de chaque lettre écrite *)
+            let count_write_letters = Array.make (Array.length tm.sigma + 1) 0 in 
+
+            List.iter (fun x -> 
+                match Array.find_index (fun e -> x=e) tm.sigma with
+                            (* Cas symbole blanc *)
+                    | None -> count_write_letters.(Array.length tm.sigma) 
+                                <- count_write_letters.(Array.length tm.sigma) + 1 
+
+                    | Some i -> count_write_letters.(i) <- count_write_letters.(i) + 1
+            ) write_letters;
+
+            (* Recherche de la plus grande occurrence *)
+            let max = ref 0 in
+            let max_i = ref 0 in
+            for i=0 to Array.length tm.sigma - 1 do 
+                if count_write_letters.(i) > !max then 
+                    begin
+                        max := count_write_letters.(i);
+                        max_i := i
+                    end
+            done;
+
+            if !max > 1 then (* On groupe selon la lettre *)
+            begin
+                (* On crée la liste des lettres à grouper *)
+                let letters_to_group = 
+                    let rec aux l1 l2 = match l1, l2 with
+                        | [], [] -> []
+                        | x::q, y::q' -> 
+                            if y=tm.sigma.(!max_i) then x::(aux q q')
+                            else aux q q'
+                        | _, _ -> failwith "Erreur de taille"
+                    in aux read_letters write_letters
+                in
+
+                (* Construction de la string du merged *)
+                let read_val = 
+                    if List.length letters_to_group = Array.length tm.sigma then 
+                        "Σ"
+                    else
+                    "[ " ^ 
+                        List.fold_left (fun acc x -> 
+                            if acc = "" then repr_letter x 
+                            else acc ^ "," ^ repr_letter x
+                        ) "" letters_to_group 
+                    ^ " ]"
+                in
+
+                (* On ajoute la transition merged *)
+                register_transition q1 q2 shift read_val (repr_letter tm.sigma.(!max_i));
+
+                (* On ajoute les transitions restantes *)
+                let rec aux l1 l2 = match l1, l2 with
+                    | [], [] -> ()
+                    | x::q, y::q' -> 
+                        if y <> tm.sigma.(!max_i) then 
+                            register_transition q1 q2 shift (repr_letter x) (repr_letter y);
+                        aux q q'
+                    | _, _ -> failwith "Erreur de taille"
+                in aux read_letters write_letters
+            end
+            else
+            begin
+                (* On ajoute les transitions telles quelles *)
+                List.iter (fun (x, y) -> 
+                    register_transition q1 q2 shift (repr_letter x) (repr_letter y)
+                ) l
+            end
+        end;
+
+    ) transitions_tmp;
+
+    !transitions
+
+let turing_to_pdf (tm: 'a t) (repr_letter: 'a -> string): unit = 
+    let oc = open_out "export.dot" in 
+    output_string oc "digraph G {\n"; 
+    output_string oc (string_of_int tm.i ^"[shape=box];\n"); 
+    List.iter (fun x -> output_string oc (string_of_int x ^"[shape=doublecircle];\n")) tm.f;
+    for i=0 to tm.nb_states - 1 do
+        if not (List.mem i tm.f) && i <> tm.i then 
+            output_string oc (string_of_int i ^"[shape=circle];\n")
+    done;
+
+    let transitions = transition_listing tm repr_letter in
+    List.iter (fun x -> output_string oc (x ^ ";\n")) transitions;
 
     output_string oc "}";
     close_out oc;
-    let _ = Sys.command "neato -Tpdf export.dot > export.pdf" in 
+    let _ = Sys.command "dot -Tpdf export.dot > export.pdf" in 
     Sys.remove "export.dot"
 
 let add_transition (tm: 'a t) (q1: int) (read_letter: 'a) (q2: int)

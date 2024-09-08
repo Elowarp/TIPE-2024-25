@@ -12,6 +12,9 @@ automaton: automaton.ml
 turing: turing.ml automaton.ml
 	ocamlc -g automaton.ml turing.ml -o turing
 
+two_color: two_color.ml turing
+	ocamlc -g automaton.ml turing.ml two_color.ml -o two_color
+
 minimisation: minimisation.ml turing automaton partition dlist partition
 	ocamlc -g automaton.ml turing.ml dlist.ml partition.ml minimisation.ml -o minimisation
 

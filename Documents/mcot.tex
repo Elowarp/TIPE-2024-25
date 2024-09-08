@@ -1,0 +1,63 @@
+\documentclass{article}
+
+\begin{document}
+
+\title{Optimisation de machines de Turing, application à une version du problème 2Color}
+\author{Elowan}
+\date{\today}
+
+\maketitle
+
+\section{Introduction}
+Ce TIPE tente de s'atteler à la minimisation de machines de Turing, en 
+s'inspirant de la minimisation d'automates finis déterministes. Essayant
+de trouver une procédure afin de réduire une machine de Turing à un automate
+fini déterministe, à appliquer l'algorithme de Hopcroft puis à reconstruire
+la machine de Turing finale. Enfin, on appliquera cette méthode à une machine
+de Turing qui résout un problème de coloriage de graphe. En l'occurrence,
+le problème n-2Color, qui vise à déterminer si un graphe de maximum n 
+sommets est coloriable avec deux couleurs. 
+
+\section{Bibliographie commentée}
+L'étude de la minimisation de machines de Turing est un sujet peu abordé
+malgré son intérêt théorique. Nous pouvons citer l'intelligence artificelle 
+pour laquelle la minimisation de machines de Turing pourrait être utile.
+De plus, la théorie des automates est un sujet très riche, qui a été étudié
+par de nombreux mathématiciens et informaticiens depuis les années 50. Notamment
+avec les travaux de Hopcroft, qui a donné un algorithme de minimisation 
+d'automates finis déterministes [1-2]. 
+
+Les machines de Turing ainsi que les automates étant des modèles de calculs 
+proches, nous nous proposons d'étudier une transformation d'une machine de 
+Turing en automate fini déterministe, qui nous permettra d'appliquer 
+l'algorithme de Hopcroft. Cette transformation ne nous permet pas d'utiliser 
+l'automate comme une machine de Turing, mais nous offre une bijection entre 
+les machines de turing et les automates obtenus par cette transformation. 
+
+Une fois cette procédure établie, nous pourrons l'appliquer à un problème de
+coloriage de graphe, le problème n-2Color. Ce problème est un problème de
+décision qui consiste à déterminer si un graphe est coloriable avec deux
+couleurs pour un graphe de maximum n sommets. Ce problème est décidable étant 
+décidable, nous savons qu'il existe une machine de Turing qui le modélise [Source?]. 
+Ainsi, dans ce TIPE, nous développerons une machine de Turing qui résout ce
+problème, puis nous cherchons à la minimiser en utilisant la procédure définie
+précédémment, afin d'attester de la validité de cette méthode.
+
+\section{Problématique retenue}
+Comment obtenir une version plus petite d'une machine de Turing, tout en
+conservant le même langage ? Et comment appliquer cette méthode à un problème
+de coloriage de graphe ?
+
+\section{Objectifs du TIPE du candidat}
+\begin{itemize}
+    \item Développer une procédure de réduction d'états d'une machine de Turing
+    \item Construire une machine de Turing qui résout le problème n-2Color
+\end{itemize}
+
+\section{Références bibliographiques}
+\begin{enumerate}
+    \item Beauquier D, Berstel J : Eléments d'algorithmique (2005)
+    \item Carton O : Langages formels, Calculabilité et complexité (2014)
+\end{enumerate}
+
+\end{document}

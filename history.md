@@ -350,7 +350,7 @@ Pour transformer une machine de turing en automate, soit un alphabet A sur leque
 
 La on vient de réussir à faire une bijection entre une machine de turing et un automate, l'automate tel quel n'est pas vraiment utilisable ou alors il faudrait savoir quelles sont les modifications à faire à l'avance
 
-On peut implementer l'algo de hopcroft dans minimisation.ml (Via Langages formels de carton et Eléments dalgorithmique (Beauquier Danièle) pages 330 dans ressources)
+On peut implementer l'algo de hopcroft dans minimisation.ml (Via `Langages formels` de carton et `Eléments dalgorithmique` (Beauquier Danièle) pages 330 dans ressources)
 
 ## 18/08/24
 J'ai fini d'implémenter l'algorithme de minimisation de Hopcroft !!!!!! horrible le pire que j'ai jamais fait
@@ -388,3 +388,15 @@ J'ai fini la construction de la machine de turing qui renvoit une coloration de 
 Parce que la machine est vraiment grosse et doit s'adapter en fonction des différentes tailles de graphes, je vais devoir faire une fonction qui génère la machine de turing en fonction d'une taille de graphe donnée, puis tester si effectivement elle fonctionne, et sinon la corriger.
 
 On s'en servira pour utiliser la minimisation dessus.
+
+Après calcul, pour des graphes de tailles au plus $n$, on a besoin de $18n + 9 + 2(l'état initial et l'état acceptant)$ états pour la machine de turing. Plutot pas mal d'avoir une machine de turing en taille linéaire par rapport à la taille du graphe
+
+## 03/09/24
+
+La machine de turing est faite mais elle ne marche pas. Bref faut la fix mais là je me concentre sur la recherche du langage accepté par l'automate transformé par la machine de Turing.
+
+Bon j'ai démontré que ma transformation ne fonctionne PAS, ff on try de comprendre la preuve de hopcroft
+
+Finalité : Le tipe entier ne fonctionne pas, je dois changer de sujet.
+
+
