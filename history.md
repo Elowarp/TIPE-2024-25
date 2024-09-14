@@ -444,3 +444,41 @@ TIPE : Utilisation de la persistance homologique (Analyse topologic) pour le dev
 Pour cela on va suivre la méthode du papier de recherche : https://arxiv.org/pdf/2206.04834 (PH FOR RESOURCE COVERAGE.pdf)
 
 Dans les trucs qui vont changer ya la facon de récuperer les données et définir les nouvelles distances
+
+## 10/09/24
+On commence à essayer de programmer la construction des VR complexes
+
+On définit un fichier .dat qui contient les coordonnées des points et les points associés à chaque points : Limite à 2 chiffres significatifs : Voir `example.dat`
+
+On définit aussi un fichier .pd qui contient les diagrammes
+de persistance : Voir `example.pd`
+
+https://arxiv.org/pdf/2307.16333 pour calculer les VR
+
+## 14/09/24
+On essaye de comprendre l'algorithme utilisée pour calculer les homologies
+
+> $<ab>$ = Un simplex constitué des points a et b
+
+> $Lune(<ab>) = \{ x \in X | d(a,x) < d(a,b) \text{ and } d(b,x) < d(a, b) \}$
+
+> MST(X) = Minimum spanning tree = Arbre couvrant minimal
+
+> RNG(X) = Relative Neighborhood Graph of X = Ensemble de sommets de X et d'arêtes de $E = \{ <xy> | lune(<xy>) \neq \emptyset \}$
+> C'est l'ensemble des one-simplieces avec une lune vide
+
+> Important : It should be noted that the above lemma also holds as long as X is a finite metric space with unique pairwise distances. This means that provided we have RNG(X) and MST(X) we know the following information about the one dimensional Vietoris-Rips persistent homology before actually computing it: The birth times of all homology classes with non-trivial persistence and the number of bars in the persistence barcode. The latter is particularly important because we will use it in the stopping condition utilised in the algorithm later in this paper
+
+### Etapes de l'algorithme 
+> Si nos points sont en 2D, pour calculer RNG on peut utiliser le truc de `Delaunator`
+
+> On construit un arbre k dimensionnel, k dépendant du RNG, un tas min H de la forme (a, N[a][t], r, t) trié par rapport à r, on stock dans un tableau N les voisins du sommet i : N[i] = KNN(i, k). Si N[a] est vide on a une fonction qui retourne tt les voisins de a du plus proche au plus loin 
+
+> $\psi$ est une bijection qui a chaque one simplex associe un entier, en gros un tableau qui a un simplex associe un entier
+
+> Faire un parcours en prof pour trouver les composantes d'une lune
+
+> T1 et T<1 sont des AVL, chaque noeud est de la forme  left, right, height, key and column -> Utilisé pour augmenter la reproduction des matrices
+
+
+J'ai crée tous les fichiers que je pense on va avoir besoins pour les structures avant d'implémenter notre algorithme.
