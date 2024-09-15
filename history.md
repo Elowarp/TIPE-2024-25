@@ -482,3 +482,8 @@ On essaye de comprendre l'algorithme utilisée pour calculer les homologies
 
 
 J'ai crée tous les fichiers que je pense on va avoir besoins pour les structures avant d'implémenter notre algorithme.
+
+## 15/09/24
+J'ai pu implémenter les tas max/min avec différents tests pour vérifier que tout fonctionne bien. De même pour les arbres k dimensionnels, le test de knn ne fonctionne pas mais je pense que ça vient de mon exemple qui n'à pas vraiment de cohérence métrique avec le schéma du cours que j'ai pris (cours de mirliaz). Tous les autres tests passent.
+
+Il faudra donc implémenter les arbres AVL, les RNG et le truc des graphes puis nous pourront commencer à implémenter l'algorithme de calcul des homologies.

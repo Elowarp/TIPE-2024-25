@@ -1,11 +1,15 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 14-09-2024 22:16:49
- *  Last modified : 14-09-2024 22:16:51
+ *  Last modified : 15-09-2024 16:46:00
  *  File : geometry.h
  */
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
+
+#include <stdbool.h>
+
+extern const int DIM;
 
 typedef struct {
     float x;
@@ -44,24 +48,29 @@ typedef struct Filtration_t {
     struct Filtration_t *next;
 } Filtration;
 
+extern float dist_euclidean(Point p1, Point p2);
+extern float dist(Point p1, Point p2);
+extern void pointPrint(Point p);
 
-EdgeList *edgeListInit();
-FaceList *faceListInit();
-PointCloud *pointCloudInit(int size);
-SimComplex *simComplexInit();
-Filtration *filtrationInit(SimComplex *cmpx);
+extern EdgeList *edgeListInit();
+extern FaceList *faceListInit();
+extern PointCloud *pointCloudInit(int size);
+extern SimComplex *simComplexInit();
+extern Filtration *filtrationInit(SimComplex *cmpx);
 
-void edgeInsert(EdgeList *edgeList, int p1, int p2, float weight);
-void faceInsert(FaceList *faceList, int p1, int p2, int p3);
+extern bool pointAreEqual(Point p1, Point p2);
 
-SimComplex *simComplexCopy(SimComplex *cmpx);
-
-void simComplexInsert(Filtration *filtration, SimComplex *cmpx);
-
-void pointCloudFree(PointCloud *pointCloud);
-void edgeListFree(EdgeList *edgeList);
-void faceListFree(FaceList *faceList);
-void simComplexFree(SimComplex *cmpx);
-void filtrationFree(Filtration *filtration);
+extern void edgeInsert(EdgeList *edgeList, int p1, int p2, float weight);
+extern void faceInsert(FaceList *faceList, int p1, int p2, int p3);
+ 
+extern SimComplex *simComplexCopy(SimComplex *cmpx);
+ 
+extern void simComplexInsert(Filtration *filtration, SimComplex *cmpx);
+ 
+extern void pointCloudFree(PointCloud *pointCloud);
+extern void edgeListFree(EdgeList *edgeList);
+extern void faceListFree(FaceList *faceList);
+extern void simComplexFree(SimComplex *cmpx);
+extern void filtrationFree(Filtration *filtration);
 
 #endif

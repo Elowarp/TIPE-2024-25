@@ -1,33 +1,43 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 14-09-2024 22:17:29
- *  Last modified : 14-09-2024 22:48:18
+ *  Last modified : 15-09-2024 16:33:20
  *  File : heap.h
  */
 #ifndef HEAP_H
 #define HEAP_H
 
+#include "geometry.h"
+
 typedef struct {
-    int a;
-    int *N_a_t;
-    float r;
-    int t;
+    float priority;
+    void *elmt;
 } HeapNode; 
 
-typedef struct heap_t {
+typedef struct {
     HeapNode **heap; // Tableau de pointeurs
     int maxSize;
-} Heap;
+} HeapMin;
 
-Heap *heapInit(int maxSize);
-HeapNode *heapNodeInit(int a, int *N_a_t, float r, int t);
+typedef struct {
+    HeapNode **heap; // Tableau de pointeurs
+    int maxSize;
+} HeapMax;
 
-int heapSize(Heap *H);
-void heapInsert(Heap *H, HeapNode *node);
-HeapNode *heapPop(Heap *H);
-HeapNode *heapTop(Heap *H);
-
-void heapNodeFree(HeapNode *node);
-void heapFree(Heap *H);
-
+extern HeapNode *heapNodeInit(float priority, void *elmt);
+extern HeapMax *heapMaxInit(int maxSize);
+extern HeapMin *heapMinInit(int maxSize);
+ 
+extern int heapMaxSize(HeapMax *H);
+extern int heapMinSize(HeapMin *H);
+extern void heapMaxInsert(HeapMax *H, HeapNode *node);
+extern void heapMinInsert(HeapMin *H, HeapNode *node);
+extern HeapNode *heapMaxPop(HeapMax *H);
+extern HeapNode *heapMinPop(HeapMin *H);
+extern HeapNode *heapMaxTop(HeapMax *H);
+extern HeapNode *heapMinTop(HeapMin *H);
+ 
+extern void heapNodeFree(HeapNode *node);
+extern void heapMaxFree(HeapMax *H);
+extern void heapMinFree(HeapMin *H);
 #endif

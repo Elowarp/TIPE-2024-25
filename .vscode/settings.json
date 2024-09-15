@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "geometry.h": "c",
+        "kdtree.h": "c",
+        "heap.h": "c"
+    }
+}

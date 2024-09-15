@@ -5,7 +5,7 @@ TARGET = persDiag
 CC = gcc
 
 # Options de compilation
-CFLAGS = -Wall -Wextra -std=c11 -g
+CFLAGS = -Wall -Wextra -std=c11 -g -lm
 
 # Liste des fichiers source
 SRCS = $(wildcard *.c) $(wildcard structures/*.c)
