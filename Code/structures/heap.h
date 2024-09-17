@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 14-09-2024 22:17:29
- *  Last modified : 15-09-2024 16:33:20
+ *  Last modified : 17-09-2024 15:49:29
  *  File : heap.h
  */
 #ifndef HEAP_H
@@ -36,7 +36,9 @@ extern HeapNode *heapMaxPop(HeapMax *H);
 extern HeapNode *heapMinPop(HeapMin *H);
 extern HeapNode *heapMaxTop(HeapMax *H);
 extern HeapNode *heapMinTop(HeapMin *H);
- 
+extern void heapMaxPrint(HeapMax *H, void (*print)(void *));
+extern void heapMinPrint(HeapMin *H, void (*print)(void *));
+
 extern void heapNodeFree(HeapNode *node);
 extern void heapMaxFree(HeapMax *H);
 extern void heapMinFree(HeapMin *H);

@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 15-09-2024 13:06:18
- *  Last modified : 15-09-2024 16:53:29
+ *  Last modified : 17-09-2024 16:07:30
  *  File : kdTree.c
  */
 #include <stdio.h>
@@ -153,15 +153,26 @@ static void visit(KDTree *tree, Point pt, int i, int k, HeapMax *H){
     visit(t1, pt, (i+1)%DIM, k, H);
 
     // Visite du deuxième si nécessaire
-    if(heapMaxSize(H) < k || heapMaxTop(H)->priority >= diff){
-        HeapNode *node = heapNodeInit(dist(tree->point, pt), (void *) (&tree->point));
+    if(heapMaxSize(H) <= k || heapMaxTop(H)->priority >= diff){
+        HeapNode *node = heapNodeInit(
+          dist(tree->point, pt), (void *) (&tree->point));
         
-        if (heapMaxSize(H) >= H->maxSize){
+        // Si le tas max est rempli et qu'on a un point moins loin 
+        // que le plus loin du tas
+        if (heapMaxSize(H) >= H->maxSize && 
+          heapMaxTop(H)->priority > node->priority){
             HeapNode *node = heapMaxPop(H);
             heapNodeFree(node);
-        }
+            heapMaxInsert(H, node);
         
-        heapMaxInsert(H, node);
+        // Sinon si le tas n'est pas encore vide
+        } else if (heapMaxSize(H) < H->maxSize){
+            heapMaxInsert(H, node);
+        
+        // Sinon notre initialisation de noeud ne sert pas alors on le libère
+        } else {
+            heapNodeFree(node);
+        }
         
         visit(t2, pt, (i+1)%DIM, k, H);
     }

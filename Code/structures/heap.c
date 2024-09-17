@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 14-09-2024 22:32:07
- *  Last modified : 15-09-2024 16:41:36
+ *  Last modified : 17-09-2024 15:53:23
  *  File : heap.c
  */
 #include <stdio.h>
@@ -169,6 +169,21 @@ HeapNode *heapMinTop(HeapMin *H){
         exit(1);
     }
     return H->heap[1];
+}
+
+// Affiche le tas max
+void heapMaxPrint(HeapMax *H, void (*print)(void *)){
+    for(int i = 1; i <= heapMaxSize(H); i++){
+        printf("Prio : %f ; Elmt : ", H->heap[i]->priority);
+        print(H->heap[i]->elmt);
+    }
+}
+
+// Affiche le tas min
+void heapMinPrint(HeapMin *H, void (*print)(void *)){
+    for(int i = 1; i <= heapMinSize(H); i++){
+        print(H->heap[i]->elmt);
+    }
 }
 
 // Libère la mémoire allouée pour un noeud du tas
