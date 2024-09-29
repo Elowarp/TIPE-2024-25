@@ -487,3 +487,40 @@ J'ai crée tous les fichiers que je pense on va avoir besoins pour les structure
 J'ai pu implémenter les tas max/min avec différents tests pour vérifier que tout fonctionne bien. De même pour les arbres k dimensionnels, le test de knn ne fonctionne pas mais je pense que ça vient de mon exemple qui n'à pas vraiment de cohérence métrique avec le schéma du cours que j'ai pris (cours de mirliaz). Tous les autres tests passent.
 
 Il faudra donc implémenter les arbres AVL, les RNG et le truc des graphes puis nous pourront commencer à implémenter l'algorithme de calcul des homologies.
+
+## 17/09/24
+J'ai réparé KNN et implémenté les AVL, il faut maintenant implémenter les RNG et les graphes, pour la triangulation on va implémenter le truc de delaunay 
+
+## 24/09/24
+Triangularisation via l'algorithme décrit ici https://paulbourke.net/papers/triangulate/
+
+```
+subroutine triangulate
+input : vertex list
+output : triangle list
+   initialize the triangle list
+   determine the supertriangle
+   add supertriangle vertices to the end of the vertex list
+   add the supertriangle to the triangle list
+   for each sample point in the vertex list
+      initialize the edge buffer
+      for each triangle currently in the triangle list
+         calculate the triangle circumcircle center and radius
+         if the point lies in the triangle circumcircle then
+            add the three triangle edges to the edge buffer
+            remove the triangle from the triangle list
+         endif
+      endfor
+      delete all doubly specified edges from the edge buffer
+         this leaves the edges of the enclosing polygon only
+      add to the triangle list all triangles formed between the point 
+         and the edges of the enclosing polygon
+   endfor
+   remove any triangles from the triangle list that use the supertriangle vertices
+   remove the supertriangle vertices from the vertex list
+end
+```
+
+## 29/09/24
+Implémentation complète de l'algorithme de triangulation !!!!!!!!
+Pour tester : `python3 repr.py` compile le code et pour un nombre aléatoire de points a des emplacements aléatoires, affiche le graphe triangulé
