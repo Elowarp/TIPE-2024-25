@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 15-09-2024 13:06:18
- *  Last modified : 17-09-2024 16:07:30
+ *  Last modified : 29-09-2024 19:22:29
  *  File : kdTree.c
  */
 #include <stdio.h>
@@ -179,16 +179,16 @@ static void visit(KDTree *tree, Point pt, int i, int k, HeapMax *H){
 }
 
 // Recherche des k plus proche voisins d'un point pt dans l'arbre
-Point *kdTreeNearestNeighbor(KDTree *tree, Point pt, int k){
+Point *kdTreeNearestNeighbor(KDTree *tree, Point pt, int k, int *nb_neighboors){
     // Construit un tas max des k plus proches voisins
     HeapMax *H = heapMaxInit(k);
     visit(tree, pt, 0, k, H);
 
     // Transforme les k voisins trouvés en tableau de points
     // Et libère les noeuds du tas
-    int size = heapMaxSize(H);
-    Point *neighbors = malloc((size)*sizeof(Point));
-    for(int i = 0; i < size; i++){
+    *nb_neighboors = heapMaxSize(H);
+    Point *neighbors = malloc((*nb_neighboors)*sizeof(Point));
+    for(int i = 0; i < *nb_neighboors; i++){
         HeapNode *node = heapMaxPop(H);
         Point p = *(Point *) node->elmt;
         neighbors[i] = p;

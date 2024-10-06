@@ -523,4 +523,55 @@ end
 
 ## 29/09/24
 Implémentation complète de l'algorithme de triangulation !!!!!!!!
-Pour tester : `python3 repr.py` compile le code et pour un nombre aléatoire de points a des emplacements aléatoires, affiche le graphe triangulé
+Pour tester : `python3 repr.py` compile le code et pour un nombre aléatoire de points a des emplacements aléatoires, affiche le graphe triangulé. 
+J'ai aussi commencé à implémenter les graphes, RNG et MST et j'ai même commencé l'algorithme finale. 
+
+Bon deux gros problèmes : Trouver la data sur laquelle vérifier que le programme est bon, comprendre bien l'algorithme et trouver la data pour faire le tipe quoi ???
+
+## 01/10/24
+
+En fait on tej le papier qui décrit un algorithme de fou de complexité de bz pour faire l'approche naive 
+
+Ex naif : https://www.jeremykun.com/2015/08/06/cech-vietoris-rips-complex/
+
+Ex d'utilisation des PD : https://iuricichf.github.io/ICT/algorithm.html
+
+Standard algorithm : L'algorithme pour réduire une matrice de bordure en des codes barres
+
+Donc les étapes :
+
+- Définir un ordre total sur les simplexes (les points, les arêtes, les triangles etc) cad que si s'il apparait dans un complexe simplical alors il doit etre plus petit que tous les autres simplexes dans les complexes simpliciaux qui le suivent et qui sont pas dans celui là
+- Itérer sur un R pour la filtration de Veirotis-Rips et à chaque nouveau simplexe on attribue un numéro de simplicial complexe
+- On construit un tableau de bordure
+- On réduit le tableau de bordure
+- On crée les diagrammes
+
+On définit a chaque simplexe un quadruplet (i, j, k, f) avec i,j,k les indices des points dans le tableau de points et f qui vaut 1 si ya une face et 0 sinon. On a j et k qui valent 0 si on est sur un point et k qui vaut 0 si on est sur une arête.
+
+On pose qu'une filtration n'est qu'une liste de simplexes ordonnée par leur numéro de simplicial complexe, sachant filt[i] contient le nombre d'élément des K_i, ce qui est cohérent vu K_i inclus dans K_j si i < j
+
+On a donc l'algorithme
+
+```
+R <- Le rayon courant
+Eps <- le rayon par lequel on ajoute pour faire les VR complexes 
+Tant que le dernier complexe simplical n'est pas complet (cad qui contient tous les simplexes possibles) :
+   K_i <- VR Complexe simplical de rayon R
+   Pour tout simplexe s de K_i :
+      Si s n'est pas dans le complexe simplical précédent alors
+         Ajouter le dernier id attribué à un simplexe à l'indentifiant de s
+         Ajouter s à la liste des simplexes
+   Fin Pour
+   R <- R + Eps
+```
+
+Alors par construction, on a une filtration et un ordre total sur les simplexes
+
+## 06/10/24
+
+Ok on va être clair sur les structures : 
+On identifie un simplex à son identifiant unique
+Complexe simplical c'est un tableau de booléen qui dit si un simplex est dans le complexe simplical ou pas
+Filtration c'est 2 tableaux, F et N, F[i] = k si le simplex i est dans le complexe simplical k (k=-1 pas encore apparu) et N[i] = j si le simplex i est le j-eme simplexe apparu dans la filtration(j=-1 pas encore apparu)
+
+J'ai donc réussi à créer une filtration depuis un fichier .dat, il faut maintenant implémenter l'algorithme "standard" pour réduire la matrice de bordure (pas capté ct quoi mais bon).

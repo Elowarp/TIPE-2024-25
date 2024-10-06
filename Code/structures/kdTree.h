@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 14-09-2024 22:17:24
- *  Last modified : 15-09-2024 15:49:27
+ *  Last modified : 29-09-2024 19:22:14
  *  File : kdTree.h
  */
 #ifndef KDTREE_H
@@ -18,7 +18,8 @@ typedef struct KDTree_t {
 extern KDTree *kdTreeInit(Point *pts, int n, int i);
 
 extern void kdTreePrint(KDTree *tree);
-extern Point *kdTreeNearestNeighbor(KDTree *tree, Point pt, int k);
+extern Point *kdTreeNearestNeighbor(KDTree *tree, Point pt, int k, 
+    int *nb_neighboors);
 
 extern void kdTreeFree(KDTree *tree);
 #endif

@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 14-09-2024 13:55:46
- *  Last modified : 29-09-2024 15:49:55
+ *  Last modified : 06-10-2024 23:00:00
  *  File : geometry.c
  */
 #include <stdio.h>
@@ -10,6 +10,7 @@
 #include <math.h>
 
 #include "geometry.h"
+#include "../misc.h"
 
 const int DIM = 2;
 
@@ -70,14 +71,14 @@ EdgeList *edgeListInit(int p1, int p2, float weight){
 }
 
 // Insère une arête dans la liste
-void edgeListInsert(EdgeList *edgeList, int p1, int p2, float weight){
+void edgeListInsert(EdgeList *edges, int p1, int p2, float weight){
     EdgeList *new = malloc(sizeof(EdgeList));
     new->p1 = p1;
     new->p2 = p2;
     new->weight = weight;
     new->next = NULL;
 
-    EdgeList *cur = edgeList;
+    EdgeList *cur = edges;
     while(cur->next != NULL){
         cur = cur->next;
     }
@@ -86,8 +87,8 @@ void edgeListInsert(EdgeList *edgeList, int p1, int p2, float weight){
 }
 
 // Affiche une liste d'arêtes
-void edgeListPrint(EdgeList *edgeList){
-    EdgeList *current = edgeList;
+void edgeListPrint(EdgeList *edges){
+    EdgeList *current = edges;
     while(current != NULL){
         printf("Edge : %d %d %f\n", current->p1, current->p2, current->weight);
         current = current->next;
@@ -101,54 +102,54 @@ bool edgeAreEqual(EdgeList *e1, EdgeList *e2){
 }
 
 // Supprime toutes les occurrences d'une arête dans une liste d'arêtes
-EdgeList *edgeListRemove(EdgeList *edgeList, EdgeList *edge){
-    if (edgeList == NULL){
+EdgeList *edgeListRemove(EdgeList *edges, EdgeList *edge){
+    if (edges == NULL){
         return NULL;
-    } else if (edgeAreEqual(edgeList, edge)){
-        EdgeList *next = edgeList->next;
+    } else if (edgeAreEqual(edges, edge)){
+        EdgeList *next = edges->next;
         EdgeList *tmp = edgeListRemove(next, edge);
-        free(edgeList);
+        free(edges);
         return tmp;
     } else {
-        edgeList->next = edgeListRemove(edgeList->next, edge);
-        return edgeList;
+        edges->next = edgeListRemove(edges->next, edge);
+        return edges;
     }
 }
 
 // Compte le nombre d'occurrences d'une arête dans une liste d'arêtes
-int edgeListCount(EdgeList *edgeList, EdgeList *edge){
-    if (edgeList == NULL){
+int edgeListCount(EdgeList *edges, EdgeList *edge){
+    if (edges == NULL){
         return 0;
-    } else if (edgeAreEqual(edgeList, edge)){
-        return 1 + edgeListCount(edgeList->next, edge);
+    } else if (edgeAreEqual(edges, edge)){
+        return 1 + edgeListCount(edges->next, edge);
     } else {
-        return edgeListCount(edgeList->next, edge);
+        return edgeListCount(edges->next, edge);
     }
 }
 
 // Supprime les arêtes en double d'une liste d'arêtes
 // Si a est une arête présente plus de 2 fois, alors la liste renvoyée ne 
 // contiendra plus a
-EdgeList *removeDoubledEdges(EdgeList *edgeList){
-    if (edgeList == NULL){
+EdgeList *removeDoubledEdges(EdgeList *edges){
+    if (edges == NULL){
         return NULL;
     } else {
-        EdgeList *next = edgeList->next;
-        EdgeList edge = {edgeList->p1, edgeList->p2, edgeList->weight, NULL};
-        if (edgeListCount(edgeList, &edge) > 1){
-            return removeDoubledEdges(edgeListRemove(edgeList, &edge));
+        EdgeList *next = edges->next;
+        EdgeList edge = {edges->p1, edges->p2, edges->weight, NULL};
+        if (edgeListCount(edges, &edge) > 1){
+            return removeDoubledEdges(edgeListRemove(edges, &edge));
             
         } else {
-            edgeList->next = removeDoubledEdges(next);
-            return edgeList;
+            edges->next = removeDoubledEdges(next);
+            return edges;
         }
     }
 }
 
 // Libère une liste d'arêtes
 // Attention, cette fonction ne libère pas les points
-void edgeListFree(EdgeList *edgeList){
-    EdgeList *current = edgeList;
+void edgeListFree(EdgeList *edges){
+    EdgeList *current = edges;
     while(current != NULL){
         EdgeList *next = current->next;
         free(current);
@@ -336,4 +337,132 @@ bool inCircle(Point *center, float radius, Point *p){
     float dy = p->y - center->y;
     float dist = sqrt(dx * dx + dy * dy);
     return dist <= radius;
+}
+
+
+///////////////////////
+//     Simplex      //
+///////////////////////
+
+int compare(const void *a, const void *b){
+    return *(int *)a - *(int *)b;
+}
+
+// Initialise un simplexe
+Simplex *simplexInit(int i, int j, int k){
+    Simplex *s = malloc(sizeof(Simplex));
+    // Respect de l'ordre lexicographique
+    int tab[3] = {i, j, k};
+    qsort(tab, 3, sizeof(int), compare);
+
+    s->i = tab[0];
+    s->j = tab[1];
+    s->k = tab[2];
+    return s;
+}
+
+// Renvoie l'identifiant associé à un simplexe
+int simplexId(Simplex *s, int n){
+    return (s->i+1) + (n+1) * (s->j+1) + (n+1) * (n+1) * (s->k+1);
+}
+
+// Renvoie le simplexe associé à un identifiant
+Simplex simplexFromId(int id, int n){
+    Simplex s;
+    s.i = id % (n+1) - 1;
+    s.j = (id / (n+1)) % n - 1;
+    s.k = id / ((n+1)*(n+1)) - 1;
+    return s;
+}
+
+// Libère un simplexe
+void simplexFree(Simplex *s){
+    free(s);
+}
+
+// Affiche un simplexe
+void simplexPrint(Simplex *s){
+    printf("{%d, %d, %d}", s->i, s->j, s->k);
+}
+
+///////////////////////
+// Simplical Complex //
+///////////////////////
+
+// Initialise un complexe simplicial
+SimComplex *simComplexInit(int n){
+    SimComplex *cmpx = malloc(sizeof(SimComplex));
+    cmpx->simplices = malloc(n * sizeof(bool));
+    for(int i = 0; i<n; i++){
+        cmpx->simplices[i] = false;
+    }
+    cmpx->size = 0;
+    return cmpx;
+}
+
+// Libère un complexe simplicial
+void simComplexFree(SimComplex *cmpx){
+    free(cmpx->simplices);
+    free(cmpx);
+}
+
+// Teste si un simplex est dans un complexe simplicial
+bool simComplexContains(SimComplex *cmpx, Simplex *s, int n){
+    return cmpx->simplices[simplexId(s, n)];
+}
+
+// Insère un simplex dans un complexe simplicial
+void simComplexInsert(SimComplex *cmpx, Simplex *s, int n){
+    cmpx->simplices[simplexId(s, n)] = true;
+    cmpx->size++;
+}
+
+
+///////////////////////
+//     Filtration    //
+///////////////////////
+
+// Initialise une filtration
+Filtration *filtrationInit(int size){
+    Filtration *filt = malloc(sizeof(Filtration));
+    filt->filt = malloc(size * sizeof(int));
+    filt->nums = malloc(size * sizeof(int));
+    for(int i = 0; i<size; i++){
+        filt->filt[i] = -1;
+        filt->nums[i] = -1;
+    }
+    
+    filt->size = size;
+    return filt;
+}
+
+// Libère une filtration
+void filtrationFree(Filtration *filtration){
+    free(filtration->nums);
+    free(filtration->filt);
+    free(filtration);
+}
+
+// Ajoute un simplexe à une filtration
+void filtrationInsert(Filtration *filtration, Simplex *s, int n, int k, int num){
+    int id = simplexId(s, n);
+    filtration->filt[id] = k;
+    filtration->nums[id] = num;
+}
+
+// Teste si un simplexe est dans une filtration
+bool filtrationContains(Filtration *filtration, Simplex *s, int n){
+    return filtration->filt[simplexId(s, n)]!=-1;
+}
+
+// Affiche une filtration
+void filtrationPrint(Filtration *filt, int n){
+    for(int r = 0; r<filt->size; r++){
+        if (filt->filt[r] != -1){
+            Simplex s = simplexFromId(r, n);
+            printf("Simplex %d (dans K_%d): ", filt->nums[r], filt->filt[r]);
+            simplexPrint(&s);
+            printf("\n");
+        }
+    }
 }

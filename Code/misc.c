@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 15-09-2024 16:30:38
- *  Last modified : 29-09-2024 15:54:49
+ *  Last modified : 29-09-2024 18:57:02
  *  File : misc.c
  */
 
@@ -13,6 +13,25 @@
 void print_err(char* str){
     fprintf(stderr, "[ERROR] %s", str);
 }
+
+PointCloud *pointCloudLoad(char *filename){
+    FILE *file = fopen(filename, "r");
+    if(file == NULL){
+        fprintf(stderr, "Erreur: fichier introuvable %s\n", filename);
+        exit(1);
+    }
+
+    int size;
+    fscanf(file, "%d", &size);
+    PointCloud *pointCloud = pointCloudInit(size);
+
+    for(int i = 0; i < size; i++){
+        fscanf(file, "%f %f", &(pointCloud->pts[i].x), &(pointCloud->pts[i].y));
+    }
+
+    fclose(file);
+    return pointCloud;
+};
 
 // Liste de triangle vers fichier texte
 void triangleListToFile(TriangleList *list, Point* pts, int n, char *filename){

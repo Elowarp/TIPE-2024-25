@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 24-09-2024 16:57:12
- *  Last modified : 29-09-2024 15:59:49
+ *  Last modified : 06-10-2024 22:48:05
  *  File : tests_geometry.c
  */
 #include <stdio.h>
@@ -82,5 +82,19 @@ void test_geometry(){
     p_circle.x = 2;
     assert(!inCircle(&center, radius, &p_circle));
     
+    // Tests simplex
+    Simplex *s = simplexInit(2, 3, 1);
+    assert(s->i == 1);
+    assert(s->j == 2);
+    assert(s->k == 3);
+
+    assert(simplexId(s, 3) == 78);
+
+    Simplex s2 = simplexFromId(52, 3);
+    assert(s2.i == -1);
+    assert(s2.j == 0);
+    assert(s2.k == 2);
+
+    free(s);
 
 }

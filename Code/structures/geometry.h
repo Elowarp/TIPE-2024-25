@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 14-09-2024 22:16:49
- *  Last modified : 29-09-2024 16:05:46
+ *  Last modified : 06-10-2024 23:00:22
  *  File : geometry.h
  */
 #ifndef GEOMETRY_H
@@ -52,16 +52,29 @@ typedef struct faceList_t {
     struct faceList_t *next;
 } FaceList;
 
+// Un simplexe est défini par une figure à au plus 3 sommets
+// et au plus une face
 typedef struct {
-    Point *pts;
-    EdgeList *edges;
-    FaceList *faces;
+    int i;
+    int j;
+    int k;
+} Simplex;
+
+typedef struct {
+    bool *simplices;
+    int size;
 } SimComplex;
 
-// Liste chainée de complexes simpliciaux
-typedef struct Filtration_t {
-    SimComplex *complex;
-    struct Filtration_t *next;
+typedef struct {
+    int *x;
+    int *y;
+    int size;
+} Tuples;
+
+typedef struct {
+    int *filt; // F[i] = k si le simplexe i est dans le complexe k
+    int *nums; // N[i] = k si le simplexe i est le k-ième simplexe ajouté
+    int size;
 } Filtration;
 
 // Math
@@ -76,10 +89,10 @@ extern void pointCloudFree(PointCloud *pointCloud);
 
 // Edges 
 extern EdgeList *edgeListInit(int p1, int p2, float weight);
-extern void edgeListFree(EdgeList *edgeList);
-extern void edgeListInsert(EdgeList *edgeList, int p1, int p2, float weight);
-extern int edgeListCount(EdgeList *edgeList, EdgeList *edge);
-extern EdgeList *edgeListRemove(EdgeList *edgeList, EdgeList *edge);
+extern void edgeListFree(EdgeList *edges);
+extern void edgeListInsert(EdgeList *edges, int p1, int p2, float weight);
+extern int edgeListCount(EdgeList *edges, EdgeList *edge);
+extern EdgeList *edgeListRemove(EdgeList *edges, EdgeList *edge);
 extern EdgeList *removeDoubledEdges(EdgeList *edges);
 
 // Triangles
@@ -102,14 +115,24 @@ extern FaceList *faceListInit();
 extern void faceInsert(FaceList *faceList, int p1, int p2, int p3);
 extern void faceListFree(FaceList *faceList);
 
+// Simplexes
+extern Simplex *simplexInit(int i, int j, int k);
+extern int simplexId(Simplex *s, int n);
+extern Simplex simplexFromId(int id, int n);
+extern void simplexFree(Simplex *s);
+extern void simplexPrint(Simplex *s);
+
 // Simplicial complexes
-extern SimComplex *simComplexInit();
-extern void simComplexInsert(Filtration *filtration, SimComplex *cmpx);
-extern SimComplex *simComplexCopy(SimComplex *cmpx);
+extern SimComplex *simComplexInit(int n);
+extern void simComplexInsert(SimComplex *cmpx, Simplex *s, int n);
 extern void simComplexFree(SimComplex *cmpx);
+extern bool simComplexContains(SimComplex *cmpx, Simplex *s, int n);
 
 // Filtrations
-extern Filtration *filtrationInit(SimComplex *cmpx);
+extern Filtration *filtrationInit(int size);
 extern void filtrationFree(Filtration *filtration);
+extern void filtrationInsert(Filtration *filtration, Simplex *s, int n, int k, int num);
+extern bool filtrationContains(Filtration *filtration, Simplex *s, int n);
+extern void filtrationPrint(Filtration *filt, int n);
 
 #endif

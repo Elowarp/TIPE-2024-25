@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 10-09-2024 16:23:55
- *  Last modified : 14-09-2024 22:50:06
+ *  Last modified : 29-09-2024 19:44:00
  *  File : persDiag.h
  */
 #ifndef PERSDIAG_H
@@ -14,7 +14,16 @@ typedef struct {
     int size;
 } PersistenceDiagram;
 
-PointCloud *pointCloudLoad(char *filename);
+typedef struct {
+    int a;
+    Point *N_a_t;
+    int t;
+} H_elmt;
+
+typedef struct {
+    int *values;
+    int size;
+} Psi;
 
 void FindPersistentHomology(PointCloud X);
 

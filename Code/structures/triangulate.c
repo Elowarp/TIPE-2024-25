@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 24-09-2024 16:05:58
- *  Last modified : 29-09-2024 16:03:22
+ *  Last modified : 29-09-2024 18:58:16
  *  File : triangulate.c
  *  Description : Triangulation d'un tableau de points via l'algorithme de Delaunay
  *             Inspiration : (https://paulbourke.net/papers/triangulate/)
@@ -84,7 +84,6 @@ TriangleList *triangulate(Point *pts, int n){
 
         // Pour chaque triangle dans la liste de triangles
         TriangleList *current = list;
-        TriangleList *modifiedList = list;
         while(current != NULL){
             // Sauvegarde la cible suivante avant potentielle suppression 
             // de current
@@ -134,12 +133,13 @@ TriangleList *triangulate(Point *pts, int n){
                     createTriangle(currentEdge->p1, currentEdge->p2, i));
             currentEdge = currentEdge->next;
         }
-        
+
+        // Libérer le buffer d'arêtes
+        edgeListFree(edgeBuffer);
     }
     // Retirer les triangles de la liste de triangles qui utilisent les 
     // sommets du supertriangle
     TriangleList *current = list;
-    TriangleList *modifiedList = list;
     while(current != NULL){
         TriangleList *next = current->next;
         if (current->t->p1 >= n || current->t->p2 >= n || current->t->p3 >= n)
@@ -148,12 +148,12 @@ TriangleList *triangulate(Point *pts, int n){
         current = next;
     }
 
-
     // Retirer les sommets du supertriangle de la liste de points
     free(p1);
     free(p2);
     free(p3);
     free(newPts);
+    free(superTriangle);
 
     return list;
 }

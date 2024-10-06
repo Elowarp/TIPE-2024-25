@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 15-09-2024 14:05:45
- *  Last modified : 17-09-2024 16:07:39
+ *  Last modified : 29-09-2024 19:24:15
  *  File : tests_kdTree.c
  */
 #include <stdio.h>
@@ -37,7 +37,8 @@ void test_kdTree(){
     // Test knn
     Point pt = {5.5, 2.8};
     int k = 3;
-    Point* result = kdTreeNearestNeighbor(tree, pt, k);
+    int nb_neighboors;
+    Point* result = kdTreeNearestNeighbor(tree, pt, k, &nb_neighboors);
     
     assert(pointAreEqual(result[0], h) || pointAreEqual(result[0], e) || pointAreEqual(result[0], g));
     assert(pointAreEqual(result[1], h) || pointAreEqual(result[1], e) || pointAreEqual(result[1], g));
