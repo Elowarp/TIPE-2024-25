@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 15-09-2024 13:36:27
- *  Last modified : 24-09-2024 17:05:30
+ *  Last modified : 08-10-2024 17:05:47
  *  File : tests.c
  */
 #include <stdio.h>
@@ -12,6 +12,7 @@
 #include "tests_avl.h"
 #include "tests_geometry.h"
 #include "tests_triangulate.h"
+#include "tests_persDiag.h"
 
 int main(){
     test_kdTree();
@@ -19,5 +20,6 @@ int main(){
     tests_avl();
     test_geometry();
     tests_triangulate();
+    tests_persDiag();
     return 0;
 }

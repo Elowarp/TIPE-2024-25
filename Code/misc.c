@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 15-09-2024 16:30:38
- *  Last modified : 29-09-2024 18:57:02
+ *  Last modified : 08-10-2024 15:27:07
  *  File : misc.c
  */
 
@@ -56,4 +56,28 @@ void triangleListToFile(TriangleList *list, Point* pts, int n, char *filename){
     }
 
     fclose(f);
+}
+
+void filtrationToFile(Filtration *filtration, Point* pts, int n, char *filename){
+    FILE *f = fopen(filename, "w");
+    if (f == NULL) {
+        printf("Impossible d'ouvrir le fichier !\n");
+        exit(1);
+    }
+
+    // Ecriture des points dans le fichier
+    for(int i=0;i<n;i++){
+        fprintf(f, "v %d %f %f\n", i, pts[i].x, pts[i].y);
+    }
+
+    // Ecriture des faces dans le fichier
+    for(int i=0;i<filtration->size;i++){
+        if(filtration->filt[i] != -1){
+            Simplex s = simplexFromId(i, n);
+            fprintf(f, "t %d %d %d %d\n", s.i, s.j, s.k, filtration->nums[i]);
+        }
+    }
+
+    fclose(f);
+
 }

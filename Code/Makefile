@@ -1,5 +1,5 @@
 # Nom de l'exécutable
-TARGET = persDiag
+TARGET = main
 
 # Compilateur
 CC = gcc
@@ -28,13 +28,13 @@ $(TARGET): $(OBJS)
 TEST_TARGET = testsAll
 
 # Liste des fichiers source de test
-TEST_SRCS = $(wildcard tests/*.c)
+TEST_SRCS = $(wildcard tests/*.c) persDiag.c
 
 # Liste des fichiers objets de test
 TEST_OBJS = $(TEST_SRCS:.c=.o)
 
 # Liste des fichiers objets sans le fichier contenant le main de persDiag
-MAIN_OBJ = persDiag.o
+MAIN_OBJ = persDiag.o main.o
 OBJS_NO_MAIN = $(filter-out $(MAIN_OBJ), $(OBJS))
 
 

@@ -575,3 +575,11 @@ Complexe simplical c'est un tableau de booléen qui dit si un simplex est dans l
 Filtration c'est 2 tableaux, F et N, F[i] = k si le simplex i est dans le complexe simplical k (k=-1 pas encore apparu) et N[i] = j si le simplex i est le j-eme simplexe apparu dans la filtration(j=-1 pas encore apparu)
 
 J'ai donc réussi à créer une filtration depuis un fichier .dat, il faut maintenant implémenter l'algorithme "standard" pour réduire la matrice de bordure (pas capté ct quoi mais bon).
+
+On peut utiliser les infos du papier : https://epjdatascience.springeropen.com/articles/10.1140/epjds/s13688-017-0109-5
+
+## 10/10/24
+
+On a réussi à implémenter l'algorithme de réduction de la matrice de bordure, et la création des diagrammes de persistance avec comme test la comparaison avec les diagrammes du site mentionné plus haut https://iuricichf.github.io/ICT/algorithm.html.
+
+Nous faisons la distinction entre les filtrations injectives et non injectives MAIS la construction de notre filtration est injective par construction, donc on s'en fiche un peu au final.

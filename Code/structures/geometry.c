@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 14-09-2024 13:55:46
- *  Last modified : 06-10-2024 23:00:00
+ *  Last modified : 08-10-2024 15:53:53
  *  File : geometry.c
  */
 #include <stdio.h>
@@ -369,9 +369,9 @@ int simplexId(Simplex *s, int n){
 // Renvoie le simplexe associé à un identifiant
 Simplex simplexFromId(int id, int n){
     Simplex s;
-    s.i = id % (n+1) - 1;
-    s.j = (id / (n+1)) % n - 1;
-    s.k = id / ((n+1)*(n+1)) - 1;
+    s.i = (id % (n+1)) - 1;
+    s.j = ((id / (n+1)) % (n+1)) - 1;
+    s.k = (id / ((n+1)*(n+1))) - 1;
     return s;
 }
 
