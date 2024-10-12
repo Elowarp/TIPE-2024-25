@@ -583,3 +583,12 @@ On peut utiliser les infos du papier : https://epjdatascience.springeropen.com/a
 On a réussi à implémenter l'algorithme de réduction de la matrice de bordure, et la création des diagrammes de persistance avec comme test la comparaison avec les diagrammes du site mentionné plus haut https://iuricichf.github.io/ICT/algorithm.html.
 
 Nous faisons la distinction entre les filtrations injectives et non injectives MAIS la construction de notre filtration est injective par construction, donc on s'en fiche un peu au final.
+
+## 12/10/24
+
+J'ai rédigé un document résumant toutes les définitions pour mieux comprendre ce que je fais, il se nomme `rapport.pdf` dans Documents. Mauvais point : Je ne comprends toujours pas comment déterminer la classe d'homologie d'un simplexe.
+
+Dans les choses a changer : savoir associé un simplexe à un temps de découverte en plus de son identifiant (ie avoir des nombres de classes d'homologies flottants).
+
+Il nous faut définir les valeurs que l'on va prendre pour remplir nos nuages de points.
+

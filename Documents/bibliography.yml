@@ -1,0 +1,31 @@
+PH_resource_coverage:
+  type: Article
+  title: "Persitent homology for resource coverage: A case study of access to polling sites"
+  author: 
+    - ABIGAIL HICKOK
+    - BENJAMIN JARMAN
+    - MICHAEL JOHNSON
+    - JIAJIE LUO
+    - MASON A. PORTER
+  url: https://arxiv.org/pdf/2206.04834
+
+PH_newcomers:
+  type: Article
+  title: "Persistent homology: a step-by-step introduction for newcomers"
+  author:
+    - U. Fugacci
+    - S. Scaramuccia
+    - F. Iuricich
+    - L. De Floriani
+  url: https://www.math.uri.edu/~thoma/comp_top__2018/stag2016.pdf
+
+PH_roadmap:
+  type: Article
+  title: A roadmap for the computation of persistent homology
+  author:
+    - Nina Otter
+    - Mason A Porter
+    - Ulrike Tillmann
+    - Peter Grindrod
+    - Heather A Harrington
+  url: https://epjdatascience.springeropen.com/articles/10.1140/epjds/s13688-017-0109-5

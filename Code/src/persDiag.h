@@ -1,13 +1,13 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 10-09-2024 16:23:55
- *  Last modified : 10-10-2024 22:10:01
+ *  Last modified : 12-10-2024 22:36:15
  *  File : persDiag.h
  */
 #ifndef PERSDIAG_H
 #define PERSDIAG_H
 
-#include "structures/geometry.h"
+#include "geometry.h"
 
 typedef struct {
     int x;
@@ -15,14 +15,12 @@ typedef struct {
 } Tuple;
 
 typedef struct {
-    Point *pts;
+    int *dims;
     Tuple *pairs;
-    int size_pts;
     int size_pairs;
+    int size_dims;
 } PersistenceDiagram;
 
-extern int dimSimplex(Simplex *s);
-extern int isFaceOf(Simplex *s1, Simplex *s2);
 extern Filtration *buildFiltration(PointCloud X);
 extern int **buildBoundaryMatrix(int *reversed, int n, int nb_pts);
 extern int **reduceMatrix(int **boundary, int n, int *low);

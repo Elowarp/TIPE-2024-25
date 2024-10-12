@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 08-10-2024 17:01:34
- *  Last modified : 10-10-2024 22:20:14
+ *  Last modified : 12-10-2024 22:35:32
  *  File : tests_persDiag.c
  */
 #include <stdio.h>
@@ -10,8 +10,8 @@
 #include <assert.h>
 
 #include "tests_persDiag.h"
-#include "../persDiag.h"
-#include "../structures/geometry.h"
+#include "../src/persDiag.h"
+#include "../src/geometry.h"
 
 void tests_persDiag(){
     // Tests des dimensions de simplexes
@@ -19,9 +19,9 @@ void tests_persDiag(){
     Simplex *s2 = simplexInit(0, 1, -1);    // Arête
     Simplex *s3 = simplexInit(0, 1, 2);     // Triangle
 
-    assert(dimSimplex(s1) == 1);
-    assert(dimSimplex(s2) == 2);
-    assert(dimSimplex(s3) == 3);
+    assert(dimSimplex(s1) == 0);
+    assert(dimSimplex(s2) == 1);
+    assert(dimSimplex(s3) == 2);
 
     // Tests de faces
     Simplex *s4 = simplexInit(0, 1, 2);
@@ -73,11 +73,11 @@ void tests_persDiag(){
     filtrationInsert(base_filt, f, n, 23, 3);
 
     Filtration *injective_filt = filtrationInit(max_simplex); 
-    for(int i=0; i<7; i++) filtrationInsert(injective_filt, simPts[i], n, i+1, i+1);
-    for(int i=0; i<5; i++) filtrationInsert(injective_filt, simEdges[i], n, i+8, i+8);
-    for(int i=7; i<n; i++) filtrationInsert(injective_filt, simPts[i], n, i+6, i+6);
-    for(int i=5; i<11; i++) filtrationInsert(injective_filt, simEdges[i], n, i+12, i+12);
-    filtrationInsert(injective_filt, f, n, 23, 23);
+    for(int i=0; i<7; i++) filtrationInsert(injective_filt, simPts[i], n, i+1, i);
+    for(int i=0; i<5; i++) filtrationInsert(injective_filt, simEdges[i], n, i+8, i+7);
+    for(int i=7; i<n; i++) filtrationInsert(injective_filt, simPts[i], n, i+6, i+5);
+    for(int i=5; i<11; i++) filtrationInsert(injective_filt, simEdges[i], n, i+12, i+11);
+    filtrationInsert(injective_filt, f, n, 23, 22);
     int *reversed = reverseIdAndSimplex(injective_filt, 23);
 
     // Matrice de bordure associée à la filtration
@@ -110,6 +110,8 @@ void tests_persDiag(){
     // Teste de l'égalité de la matrice
     for(int i=0; i<23; i++){
         for(int j=0; j<23; j++){
+            if (trueBoundary[i][j] != testBoundary[i][j])
+                printf("i=%d, j=%d %d %d\n", i, j, trueBoundary[i][j], testBoundary[i][j]);
             assert(testBoundary[i][j] == trueBoundary[i][j]);
         }
     } 
@@ -201,19 +203,6 @@ void tests_persDiag(){
             c++;
         }
 
-    // Paires de la fonction non injective
-    Tuple *base_pairs = extractPairsBeforeInjective(test_low, 23, &size_pairs, 
-        base_filt, reversed);
-    Tuple true_base_pairs[1] = {{1, 2}};
-
-    c = 0;
-    for(int i=0; i<size_pairs; i++) 
-        if (base_pairs[i].y != -1) {
-            assert(base_pairs[i].x == true_base_pairs[c].x &&
-                base_pairs[i].y == true_base_pairs[c].y);
-            c++;
-        }
-
     // Tests de création de diagramme de persistance
     PointCloud *X = malloc(sizeof(PointCloud));
     X->size = 11;
@@ -227,13 +216,18 @@ void tests_persDiag(){
     c = 0;
     for(int i=0; i<pd->size_pairs; i++)
         if (pd->pairs[i].y != -1){
+            if (pd->pairs[i].x != true_pairs[c].x || 
+                pd->pairs[i].y != true_pairs[c].y)
+                printf("pdx %d pdy %d truex %d truey %d\n", pd->pairs[i].x, pd->pairs[i].y, 
+                    true_pairs[c].x, true_pairs[c].y);
+                    
             assert(pd->pairs[i].x == true_pairs[c].x && 
                 pd->pairs[i].y == true_pairs[c].y);
             c++;
         }
 
     // Tests de l'exportation
-    PDExport(pd, "pers_diag.txt");
+    PDExport(pd, "exportedPD/pd_test.dat");
 
     // Libération de la mémoire
     for(int i=0; i<11; i++) simplexFree(simPts[i]);
@@ -253,7 +247,6 @@ void tests_persDiag(){
     free(testBoundary);
     free(reduced);
     free(pairs);
-    free(base_pairs);
     PDFree(pd);
     free(X->pts);
     free(X);

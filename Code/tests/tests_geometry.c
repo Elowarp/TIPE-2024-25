@@ -1,14 +1,14 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 24-09-2024 16:57:12
- *  Last modified : 06-10-2024 22:48:05
+ *  Last modified : 12-10-2024 22:35:44
  *  File : tests_geometry.c
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 
-#include "../structures/geometry.h"
+#include "../src/geometry.h"
 
 void test_geometry(){
     // Tests points

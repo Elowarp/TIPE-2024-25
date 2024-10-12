@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 14-09-2024 22:16:49
- *  Last modified : 06-10-2024 23:00:22
+ *  Last modified : 12-10-2024 22:05:40
  *  File : geometry.h
  */
 #ifndef GEOMETRY_H
@@ -86,6 +86,7 @@ extern void pointPrint(Point p);
 extern bool pointAreEqual(Point p1, Point p2);
 extern PointCloud *pointCloudInit(int size);
 extern void pointCloudFree(PointCloud *pointCloud);
+extern PointCloud *pointCloudLoad(char *filename);
 
 // Edges 
 extern EdgeList *edgeListInit(int p1, int p2, float weight);
@@ -105,6 +106,7 @@ extern TriangleList *triangleListRemove(TriangleList *list, Triangle *t);
 extern void triangleListFree(TriangleList *list);
 extern void triangleListPrint(TriangleList *list);
 extern int triangleListLength(TriangleList *list);
+extern void triangleListToFile(TriangleList *list, Point *pts, int n, char *filename);
 
 // Circles
 extern void circumCircle(Triangle *t, Point *pts, Point *center, float *radius);
@@ -121,6 +123,8 @@ extern int simplexId(Simplex *s, int n);
 extern Simplex simplexFromId(int id, int n);
 extern void simplexFree(Simplex *s);
 extern void simplexPrint(Simplex *s);
+extern int dimSimplex(Simplex *s);
+extern bool isFaceOf(Simplex *s1, Simplex *s2);
 
 // Simplicial complexes
 extern SimComplex *simComplexInit(int n);
@@ -134,5 +138,8 @@ extern void filtrationFree(Filtration *filtration);
 extern void filtrationInsert(Filtration *filtration, Simplex *s, int n, int k, int num);
 extern bool filtrationContains(Filtration *filtration, Simplex *s, int n);
 extern void filtrationPrint(Filtration *filt, int n);
+extern int *reverseIdAndSimplex(Filtration *filt, int max_nums);
+extern void filtrationToFile(Filtration *filtration, Point* pts, int n, char *filename);
+extern int filtrationMaxName(Filtration *filtration);
 
 #endif

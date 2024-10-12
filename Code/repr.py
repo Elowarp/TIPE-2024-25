@@ -1,13 +1,14 @@
 '''
  Contact : Elowan - elowarp@gmail.com
  Creation : 10-09-2024 17:13:53
- Last modified : 10-10-2024 22:33:25
+ Last modified : 12-10-2024 22:12:55
  File : repr.py
 '''
 #%%
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import gudhi
 
 def repr_pointCloud(filename):
     # Charger le fichier de triangulation
@@ -88,7 +89,8 @@ def repr_filtration(filename):
         pt2 = pts_by_id[triangle[2]]
         pt3 = pts_by_id[triangle[3]]
         center = (pt1 + pt2 + pt3) / 3
-        plt.fill([pt1[0], pt2[0], pt3[0]], [pt1[1], pt2[1], pt3[1]], c="blue", alpha=0.2)
+        plt.fill([pt1[0], pt2[0], pt3[0]], [pt1[1], pt2[1], pt3[1]], c="blue", 
+                 alpha=0.2)
         plt.text(center[0], center[1], str(triangle[0]), c="red")
         
     plt.axis("equal")
@@ -96,36 +98,15 @@ def repr_filtration(filename):
 
 def repr_PD(filename):
     # Charger le diagramme de persistance
-    pts = []
-    pairs = []
-    max_birth = 0
-    with open(filename, "r") as f:
-        data = f.readlines()
-        for line in data:
-            if line[0] == "v":
-                pts.append([float(x) for x in line.split()[1:]])
-            elif line[0] == "p":
-                pairs.append([int(x) for x in line.split()[1:]]) 
-                max_birth = max(max_birth, pairs[-1][1])
-
-    # Convertir les listes en tableaux numpy
-    pts = np.array(pts)
-    pairs = np.array(pairs)
-
-    # Afficher les paires
-    for pair in pairs:
-        if pair[1] == -1:
-            plt.scatter(pair[0], max_birth, c="blue")
-        else:
-            plt.scatter(pair[0], pair[1], c="blue")
-
-    plt.axis("equal")
-    plt.plot([0, max_birth], [0, max_birth], c="red")
+    ax = gudhi.plot_persistence_diagram(persistence_file=filename, legend=True)
+    ax.set_title("Persistence diagram of {}".format(filename))
+    ax.set_aspect("equal") 
     plt.show()
-
+    
 if __name__ == "__main__":
     # os.system("make tests")
     # repr_pointCloud("triangulation.txt")
     # repr_filtration("filtration.txt")
     repr_PD("exportedPD/pd_example.dat")
+    
 # %%

@@ -8,7 +8,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -std=c11 -g -lm
 
 # Liste des fichiers source
-SRCS = $(wildcard *.c) $(wildcard structures/*.c)
+SRCS = $(wildcard *.c) $(wildcard src/*.c)
 
 # Liste des fichiers objets
 OBJS = $(SRCS:.c=.o)
@@ -28,13 +28,13 @@ $(TARGET): $(OBJS)
 TEST_TARGET = testsAll
 
 # Liste des fichiers source de test
-TEST_SRCS = $(wildcard tests/*.c) persDiag.c
+TEST_SRCS = $(wildcard tests/*.c)
 
 # Liste des fichiers objets de test
 TEST_OBJS = $(TEST_SRCS:.c=.o)
 
-# Liste des fichiers objets sans le fichier contenant le main de persDiag
-MAIN_OBJ = persDiag.o main.o
+# Liste des fichiers objets sans le fichier contenant le main
+MAIN_OBJ = main.o
 OBJS_NO_MAIN = $(filter-out $(MAIN_OBJ), $(OBJS))
 
 

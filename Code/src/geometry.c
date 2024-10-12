@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 14-09-2024 13:55:46
- *  Last modified : 08-10-2024 15:53:53
+ *  Last modified : 12-10-2024 22:37:27
  *  File : geometry.c
  */
 #include <stdio.h>
@@ -10,7 +10,7 @@
 #include <math.h>
 
 #include "geometry.h"
-#include "../misc.h"
+#include "misc.h"
 
 const int DIM = 2;
 
@@ -54,6 +54,25 @@ void pointCloudFree(PointCloud *pointCloud){
     free(pointCloud->pts);
     free(pointCloud->weights);
     free(pointCloud);
+};
+
+PointCloud *pointCloudLoad(char *filename){
+    FILE *file = fopen(filename, "r");
+    if(file == NULL){
+        fprintf(stderr, "Erreur: fichier introuvable %s\n", filename);
+        exit(1);
+    }
+
+    int size;
+    fscanf(file, "%d", &size);
+    PointCloud *pointCloud = pointCloudInit(size);
+
+    for(int i = 0; i < size; i++){
+        fscanf(file, "%f %f", &(pointCloud->pts[i].x), &(pointCloud->pts[i].y));
+    }
+
+    fclose(file);
+    return pointCloud;
 };
 
 ///////////////////////
@@ -279,6 +298,31 @@ void triangleListFree(TriangleList *list){
     }
 }
 
+// Liste de triangle vers fichier texte
+void triangleListToFile(TriangleList *list, Point* pts, int n, char *filename){
+    FILE *f = fopen(filename, "w"); 
+    if (f == NULL) {
+        printf("Impossible d'ouvrir le fichier !\n");
+        exit(1);
+    }
+
+    // Ecriture des points dans le fichier
+    for(int i=0;i<n;i++){
+        fprintf(f, "v %d %f %f\n", i, pts[i].x, pts[i].y);
+    }
+
+    // Ecriture des faces dans le fichier
+    TriangleList *current = list;
+    while(current != NULL){
+        fprintf(f, "t %d %d %d\n", current->t->p1,
+                        current->t->p2,
+                        current->t->p3);
+        current = current->next;
+    }
+
+    fclose(f);
+}
+
 // Affiche un triangle
 void trianglePrint(Triangle *t){
     printf("Triangle : %d %d %d", t->p1, t->p2, t->p3);
@@ -385,6 +429,48 @@ void simplexPrint(Simplex *s){
     printf("{%d, %d, %d}", s->i, s->j, s->k);
 }
 
+// Renvoie la dimension d'un simplexe
+int dimSimplex(Simplex *s){
+    if (s->i != -1){
+        return 2;
+    } else if (s->j != -1){
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+// Renvoie vrai si s1 est une face de s2, false sinon
+bool isFaceOf(Simplex *s1, Simplex *s2){
+    // Si les dimensions ne sont pas cohérentes
+    if (dimSimplex(s1) != dimSimplex(s2) - 1){
+        return false;
+    }
+
+    // Si s1 est un point
+    if (s1->i == -1 && s1->j == -1){
+        if (s1->k == s2->i || s1->k == s2->j || s1->k == s2->k){
+            return true;
+        }
+    }
+
+    // Si s1 est une arête
+    if (s1->j != -1){
+        if (s1->j == s2->i && s1->k == s2->j){
+            return true;
+        } else if (s1->j == s2->i && s1->k == s2->k){
+            return true;
+        } else if (s1->j == s2->j && s1->k == s2->k){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    // Sinon on est dans un cas impossible
+    return false;    
+}
+
 ///////////////////////
 // Simplical Complex //
 ///////////////////////
@@ -416,7 +502,6 @@ void simComplexInsert(SimComplex *cmpx, Simplex *s, int n){
     cmpx->simplices[simplexId(s, n)] = true;
     cmpx->size++;
 }
-
 
 ///////////////////////
 //     Filtration    //
@@ -465,4 +550,52 @@ void filtrationPrint(Filtration *filt, int n){
             printf("\n");
         }
     }
+}
+
+// Renvoie le tableau des identifiants des simplexes dans la filtration
+int *reverseIdAndSimplex(Filtration *filt, int max_nums){
+    int *reversed = malloc(max_nums*sizeof(int));
+    for(int i=0; i<filt->size; i++){
+        if(filt->filt[i] != -1)
+            reversed[filt->nums[i]] = i; 
+        
+    }
+
+    return reversed;
+}
+
+// Renvoie le plus grand nom de simplexe + 1 dans une filtration
+int filtrationMaxName(Filtration *filt){
+    int max = 0;
+    for(int i=0; i<filt->size; i++){
+        if (filt->nums[i] > max){
+            max = filt->nums[i];
+        }
+    }
+    return max+1;
+}
+
+// Ecrit une filtration dans un fichier
+void filtrationToFile(Filtration *filtration, Point* pts, int n, char *filename){
+    FILE *f = fopen(filename, "w");
+    if (f == NULL) {
+        printf("Impossible d'ouvrir le fichier !\n");
+        exit(1);
+    }
+
+    // Ecriture des points dans le fichier
+    for(int i=0;i<n;i++){
+        fprintf(f, "v %d %f %f\n", i, pts[i].x, pts[i].y);
+    }
+
+    // Ecriture des faces dans le fichier
+    for(int i=0;i<filtration->size;i++){
+        if(filtration->filt[i] != -1){
+            Simplex s = simplexFromId(i, n);
+            fprintf(f, "t %d %d %d %d\n", s.i, s.j, s.k, filtration->nums[i]);
+        }
+    }
+
+    fclose(f);
+
 }
