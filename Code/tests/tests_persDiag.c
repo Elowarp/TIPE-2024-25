@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 08-10-2024 17:01:34
- *  Last modified : 12-10-2024 22:35:32
+ *  Last modified : 05-11-2024 21:28:39
  *  File : tests_persDiag.c
  */
 #include <stdio.h>
@@ -65,20 +65,16 @@ void tests_persDiag(){
 
     int max_simplex = (n+1)*(n+1)*(n+1);
     Filtration *base_filt = filtrationInit(max_simplex);
-    for(int i=0; i<3; i++) filtrationInsert(base_filt, simPts[i], n, i+1, 1);
-    for(int i=3; i<7; i++) filtrationInsert(base_filt, simPts[i], n, i+1, 2);
-    for(int i=0; i<5; i++) filtrationInsert(base_filt, simEdges[i], n, i+1, 2);
-    for(int i=5; i<11; i++) filtrationInsert(base_filt, simEdges[i], n, i+1, 3);
-    for(int i=7; i<n; i++) filtrationInsert(base_filt, simPts[i], n, i+1, 3);
-    filtrationInsert(base_filt, f, n, 23, 3);
+    for(int i=0; i<3; i++) filtrationInsert(base_filt, simPts[i], n, 1, i);
+    for(int i=3; i<7; i++) filtrationInsert(base_filt, simPts[i], n, 2, i);
+    for(int i=0; i<5; i++) filtrationInsert(base_filt, simEdges[i], n, 2, i+7);
+    for(int i=7; i<n; i++) filtrationInsert(base_filt, simPts[i], n, 3, i+5);
+    for(int i=5; i<11; i++) filtrationInsert(base_filt, simEdges[i], n, 3, i+11);
+    filtrationInsert(base_filt, f, n, 3, 22);
 
-    Filtration *injective_filt = filtrationInit(max_simplex); 
-    for(int i=0; i<7; i++) filtrationInsert(injective_filt, simPts[i], n, i+1, i);
-    for(int i=0; i<5; i++) filtrationInsert(injective_filt, simEdges[i], n, i+8, i+7);
-    for(int i=7; i<n; i++) filtrationInsert(injective_filt, simPts[i], n, i+6, i+5);
-    for(int i=5; i<11; i++) filtrationInsert(injective_filt, simEdges[i], n, i+12, i+11);
-    filtrationInsert(injective_filt, f, n, 23, 22);
-    int *reversed = reverseIdAndSimplex(injective_filt, 23);
+    int *reversed = reverseIdAndSimplex(base_filt, 23);
+
+    // filtrationPrint(base_filt, n, true);
 
     // Matrice de bordure associée à la filtration
     int trueBoundary[23][23];
@@ -203,28 +199,39 @@ void tests_persDiag(){
             c++;
         }
 
-    // Tests de création de diagramme de persistance
-    PointCloud *X = malloc(sizeof(PointCloud));
-    X->size = 11;
-    X->pts = malloc(11*sizeof(Point));
-    
-    // On se fiche de la valeur des points pour l'instant
-    for(int i=0; i<11; i++) X->pts[i] = (Point) {0, 0}; 
-    
-    PersistenceDiagram *pd = PDCreate(injective_filt, X);
-
+    // Tests de l'extraction des paires par rapport à la filtration initiale
+    int size_pairs_filt;
+    Tuple *pairs_filt = extractPairsFilt(test_low, base_filt, 23, &size_pairs_filt);
+    Tuple pair = {1, 2};
     c = 0;
-    for(int i=0; i<pd->size_pairs; i++)
-        if (pd->pairs[i].y != -1){
-            if (pd->pairs[i].x != true_pairs[c].x || 
-                pd->pairs[i].y != true_pairs[c].y)
-                printf("pdx %d pdy %d truex %d truey %d\n", pd->pairs[i].x, pd->pairs[i].y, 
-                    true_pairs[c].x, true_pairs[c].y);
-                    
-            assert(pd->pairs[i].x == true_pairs[c].x && 
-                pd->pairs[i].y == true_pairs[c].y);
+
+    for(int i=0; i<size_pairs_filt; i++){
+        if (pairs_filt[i].y != -1){
+            assert(c==0);
+            assert(base_filt->filt[pairs_filt[i].x] == pair.x && 
+                base_filt->filt[pairs_filt[i].y] == pair.y);
             c++;
         }
+    }
+
+    // Tests de création de diagramme de persistance
+    PointCloud *X = pointCloudInit(11);
+    
+    // On se fiche de la valeur des points pour l'instant
+    for(int i=0; i<11; i++)
+        X->pts[i] = (Point) {0, 0}; 
+    
+    
+    PersistenceDiagram *pd = PDCreate(base_filt, X);
+
+    c = 0;
+    for(int i=0; i<pd->size_pairs; i++){
+        if (pd->pairs[i].y != -1){
+            assert(pd->pairs[i].x == pair.x && 
+                pd->pairs[i].y == pair.y);
+            c++;
+        }
+    }
 
     // Tests de l'exportation
     PDExport(pd, "exportedPD/pd_test.dat");
@@ -247,9 +254,9 @@ void tests_persDiag(){
     free(testBoundary);
     free(reduced);
     free(pairs);
+    free(pairs_filt);
     PDFree(pd);
     free(X->pts);
     free(X);
     filtrationFree(base_filt);
-    filtrationFree(injective_filt);
 }

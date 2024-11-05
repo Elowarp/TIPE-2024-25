@@ -1,13 +1,13 @@
 '''
  Contact : Elowan - elowarp@gmail.com
  Creation : 10-09-2024 17:13:53
- Last modified : 12-10-2024 22:12:55
+ Last modified : 23-10-2024 23:34:50
  File : repr.py
 '''
 #%%
 import numpy as np
 import matplotlib.pyplot as plt
-import os
+import sys
 import gudhi
 
 def repr_pointCloud(filename):
@@ -101,12 +101,17 @@ def repr_PD(filename):
     ax = gudhi.plot_persistence_diagram(persistence_file=filename, legend=True)
     ax.set_title("Persistence diagram of {}".format(filename))
     ax.set_aspect("equal") 
+    ax.grid()
     plt.show()
     
 if __name__ == "__main__":
     # os.system("make tests")
     # repr_pointCloud("triangulation.txt")
     # repr_filtration("filtration.txt")
-    repr_PD("exportedPD/pd_example.dat")
+    if len(sys.argv) < 2: 
+        print("Il faut au moins le nom d'une ville !")
+        exit(1)
+    
+    repr_PD("exportedPD/" + sys.argv[1] + ".dat")
     
 # %%

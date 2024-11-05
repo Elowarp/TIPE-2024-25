@@ -592,3 +592,39 @@ Dans les choses a changer : savoir associé un simplexe à un temps de découver
 
 Il nous faut définir les valeurs que l'on va prendre pour remplir nos nuages de points.
 
+## 15/10/24
+
+En général :
+Pour calculer le temps de trajet à pied ou en voiture on utilise https://apidocs.geoapify.com/docs/route-matrix/ /!\ le trajet dans le deux sens nont pas le mm temps donc on va utiliser la moyenne entre les deux temps pour avoir une distance symétrique.
+
+Pour Paris :
+
+- carte des points metro : https://prim.iledefrance-mobilites.fr/fr/jeux-de-donnees/traces-du-reseau-ferre-idf
+- Etat des lignes pour recup les temps d'attente (à moyenner): https://prim.iledefrance-mobilites.fr/fr/apis/idfm-ivtr-requete_unitaire ou 
+
+Pour Marseille :
+
+- carte des points metro : https://data.ampmetropole.fr/explore/dataset/points-d-arret-de-tout-les-reseaux-de-transport/table/ (/!\ a trier)
+- Temps d'attente (à moyenner): https://transport.data.gouv.fr/resources/39589?issue_type=DuplicateStops#issues
+
+Pour Toulouse :
+
+- https://transport.data.gouv.fr/resources/81678
+
+Pour Rennes :
+
+- https://transport.data.gouv.fr/datasets/versions-des-horaires-theoriques-des-lignes-de-bus-et-de-metro-du-reseau-star-au-format-gtfs
+
+Dans les trucs qu'il faut faire :
+
+- Définir les VR avec les boules dans le code
+- Créer un fichier qui récupère les distances entre chaque station de metro en temps
+- Definir des fichiers dist_villes.txt pour définir notre distance sur nos points des villes
+- Savoir dessiner les zones de trous sur la carte
+- Faire des analyses statistiques
+
+On va construire les VR par incrémentation par secondes et on renomme les fichiers de points par example_pts.txt
+
+## 22/10/24 
+
+On a trié et recup tt les infos pour calculer les trucs sur marseille, on va calculer la plus grande distance entre deux point pour savoir quand arreter la boucle while

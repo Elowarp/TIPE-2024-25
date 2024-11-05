@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 14-09-2024 13:55:46
- *  Last modified : 12-10-2024 22:37:27
+ *  Last modified : 05-11-2024 21:23:40
  *  File : geometry.c
  */
 #include <stdio.h>
@@ -15,15 +15,18 @@
 const int DIM = 2;
 
 // Renvoie la distance euclidienne entre deux points
-float dist_euclidean(Point p1, Point p2){
-    return sqrt(pow(p2.x - p1.x, 2) + pow(p2.y-p1.y, 2));
+float dist_euclidean(int p1, int p2, PointCloud *X){
+    return sqrt(pow(X->pts[p2].x - X->pts[p1].x, 2) + 
+            pow(X->pts[p2].y - X->pts[p1].y, 2));
 }
 
 // Renvoie la distance entre deux points
 // Cette fonction sert d'interface pour que l'on puisse facilement
 // la modifier lors de l'application de notre programme à un sujet
-float dist(Point p1, Point p2){
-    return dist_euclidean(p1, p2);
+float dist(int p1, int p2, PointCloud *X){
+    // return dist_euclidean(p1, p2, X);
+
+    return X->dist[p1][p2];
 }
 
 ///////////////////////
@@ -40,6 +43,8 @@ PointCloud *pointCloudInit(int size){
     PointCloud *pointCloud = malloc(sizeof(PointCloud));
     pointCloud->pts = malloc(size * sizeof(Point));
     pointCloud->weights = malloc(size * sizeof(float));
+    pointCloud->dist = malloc(size * sizeof(float*));
+    for(int i=0; i<size; i++) pointCloud->dist[i] = calloc(size, sizeof(float));
     pointCloud->size = size;
     return pointCloud;
 };
@@ -56,10 +61,10 @@ void pointCloudFree(PointCloud *pointCloud){
     free(pointCloud);
 };
 
-PointCloud *pointCloudLoad(char *filename){
+PointCloud *pointCloudLoad(char *filename, char *dist_filename){
     FILE *file = fopen(filename, "r");
     if(file == NULL){
-        fprintf(stderr, "Erreur: fichier introuvable %s\n", filename);
+        print_err("Erreur: fichier points introuvable\n");
         exit(1);
     }
 
@@ -68,12 +73,60 @@ PointCloud *pointCloudLoad(char *filename){
     PointCloud *pointCloud = pointCloudInit(size);
 
     for(int i = 0; i < size; i++){
-        fscanf(file, "%f %f", &(pointCloud->pts[i].x), &(pointCloud->pts[i].y));
+        float weigth;
+        fscanf(file, "%f %f %f", &(pointCloud->pts[i].x), 
+            &(pointCloud->pts[i].y), &weigth);
+        pointCloud->weights[i] = weigth;
+
+    }
+    fclose(file);
+
+    // Si un fichier distance a été fourni
+    if (dist_filename != NULL){
+        FILE *dist_file = fopen(dist_filename, "r");
+        if(file == NULL){
+            print_err("Erreur: fichier distances introuvable\n");
+        }
+
+        fscanf(dist_file, "%d", &size);
+        int poubelle;
+        for(int i = 0; i<size; i++){
+            for(int j=i+1; j<size; j++){
+                float weigth;
+                fscanf(dist_file, "%d %d %f", &poubelle, &poubelle, &weigth);
+                pointCloud->dist[i][j] = weigth;
+            }
+        }
+
+        for(int i=0; i<size;i++)
+            for(int j=0; j<i+1; j++)
+                pointCloud->dist[i][j] = pointCloud->dist[j][i];
+
+    } else { // Sinon on utilise les distances euclidiennes
+        printf("Remplissage par des distances euclidiennes\n");
+        for(int i = 0; i<size; i++){
+            for(int j=0; j<size; j++){
+                pointCloud->dist[i][j] = dist_euclidean(i, j, pointCloud);
+            }
+        }
     }
 
-    fclose(file);
+
     return pointCloud;
 };
+
+void pointCloudPrint(PointCloud *X){
+    for(int i=0; i<X->size; i++){
+        printf("Point %d : ", i);
+        pointPrint(X->pts[i]);
+        printf(" de poids %.2f\n", X->weights[i]);
+    }
+    printf("Distances :\n");
+    for(int i=0; i<X->size; i++){
+        for(int j=i+1; j<X->size; j++) 
+            printf("%d -- %.3f --> %d\n", i, dist(i, j, X), j);
+    }
+}
 
 ///////////////////////
 //       EDGES       //
@@ -424,6 +477,11 @@ void simplexFree(Simplex *s){
     free(s);
 }
 
+// Renvoie le maximum de simplex possible pour un nuage de points de taille n
+int simplexMax(int n){
+    return (n+1)*(n+1)*(n+1);
+}
+
 // Affiche un simplexe
 void simplexPrint(Simplex *s){
     printf("{%d, %d, %d}", s->i, s->j, s->k);
@@ -540,12 +598,28 @@ bool filtrationContains(Filtration *filtration, Simplex *s, int n){
     return filtration->filt[simplexId(s, n)]!=-1;
 }
 
-// Affiche une filtration
-void filtrationPrint(Filtration *filt, int n){
+// Affiche une filtration, l'option sorted trie selon les noms de simplexes,
+// n'a de sens et ne fonctionne que lorsque la fonction de nommage est injective
+void filtrationPrint(Filtration *filt, int n, bool sorted){
+    int *sortByName = calloc(simplexMax(n), sizeof(int));
+    
+    if (sorted){
+        for(int i=0; i<filt->size; i++){
+            if (filt->filt[i] != -1){
+                Simplex s = simplexFromId(i, n);
+                sortByName[filt->nums[i]] = i;
+            }
+        }
+    } else {
+        for(int i=0; i<filt->size; i++)
+            sortByName[i] = i;
+    }
+    
     for(int r = 0; r<filt->size; r++){
-        if (filt->filt[r] != -1){
-            Simplex s = simplexFromId(r, n);
-            printf("Simplex %d (dans K_%d): ", filt->nums[r], filt->filt[r]);
+        if (filt->filt[sortByName[r]] != -1){
+            Simplex s = simplexFromId(sortByName[r], n);
+            printf("Simplex %d (dans K_%d): ", filt->nums[sortByName[r]], 
+                filt->filt[sortByName[r]]);
             simplexPrint(&s);
             printf("\n");
         }

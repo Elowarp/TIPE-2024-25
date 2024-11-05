@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 14-09-2024 22:16:49
- *  Last modified : 12-10-2024 22:05:40
+ *  Last modified : 05-11-2024 17:14:58
  *  File : geometry.h
  */
 #ifndef GEOMETRY_H
@@ -20,6 +20,7 @@ typedef struct {
     Point *pts;
     float *weights;
     int size;
+    float **dist;
 } PointCloud;
 
 typedef struct edge_t { // On stocke les indices des points
@@ -78,15 +79,16 @@ typedef struct {
 } Filtration;
 
 // Math
-extern float dist_euclidean(Point p1, Point p2);
-extern float dist(Point p1, Point p2);
+extern float dist_euclidean(int p1, int p2, PointCloud *X);
+extern float dist(int p1, int p2, PointCloud *X);
 
 // Points
 extern void pointPrint(Point p);
 extern bool pointAreEqual(Point p1, Point p2);
 extern PointCloud *pointCloudInit(int size);
 extern void pointCloudFree(PointCloud *pointCloud);
-extern PointCloud *pointCloudLoad(char *filename);
+extern PointCloud *pointCloudLoad(char *filename, char *dist_filename);
+void pointCloudPrint(PointCloud *X);
 
 // Edges 
 extern EdgeList *edgeListInit(int p1, int p2, float weight);
@@ -122,6 +124,7 @@ extern Simplex *simplexInit(int i, int j, int k);
 extern int simplexId(Simplex *s, int n);
 extern Simplex simplexFromId(int id, int n);
 extern void simplexFree(Simplex *s);
+extern int simplexMax(int n);
 extern void simplexPrint(Simplex *s);
 extern int dimSimplex(Simplex *s);
 extern bool isFaceOf(Simplex *s1, Simplex *s2);
@@ -137,7 +140,7 @@ extern Filtration *filtrationInit(int size);
 extern void filtrationFree(Filtration *filtration);
 extern void filtrationInsert(Filtration *filtration, Simplex *s, int n, int k, int num);
 extern bool filtrationContains(Filtration *filtration, Simplex *s, int n);
-extern void filtrationPrint(Filtration *filt, int n);
+extern void filtrationPrint(Filtration *filt, int n, bool sorted);
 extern int *reverseIdAndSimplex(Filtration *filt, int max_nums);
 extern void filtrationToFile(Filtration *filtration, Point* pts, int n, char *filename);
 extern int filtrationMaxName(Filtration *filtration);

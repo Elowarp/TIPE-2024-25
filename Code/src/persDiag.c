@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 10-09-2024 16:33:19
- *  Last modified : 12-10-2024 22:06:31
+ *  Last modified : 05-11-2024 21:29:41
  *  File : persDiag.c
  */
 #include <stdio.h>
@@ -14,11 +14,6 @@
 //    Filtrations & VR    //
 ////////////////////////////
 
-// Renvoie le maximum de simplex possible pour un nuage de points de taille n
-int maxSimplex(int n){
-    return (n+1)*(n+1)*(n+1);
-}
-
 // Ajoute un simplexe à un complexe simplicial en incrémentant le compteur
 // si le simplexe n'est pas déjà présent
 void addSimplex(SimComplex *K, Simplex *s, int n, int *count){
@@ -28,47 +23,52 @@ void addSimplex(SimComplex *K, Simplex *s, int n, int *count){
     }
 }
 
-// Renvoie le VR complexe simplical associé à un nuage de points et un rayon R
-SimComplex *VRSimplex(PointCloud X, float R){
-    int n = X.size;
-    SimComplex *K = simComplexInit(maxSimplex(n));
+// Renvoie le VR complexe simplical associé à un nuage de points et un temps t
+SimComplex *VRSimplex(PointCloud *X, float t){
+    int n = X->size;
+    SimComplex *K = simComplexInit(simplexMax(n));
     
     int count = 0;
     for(int i = 0; i<n; i++){
-        for(int j = i+1; j<n; j++){
-            if (dist(X.pts[i], X.pts[j]) <= R){
-                // Ajoute le simplexe {i} et {j} s'ils ne sont pas déjà présent
-                Simplex *s_i = simplexInit(-1, -1, i);
-                Simplex *s_j = simplexInit(-1, -1, j);
-                addSimplex(K, s_i, n, &count);
-                addSimplex(K, s_j, n, &count);
+        if (X->weights[i] < t){
+            // Ajoute le simplexe {i}
+            Simplex *s_i = simplexInit(-1, -1, i);
+            addSimplex(K, s_i, n, &count);
 
-                // Ajoute le simplexe {i, j} à cmpx s'il n'est pas déjà présent
-                Simplex *s_ij = simplexInit(-1, i, j);
-                addSimplex(K, s_ij, n, &count);
+            for(int j = i+1; j<n; j++){
+                if (X->weights[j]<t){
+                    // Ajoute le simplexe {j} s'il est pas déjà présent
+                    Simplex *s_j = simplexInit(-1, -1, j);
+                    addSimplex(K, s_j, n, &count);
 
-                // S'il existe déjà deux autres simplexes {i, k} et {j, k}
-                // alors on ajoute le simplexe {i, j, k} à cmpx
-                for(int k = 0; k<n; k++){
-                    // Evite le cas où on considère les mêmes arêtes
-                    if (k == i || k == j){
-                        continue;
+                    // Ajout des simplexes de dimensions > 0
+                    if (dist(i, j, X) + X->weights[i] + X->weights[j] < 2*t){
+                        // Ajoute le simplexe {i, j} à cmpx s'il n'est pas déjà présent
+                        Simplex *s_ij = simplexInit(-1, i, j);
+                        addSimplex(K, s_ij, n, &count);
+
+                        // S'il existe déjà deux autres simplexes {i, k} et {j, k}
+                        // alors on ajoute le simplexe {i, j, k} à cmpx
+                        for(int k = 0; k<n; k++){
+                            // Evite le cas où on considère les mêmes arêtes
+                            if (k == i || k == j) continue;
+                            
+                            Simplex *s_ik = simplexInit(-1, i, k);
+                            Simplex *s_jk = simplexInit(-1, j, k);
+                            if (simComplexContains(K, s_ik, n) && simComplexContains(K, s_jk, n)){
+                                Simplex *s_ijk = simplexInit(i, j, k);
+                                addSimplex(K, s_ijk, n, &count);
+                                simplexFree(s_ijk);
+                            }
+                            simplexFree(s_ik);
+                            simplexFree(s_jk);
+                        }
+                        simplexFree(s_ij);
+                        simplexFree(s_j);
                     }
-
-                    Simplex *s_ik = simplexInit(-1, i, k);
-                    Simplex *s_jk = simplexInit(-1, j, k);
-                    if (simComplexContains(K, s_ik, n) && simComplexContains(K, s_jk, n)){
-                        Simplex *s_ijk = simplexInit(i, j, k);
-                        addSimplex(K, s_ijk, n, &count);
-                        simplexFree(s_ijk);
-                    }
-                    simplexFree(s_ik);
-                    simplexFree(s_jk);
                 }
-                simplexFree(s_ij);
-                simplexFree(s_i);
-                simplexFree(s_j);
             }
+            simplexFree(s_i);
         }
     }
 
@@ -77,23 +77,33 @@ SimComplex *VRSimplex(PointCloud X, float R){
     return K;
 }
 
+float maxDistOfPointCloud(PointCloud *X){
+    float max = 0;
+    for(int i=0; i<X->size; i++){
+        for(int j=i+1; j<X->size; j++){
+            if (max < dist(i, j, X)) max = dist(i, j, X);
+        }
+    }
+    return max;
+}
+
 // Renvoie une filtration associée à un nuage de points via la VR complexe 
 // simplicial
-Filtration *buildFiltration(PointCloud X){
-    int n = X.size;
-    int max_simplex = maxSimplex(n); // Nombre maximal de simplexes possible
-    float eps = 0.5; // Epsilon pour la filtration
-    float dist_max = 32; // Distance maximale entre deux points
+Filtration *buildFiltration(PointCloud *X){
+    int n = X->size;
+    int max_simplex = simplexMax(n); // Nombre maximal de simplexes possible
+    float eps = 0.5; // Epsilon pour la filtration ie 1seconde
+    float dist_max = maxDistOfPointCloud(X); // Distance maximale entre deux points
 
     // Initialisation de la filtration
     Filtration *filt = filtrationInit(max_simplex);
 
     int nb_simplex = 0;
     int nb_complex = 1; // 0 est le complexe vide
-    float r = 0.0; // Rayon de la boule
-    int last_size = 0; // Taille du dernier complexe simplical
-    while(r < dist_max){
-        SimComplex *K = VRSimplex(X, r);
+    float t = 0.0;      // Rayon des boules
+    int last_size = 0;  // Taille du dernier complexe simplical
+    while(t < dist_max+eps){
+        SimComplex *K = VRSimplex(X, t);
         
         // Si le complexe n'est pas vide et n'est pas égal au précédent
         if (K->size != 0 && K->size != last_size){
@@ -117,8 +127,10 @@ Filtration *buildFiltration(PointCloud X){
         }
         
         simComplexFree(K);
-        r = r + eps;
+        t = t + eps;
     }
+
+    filtrationPrint(filt, X->size, true);
 
     return filt;
 }
@@ -217,6 +229,45 @@ Tuple *extractPairs(int *low, int n, int *size_pairs){
     return pairs;
 }
 
+// Renvoie une liste de paires correspondant aux idéntifiants des simplexes 
+// récupérés depuis la matrice réduite
+Tuple *extractPairsFilt(int *low, Filtration *filt, int n, int *size_pairs){
+    Tuple *pairs = malloc(n * sizeof(Tuple));
+    *size_pairs = 0;
+    
+    bool seen[n];
+    for(int i=0; i<n; i++) seen[i] = false;
+
+    int *rev = reverseIdAndSimplex(filt, simplexMax(n));
+
+    for(int j = n-1; j>=0; j--){
+        if (!seen[j]){ // Pas déjà appairé
+            if (low[j] != -1){
+                // On a trouvé une paire
+                int x = filt->filt[rev[low[j]]];
+                int y = filt->filt[rev[j]];
+                if (x != y){
+                    pairs[*size_pairs].x = rev[low[j]];
+                    pairs[*size_pairs].y = rev[j];
+                    (*size_pairs)++;
+                }
+                
+                seen[low[j]] = true;
+                seen[j] = true;
+            } else {
+                // On a trouvé un cycle encore en vie
+                pairs[*size_pairs].x = rev[j];
+                pairs[*size_pairs].y = -1;
+                (*size_pairs)++;
+            }
+        }
+    }
+    
+    pairs = realloc(pairs, *size_pairs * sizeof(Tuple));
+    free(rev);
+    return pairs;
+}
+
 ////////////////////////////
 //  Persistance Diagram   //
 ////////////////////////////
@@ -227,7 +278,7 @@ PersistenceDiagram *PDCreate(Filtration *filtration, PointCloud *X){
     
     // Récupère le plus grand nom de simplexe dans la filtration
     int max_name = filtrationMaxName(filtration);
-    
+
     // Matrice tq reversed[i] = j si le simplexe j est le i-ème simplexe de la filtration
     // Cohérent dans l'hypothèse de filtration injective
     int *reversed = reverseIdAndSimplex(filtration, max_name);
@@ -241,14 +292,37 @@ PersistenceDiagram *PDCreate(Filtration *filtration, PointCloud *X){
     // Réduction de la matrice de bordure
     int **reduced = reduceMatrix(boundary, max_name, low);
 
-    // Extraction des paires
-    Tuple *pairs = extractPairs(low, max_name, &pd->size_pairs);
-    pd->pairs = pairs;
+    // for(int i=0; i<max_name; i++){
+    //     for(int j=0; j<max_name; j++){
+    //         printf("%d ", reduced[i][j]);
 
-    // Récupération des classes d'homologie
+    //     }printf("\n");
+    // }
+
+    // Extraction des paires
+    // pd->pairs = extractPairs(low, max_name, &(pd->size_pairs));
+    Tuple *pairs = extractPairsFilt(low, filtration, max_name, &(pd->size_pairs));
+
+    // for(int i=0; i<pd->size_pairs; i++)
+    //     printf("(%d, %d)\n", pairs[i].x, pairs[i].y);
+
+    // Assignation du rang d'apparition des simplexes dans la filtration 
+    // depuis la liste de paires
+    pd->pairs = malloc(pd->size_pairs * sizeof(Tuple));
+    for(int i=0; i<pd->size_pairs; i++){
+        pd->pairs[i].x = filtration->filt[pairs[i].x];
+
+        if (pairs[i].y != -1)
+            pd->pairs[i].y = filtration->filt[pairs[i].y];
+        else
+            pd->pairs[i].y = -1;
+    }
+
+    // Récupération des dimensions des simplexes et donc les catégorises en 
+    // classes d'homologie
     pd->dims = malloc(pd->size_pairs * sizeof(int));
     for(int i=0; i<pd->size_pairs; i++){
-        Simplex s = simplexFromId(reversed[pd->pairs[i].x], X->size);
+        Simplex s = simplexFromId(pairs[i].x, X->size);
         pd->dims[i] = dimSimplex(&s);
     }
 
@@ -280,6 +354,7 @@ void PDExport(PersistenceDiagram *pd, char *filename){
     }
 
     fclose(f);
+    printf("Diagram exported at %s\n", filename);
 }
 
 // Libère la mémoire allouée pour un diagramme de persistance

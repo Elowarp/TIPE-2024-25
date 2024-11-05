@@ -12,4 +12,5 @@ testsAll
 triangulation.txt
 .vscode/*
 *.vscode/*
-*.venv/*
+*/.venv/*
+Code/SourceData
