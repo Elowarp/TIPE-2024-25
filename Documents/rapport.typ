@@ -121,5 +121,23 @@ On a $H_k (K) approx.eq underbrace(ZZ_2 plus.circle ... plus.circle ZZ_2,beta_k 
 
 Le $k$-nombre de Betti de $K$ $beta_k$ est le rang du $k$-ième groupe d'homologie de $K$. Intuitivement il s'agit du nombre de $k$-trous dans $K$.
 
+= Modélisation 
+
+Soit un espace métrique (M, d) et $X$ un ensemble de points de M.
+
+Similairement à@PH_resource_coverage, on va utiliser un ensemble de points $X$ pour représenter une ville, chaque point $x_i$ a un poids $w_i$ qui sera le temps d'attente moyen à la station, que l'on etablira via les densités de population environnante aux stations.
+
+On définit pour chaque point $x_i$, et pour le paramètre de filtration $t$ la fonction _rayon_ $r_i (t)$ comme 
+
+$ r_i (t) = cases(- infinity "    si " t<w_i, t-w_i " sinon") $
+
+On définit le VR complexe pondéré $V_t = (X, M, d, w)$ à la filtration $t$ comme le complexe simplicial qui contient tout point $x_i$ tel que $w_i < t$ et tout simplexe $sigma = (x_i_0, ..., x_i_k)$ qui satisfait $d(x_i_j, x_i_l) + w_i_j + w_i_l < 2t$
+
+Intuitivement, $union_i B(x_i, r_i (t))$ est l'ensemble des points tels que si un individu est en $y$ alors son temps estimé pour prendre le transport (incluant le temps de marche jusque la station et le temps d'attente en station)
+
+On définit la fonction distance comme
+
+$ d(x,y) = min(t_"marche" (x,y), t_"voiture" (x,y)) $
+
 
 #bibliography("bibliography.yml", style: "american-physics-society")
