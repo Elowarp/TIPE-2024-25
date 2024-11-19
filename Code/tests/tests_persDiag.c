@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 08-10-2024 17:01:34
- *  Last modified : 05-11-2024 21:28:39
+ *  Last modified : 12-11-2024 15:43:57
  *  File : tests_persDiag.c
  */
 #include <stdio.h>
@@ -72,9 +72,9 @@ void tests_persDiag(){
     for(int i=5; i<11; i++) filtrationInsert(base_filt, simEdges[i], n, 3, i+11);
     filtrationInsert(base_filt, f, n, 3, 22);
 
-    int *reversed = reverseIdAndSimplex(base_filt, 23);
+    int *reversed = reverseIdAndSimplex(base_filt);
 
-    // filtrationPrint(base_filt, n, true);
+    filtrationPrint(base_filt, n, true);
 
     // Matrice de bordure associée à la filtration
     int trueBoundary[23][23];
@@ -186,26 +186,27 @@ void tests_persDiag(){
         assert(true_low_reduced[j] == test_low[j]);
 
     // Tests de l'extraction des paires
-    int size_pairs;
-    Tuple *pairs = extractPairs(test_low, 23, &size_pairs);
-    Tuple true_pairs[10] = {{21, 22}, {15, 20}, {14, 19}, {13, 17}, {12, 16},
-        {2, 11}, {4, 10}, {6, 9}, {5, 8}, {3, 7}};
+    // int size_pairs;
+    // Tuple *pairs = extractPairs(test_low, 23, &size_pairs);
+    // Tuple true_pairs[10] = {{21, 22}, {15, 20}, {14, 19}, {13, 17}, {12, 16},
+    //     {2, 11}, {4, 10}, {6, 9}, {5, 8}, {3, 7}};
         
-    int c = 0;
-    for(int i=0; i<size_pairs; i++)
-        if (pairs[i].y != -1){
-            assert(pairs[i].x == true_pairs[c].x && 
-                pairs[i].y == true_pairs[c].y);
-            c++;
-        }
+    // int c = 0;
+    // for(int i=0; i<size_pairs; i++)
+    //     if (pairs[i].y != -1){
+    //         assert(pairs[i].x == true_pairs[c].x && 
+    //             pairs[i].y == true_pairs[c].y);
+    //         c++;
+    //     }
 
     // Tests de l'extraction des paires par rapport à la filtration initiale
-    int size_pairs_filt;
-    Tuple *pairs_filt = extractPairsFilt(test_low, base_filt, 23, &size_pairs_filt);
+    unsigned long long size_pairs_filt;
+    Tuple *pairs_filt = extractPairsFilt(test_low, base_filt, &size_pairs_filt,
+        reversed);
     Tuple pair = {1, 2};
-    c = 0;
+    unsigned long long c = 0;
 
-    for(int i=0; i<size_pairs_filt; i++){
+    for(unsigned long long i=0; i<size_pairs_filt; i++){
         if (pairs_filt[i].y != -1){
             assert(c==0);
             assert(base_filt->filt[pairs_filt[i].x] == pair.x && 
@@ -225,16 +226,17 @@ void tests_persDiag(){
     PersistenceDiagram *pd = PDCreate(base_filt, X);
 
     c = 0;
-    for(int i=0; i<pd->size_pairs; i++){
+    for(unsigned long long i=0; i<pd->size_pairs; i++){
         if (pd->pairs[i].y != -1){
             assert(pd->pairs[i].x == pair.x && 
                 pd->pairs[i].y == pair.y);
+                // printf("%d %d\n", pd->pairs[i].x, pd->pairs[i].y);
             c++;
         }
     }
 
     // Tests de l'exportation
-    PDExport(pd, "exportedPD/pd_test.dat");
+    PDExport(pd, "exportedPD/pd_test.dat", true);
 
     // Libération de la mémoire
     for(int i=0; i<11; i++) simplexFree(simPts[i]);
@@ -253,7 +255,7 @@ void tests_persDiag(){
     free(true_reduced);
     free(testBoundary);
     free(reduced);
-    free(pairs);
+    // free(pairs);
     free(pairs_filt);
     PDFree(pd);
     free(X->pts);

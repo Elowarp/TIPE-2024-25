@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 10-09-2024 16:23:55
- *  Last modified : 05-11-2024 17:15:19
+ *  Last modified : 05-11-2024 22:42:48
  *  File : persDiag.h
  */
 #ifndef PERSDIAG_H
@@ -17,20 +17,20 @@ typedef struct {
 typedef struct {
     int *dims;
     Tuple *pairs;
-    int size_pairs;
+    unsigned long long size_pairs;
     int size_dims;
 } PersistenceDiagram;
 
 extern Filtration *buildFiltration(PointCloud *X);
-extern int **buildBoundaryMatrix(int *reversed, int n, int nb_pts);
-extern int **reduceMatrix(int **boundary, int n, int *low);
-extern int *buildLowMatrix(int **boundary, int n);
-extern Tuple *extractPairs(int *low, int n, int *size_pairs);
-extern Tuple *extractPairsFilt(int *low, Filtration *filt, int n, int *size_pairs);
-extern int *reverseIdAndSimplex(Filtration *filt, int max_nums);
+extern int *reverseIdAndSimplex(Filtration *filt);
+extern int **buildBoundaryMatrix(int *reversed, unsigned long long n, int nb_pts);
+extern int *buildLowMatrix(int **boundary, unsigned long long n);
+extern int **reduceMatrix(int **boundary, unsigned long long n, int *low);
+extern Tuple *extractPairsFilt(int *low, Filtration *filt, 
+    unsigned long long *size_pairs, int *reversed);
 
 PersistenceDiagram *PDCreate(Filtration *filtration, PointCloud *X);
-void PDExport(PersistenceDiagram *pd, char *filename);
+void PDExport(PersistenceDiagram *pd, char *filename, bool bigger_dims);
 void PDFree(PersistenceDiagram *pd);
 
 #endif

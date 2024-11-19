@@ -628,3 +628,7 @@ On va construire les VR par incrémentation par secondes et on renomme les fichi
 ## 22/10/24 
 
 On a trié et recup tt les infos pour calculer les trucs sur marseille, on va calculer la plus grande distance entre deux point pour savoir quand arreter la boucle while
+
+## 19/11/24
+
+Représentation sur la carte des stations de marseille + les morts de 1d simplexes avec evaluation rapide des statistiques

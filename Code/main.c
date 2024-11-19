@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 08-10-2024 17:08:19
- *  Last modified : 05-11-2024 17:16:22
+ *  Last modified : 12-11-2024 15:49:25
  *  File : main.c
  */
 #include <stdio.h>
@@ -53,11 +53,10 @@ int main(int argc, char *argv[]){
 
     // Routine principale
     PointCloud *X = pointCloudLoad(pts_filename, dist_filename);
-    pointCloudPrint(X);
     Filtration *filt = buildFiltration(X);
     PersistenceDiagram *pd = PDCreate(filt, X);
     
-    PDExport(pd, pd_filename);
+    PDExport(pd, pd_filename, false);
 
     PDFree(pd);
     filtrationFree(filt);

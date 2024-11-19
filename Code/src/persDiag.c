@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 10-09-2024 16:33:19
- *  Last modified : 05-11-2024 21:29:41
+ *  Last modified : 12-11-2024 16:43:10
  *  File : persDiag.c
  */
 #include <stdio.h>
@@ -91,7 +91,7 @@ float maxDistOfPointCloud(PointCloud *X){
 // simplicial
 Filtration *buildFiltration(PointCloud *X){
     int n = X->size;
-    int max_simplex = simplexMax(n); // Nombre maximal de simplexes possible
+    unsigned long long max_simplex = simplexMax(n); // Nombre maximal de simplexes possible
     float eps = 0.5; // Epsilon pour la filtration ie 1seconde
     float dist_max = maxDistOfPointCloud(X); // Distance maximale entre deux points
 
@@ -109,7 +109,7 @@ Filtration *buildFiltration(PointCloud *X){
         if (K->size != 0 && K->size != last_size){
             last_size = K->size;
             
-            for(int s = 0; s<max_simplex; s++){
+            for(unsigned long long s = 0; s<max_simplex; s++){
                 // Si le simplexe est présent dans le complexe
                 if (K->simplices[s]){
                     // Récupère le simplexe associé à l'identifiant
@@ -130,17 +130,15 @@ Filtration *buildFiltration(PointCloud *X){
         t = t + eps;
     }
 
-    filtrationPrint(filt, X->size, true);
-
     return filt;
 }
 
 // Renvoie la matrice low associée à une matrice de bordure
-int *buildLowMatrix(int **boundary, int n){
+int *buildLowMatrix(int **boundary, unsigned long long n){
     int *low = malloc(n*sizeof(int));
-    for(int j=0; j<n; j++){
+    for(unsigned long long j=0; j<n; j++){
         low[j] = -1;
-        for(int i=0; i<n; i++)
+        for(unsigned long long i=0; i<n; i++)
             if(boundary[i][j] != 0) low[j] = i;
     }
     return low;
@@ -164,13 +162,13 @@ void updateLow(int **boundary, int* low, int j, int n){
 }
 
 // Standart Algorithm
-int **reduceMatrix(int **boundary, int n, int *low){
+int **reduceMatrix(int **boundary, unsigned long long n, int *low){
     int **reduced = copy_matrix(boundary, n);
-    for(int i=0; i<n; i++){
+    for(unsigned long long i=0; i<n; i++){
         int j = sameLow(low, i);
         while(j != -1){
             // Soustraction de la colonne j à la colonne i
-            for(int k=0; k<n; k++){
+            for(unsigned long long k=0; k<n; k++){
                 reduced[k][i] = (reduced[k][i] + reduced[k][j]) % 2;
             }
             
@@ -182,13 +180,13 @@ int **reduceMatrix(int **boundary, int n, int *low){
 }
 
 // Construit la matrice de bordure associée à une filtration
-int **buildBoundaryMatrix(int *reversed, int n, int nb_pts){
+int **buildBoundaryMatrix(int *reversed, unsigned long long n, int nb_pts){
     int **boundary = malloc(n * sizeof(int*));
     
-    for(int i = 0; i<n; i++){
+    for(unsigned long long i = 0; i<n; i++){
         boundary[i] = malloc(n * sizeof(int));
         
-        for(int j = 0; j<n; j++){
+        for(unsigned long long j = 0; j<n; j++){
             Simplex s1 = simplexFromId(reversed[i], nb_pts);
             Simplex s2 = simplexFromId(reversed[j], nb_pts);
             if (isFaceOf(&s1, &s2)) boundary[i][j] = 1;
@@ -199,56 +197,26 @@ int **buildBoundaryMatrix(int *reversed, int n, int nb_pts){
     return boundary;
 }
 
-// Renvoie des paires à partir d'une matrice de reduction, size_pairs est
-// la taille du tableau de paires créé
-Tuple *extractPairs(int *low, int n, int *size_pairs){
-    Tuple *pairs = malloc(n * sizeof(Tuple));
-    *size_pairs = 0;
-
-    bool seen[n];
-    for(int i=0; i<n; i++) seen[i] = false;
-
-    for(int j = n-1; j>=0; j--){
-        if (!seen[j]){
-            if (low[j] != -1){
-                // On a trouvé une paire
-                pairs[*size_pairs].x = low[j];
-                pairs[*size_pairs].y = j;
-                (*size_pairs)++;
-                seen[low[j]] = true;
-                seen[j] = true;
-            } else {
-                // On a trouvé un cycle encore en vie
-                pairs[*size_pairs].x = j;
-                pairs[*size_pairs].y = -1;
-                (*size_pairs)++;
-            }
-        }
-    }
-    pairs = realloc(pairs, *size_pairs * sizeof(Tuple));
-    return pairs;
-}
-
 // Renvoie une liste de paires correspondant aux idéntifiants des simplexes 
 // récupérés depuis la matrice réduite
-Tuple *extractPairsFilt(int *low, Filtration *filt, int n, int *size_pairs){
-    Tuple *pairs = malloc(n * sizeof(Tuple));
+Tuple *extractPairsFilt(int *low, Filtration *filt, unsigned long long *size_pairs,
+ int *reversed){
+    Tuple *pairs = malloc(filt->max_name * sizeof(Tuple));
     *size_pairs = 0;
     
-    bool seen[n];
-    for(int i=0; i<n; i++) seen[i] = false;
+    bool seen[filt->max_name];
+    for(unsigned long long i=0; i<filt->max_name; i++) seen[i] = false;
 
-    int *rev = reverseIdAndSimplex(filt, simplexMax(n));
-
-    for(int j = n-1; j>=0; j--){
+    unsigned long long count = 0; 
+    for(unsigned long long j = filt->max_name-1; count < filt->max_name; j--){
         if (!seen[j]){ // Pas déjà appairé
             if (low[j] != -1){
                 // On a trouvé une paire
-                int x = filt->filt[rev[low[j]]];
-                int y = filt->filt[rev[j]];
+                int x = filt->filt[reversed[low[j]]];
+                int y = filt->filt[reversed[j]];
                 if (x != y){
-                    pairs[*size_pairs].x = rev[low[j]];
-                    pairs[*size_pairs].y = rev[j];
+                    pairs[*size_pairs].x = reversed[low[j]];
+                    pairs[*size_pairs].y = reversed[j];
                     (*size_pairs)++;
                 }
                 
@@ -256,15 +224,15 @@ Tuple *extractPairsFilt(int *low, Filtration *filt, int n, int *size_pairs){
                 seen[j] = true;
             } else {
                 // On a trouvé un cycle encore en vie
-                pairs[*size_pairs].x = rev[j];
+                pairs[*size_pairs].x = reversed[j];
                 pairs[*size_pairs].y = -1;
                 (*size_pairs)++;
             }
         }
+        count++;
     }
     
     pairs = realloc(pairs, *size_pairs * sizeof(Tuple));
-    free(rev);
     return pairs;
 }
 
@@ -275,41 +243,28 @@ Tuple *extractPairsFilt(int *low, Filtration *filt, int n, int *size_pairs){
 // Crée un diagramme de persistance à partir d'une filtration injective
 PersistenceDiagram *PDCreate(Filtration *filtration, PointCloud *X){
     PersistenceDiagram *pd = malloc(sizeof(PersistenceDiagram));
-    
-    // Récupère le plus grand nom de simplexe dans la filtration
-    int max_name = filtrationMaxName(filtration);
 
     // Matrice tq reversed[i] = j si le simplexe j est le i-ème simplexe de la filtration
     // Cohérent dans l'hypothèse de filtration injective
-    int *reversed = reverseIdAndSimplex(filtration, max_name);
+    int *reversed = reverseIdAndSimplex(filtration);
 
     // Matrice de bordure associée à la filtration
-    int **boundary = buildBoundaryMatrix(reversed, max_name, X->size);
+    int **boundary = buildBoundaryMatrix(reversed, filtration->max_name, X->size);
     
     // Matrice low associée à la matrice de bordure
-    int *low = buildLowMatrix(boundary, max_name);
+    int *low = buildLowMatrix(boundary, filtration->max_name);
 
     // Réduction de la matrice de bordure
-    int **reduced = reduceMatrix(boundary, max_name, low);
-
-    // for(int i=0; i<max_name; i++){
-    //     for(int j=0; j<max_name; j++){
-    //         printf("%d ", reduced[i][j]);
-
-    //     }printf("\n");
-    // }
-
+    int **reduced = reduceMatrix(boundary, filtration->max_name, low);
+    
     // Extraction des paires
-    // pd->pairs = extractPairs(low, max_name, &(pd->size_pairs));
-    Tuple *pairs = extractPairsFilt(low, filtration, max_name, &(pd->size_pairs));
-
-    // for(int i=0; i<pd->size_pairs; i++)
-    //     printf("(%d, %d)\n", pairs[i].x, pairs[i].y);
+    Tuple *pairs = extractPairsFilt(low, filtration, &(pd->size_pairs),
+        reversed);
 
     // Assignation du rang d'apparition des simplexes dans la filtration 
     // depuis la liste de paires
     pd->pairs = malloc(pd->size_pairs * sizeof(Tuple));
-    for(int i=0; i<pd->size_pairs; i++){
+    for(unsigned long long i=0; i<pd->size_pairs; i++){
         pd->pairs[i].x = filtration->filt[pairs[i].x];
 
         if (pairs[i].y != -1)
@@ -320,32 +275,42 @@ PersistenceDiagram *PDCreate(Filtration *filtration, PointCloud *X){
 
     // Récupération des dimensions des simplexes et donc les catégorises en 
     // classes d'homologie
+    
+    printf("Affichage des simplexes tuant des 1D homologies\n");
     pd->dims = malloc(pd->size_pairs * sizeof(int));
-    for(int i=0; i<pd->size_pairs; i++){
+    for(unsigned long long i=0; i<pd->size_pairs; i++){
         Simplex s = simplexFromId(pairs[i].x, X->size);
         pd->dims[i] = dimSimplex(&s);
+
+        Simplex death_s = simplexFromId(pairs[i].y, X->size);
+        if(dimSimplex(&s) == 1){
+            simplexPrint(&death_s);
+            printf("\n");
+        }
     }
 
     // Libération de la mémoire
     free(reversed);
-    for(int i=0; i<max_name; i++) free(boundary[i]);
+    for(unsigned long long i=0; i<filtration->max_name; i++) free(boundary[i]);
     free(boundary);
     free(low);
-    for(int i=0; i<max_name; i++) free(reduced[i]);
+    for(unsigned long long i=0; i<filtration->max_name; i++) free(reduced[i]);
     free(reduced);
 
     return pd;
 }
 
 // Exporte un diagramme de persistance dans un fichier
-void PDExport(PersistenceDiagram *pd, char *filename){
+void PDExport(PersistenceDiagram *pd, char *filename, bool bigger_dims){
     FILE *f = fopen(filename, "w");
     if (f == NULL){
         print_err("Erreur lors de l'ouverture du fichier");
     }
 
     // Ecriture des paires
-    for(int i=0; i<pd->size_pairs; i++){
+    for(unsigned long long i=0; i<pd->size_pairs; i++){
+        if (pd->dims[i] >= 2 && !bigger_dims) continue; // On veut que dims 0 et 1
+
         if (pd->pairs[i].y == -1){
             fprintf(f, "%d %d inf\n", pd->dims[i], pd->pairs[i].x);
         } else {

@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 14-09-2024 13:55:46
- *  Last modified : 05-11-2024 21:23:40
+ *  Last modified : 12-11-2024 15:29:04
  *  File : geometry.c
  */
 #include <stdio.h>
@@ -129,315 +129,6 @@ void pointCloudPrint(PointCloud *X){
 }
 
 ///////////////////////
-//       EDGES       //
-///////////////////////
-
-// Initialise une liste d'arêtes
-EdgeList *edgeListInit(int p1, int p2, float weight){
-    EdgeList *list = malloc(sizeof(EdgeList));
-    list->p1 = p1;
-    list->p2 = p2;
-    list->weight = weight;
-    list->next = NULL;
-    return list;
-}
-
-// Insère une arête dans la liste
-void edgeListInsert(EdgeList *edges, int p1, int p2, float weight){
-    EdgeList *new = malloc(sizeof(EdgeList));
-    new->p1 = p1;
-    new->p2 = p2;
-    new->weight = weight;
-    new->next = NULL;
-
-    EdgeList *cur = edges;
-    while(cur->next != NULL){
-        cur = cur->next;
-    }
-    
-    cur->next = new;
-}
-
-// Affiche une liste d'arêtes
-void edgeListPrint(EdgeList *edges){
-    EdgeList *current = edges;
-    while(current != NULL){
-        printf("Edge : %d %d %f\n", current->p1, current->p2, current->weight);
-        current = current->next;
-    }
-}
-
-// Retourne vrai si deux arêtes sont égales
-bool edgeAreEqual(EdgeList *e1, EdgeList *e2){
-    return (e1->p1 == e2->p1 && e1->p2 == e2->p2) ||
-        (e1->p1 == e2->p2 && e1->p2 == e2->p1);
-}
-
-// Supprime toutes les occurrences d'une arête dans une liste d'arêtes
-EdgeList *edgeListRemove(EdgeList *edges, EdgeList *edge){
-    if (edges == NULL){
-        return NULL;
-    } else if (edgeAreEqual(edges, edge)){
-        EdgeList *next = edges->next;
-        EdgeList *tmp = edgeListRemove(next, edge);
-        free(edges);
-        return tmp;
-    } else {
-        edges->next = edgeListRemove(edges->next, edge);
-        return edges;
-    }
-}
-
-// Compte le nombre d'occurrences d'une arête dans une liste d'arêtes
-int edgeListCount(EdgeList *edges, EdgeList *edge){
-    if (edges == NULL){
-        return 0;
-    } else if (edgeAreEqual(edges, edge)){
-        return 1 + edgeListCount(edges->next, edge);
-    } else {
-        return edgeListCount(edges->next, edge);
-    }
-}
-
-// Supprime les arêtes en double d'une liste d'arêtes
-// Si a est une arête présente plus de 2 fois, alors la liste renvoyée ne 
-// contiendra plus a
-EdgeList *removeDoubledEdges(EdgeList *edges){
-    if (edges == NULL){
-        return NULL;
-    } else {
-        EdgeList *next = edges->next;
-        EdgeList edge = {edges->p1, edges->p2, edges->weight, NULL};
-        if (edgeListCount(edges, &edge) > 1){
-            return removeDoubledEdges(edgeListRemove(edges, &edge));
-            
-        } else {
-            edges->next = removeDoubledEdges(next);
-            return edges;
-        }
-    }
-}
-
-// Libère une liste d'arêtes
-// Attention, cette fonction ne libère pas les points
-void edgeListFree(EdgeList *edges){
-    EdgeList *current = edges;
-    while(current != NULL){
-        EdgeList *next = current->next;
-        free(current);
-        current = next;
-    }
-}
-
-///////////////////////
-//     TRIANGLES    //
-///////////////////////
-// Crée un triangle
-Triangle *createTriangle(int p1, int p2, int p3){
-    Triangle *t = malloc(sizeof(Triangle));
-    t->p1 = p1;
-    t->p2 = p2;
-    t->p3 = p3;
-    return t;
-}
-
-// Crée une liste de triangles
-TriangleList *triangleListInit(Triangle *t){
-    TriangleList *list = malloc(sizeof(TriangleList));
-    list->t = t;
-    list->next = NULL;
-    list->prev = NULL;
-    return list;
-}
-
-// Affiche liste triangle 
-void triangleListPrint(TriangleList *list){
-    TriangleList *current = list;
-    while(current != NULL){
-        trianglePrint(current->t);
-        printf("\n");
-        current = current->next;
-    }
-}
-
-// Ajoute un triangle à la liste
-TriangleList *triangleListInsert(TriangleList *list, Triangle *t){
-    TriangleList *new = triangleListInit(t);
-    TriangleList *cur = list;
-
-    if (cur == NULL){
-        return new;
-    }
-
-    while(cur->next != NULL){
-        cur = cur->next;
-    }
-    cur->next = new;
-    new->prev = cur;
-
-    return list;
-}
-
-// Teste si deux triangles sont égaux
-bool triangleAreEqual(Triangle *t1, Triangle *t2){
-    return (t1->p1 == t2->p1 && t1->p2 == t2->p2 && t1->p3 == t2->p3) ||
-        (t1->p1 == t2->p1 && t1->p2 == t2->p3 && t1->p3 == t2->p2) ||
-        (t1->p1 == t2->p2 && t1->p2 == t2->p1 && t1->p3 == t2->p3) ||
-        (t1->p1 == t2->p2 && t1->p2 == t2->p3 && t1->p3 == t2->p1) ||
-        (t1->p1 == t2->p3 && t1->p2 == t2->p1 && t1->p3 == t2->p2) ||
-        (t1->p1 == t2->p3 && t1->p2 == t2->p2 && t1->p3 == t2->p1);
-}
-
-// Supprime un triangle de la liste
-TriangleList *triangleListRemove(TriangleList *list, Triangle *t){
-    if (list == NULL){
-        return NULL;
-    } else if (triangleAreEqual(list->t, t)){
-        TriangleList *next = list->next;
-        free(list);
-        return next;
-    }
-    
-    TriangleList *cur = list->next;
-    
-    while(cur != NULL){
-        TriangleList *next = cur->next;
-        
-        if(triangleAreEqual(cur->t, t)){
-            if (cur->next == NULL) {
-                if (cur->prev != NULL)
-                    cur->prev->next = NULL;
-            } else {
-                cur->next->prev = cur->prev;
-            }
-            
-            if (cur->prev == NULL){
-                if (cur->next != NULL)
-                    cur->next->prev = NULL;
-                
-            } else {
-                cur->prev->next = cur->next;
-            }
-
-            free(cur);
-        } 
-        
-        cur = next;
-    }
-    return list;
-
-}
-
-// Renvoie la longueur de la liste de triangles
-int triangleListLength(TriangleList *list){
-    int length = 0;
-    TriangleList *cur = list;
-    while(cur != NULL){
-        length++;
-        cur = cur->next;
-    }
-    return length;
-}
-
-// Libère la mémoire allouée pour une liste de triangles
-// /!\ Attention, cette fonction ne libère pas la mémoire des triangles, que
-// des maillons de la liste
-void triangleListFree(TriangleList *list){
-    TriangleList *tmp;
-    while(list != NULL){
-        tmp = list;
-        list = list->next;
-        free(tmp);
-    }
-}
-
-// Liste de triangle vers fichier texte
-void triangleListToFile(TriangleList *list, Point* pts, int n, char *filename){
-    FILE *f = fopen(filename, "w"); 
-    if (f == NULL) {
-        printf("Impossible d'ouvrir le fichier !\n");
-        exit(1);
-    }
-
-    // Ecriture des points dans le fichier
-    for(int i=0;i<n;i++){
-        fprintf(f, "v %d %f %f\n", i, pts[i].x, pts[i].y);
-    }
-
-    // Ecriture des faces dans le fichier
-    TriangleList *current = list;
-    while(current != NULL){
-        fprintf(f, "t %d %d %d\n", current->t->p1,
-                        current->t->p2,
-                        current->t->p3);
-        current = current->next;
-    }
-
-    fclose(f);
-}
-
-// Affiche un triangle
-void trianglePrint(Triangle *t){
-    printf("Triangle : %d %d %d", t->p1, t->p2, t->p3);
-}
-
-
-///////////////////////
-//       Circles     //
-///////////////////////
-
-// Calcule le cercle circonscrit d'un triangle
-void circumCircle(Triangle *t, Point *pts, Point *center, float *radius){
-    Point p1 = pts[t->p1];
-    Point p2 = pts[t->p2];
-    Point p3 = pts[t->p3];
-
-    float x1 = p1.x;
-    float y1 = p1.y;
-    float x2 = p2.x;
-    float y2 = p2.y;
-    float x3 = p3.x;
-    float y3 = p3.y;
-
-    float A = x2 - x1;
-    float B = y2 - y1;
-    float C = x3 - x1;
-    float D = y3 - y1;
-
-    float E = A * (x1 + x2) + B * (y1 + y2);
-    float F = C * (x1 + x3) + D * (y1 + y3);
-
-    float G = 2.0 * (A * (y3 - y2) - B * (x3 - x2));
-
-    float dx, dy;
-
-    if (fabs(G) < 0.000001) {
-        center->x = 0;
-        center->y = 0;
-        *radius = -1;
-        return;
-    }
-
-    center->x = (D * E - B * F) / G;
-    center->y = (A * F - C * E) / G;
-
-    dx = center->x - x1;
-    dy = center->y - y1;
-    *radius = sqrt(dx * dx + dy * dy);
-}
-
-
-// Retourne vrai si le point est dans un cercle de centre center et de rayon 
-// radius
-bool inCircle(Point *center, float radius, Point *p){
-    float dx = p->x - center->x;
-    float dy = p->y - center->y;
-    float dist = sqrt(dx * dx + dy * dy);
-    return dist <= radius;
-}
-
-
-///////////////////////
 //     Simplex      //
 ///////////////////////
 
@@ -478,7 +169,7 @@ void simplexFree(Simplex *s){
 }
 
 // Renvoie le maximum de simplex possible pour un nuage de points de taille n
-int simplexMax(int n){
+unsigned long long simplexMax(int n){
     return (n+1)*(n+1)*(n+1);
 }
 
@@ -534,10 +225,10 @@ bool isFaceOf(Simplex *s1, Simplex *s2){
 ///////////////////////
 
 // Initialise un complexe simplicial
-SimComplex *simComplexInit(int n){
+SimComplex *simComplexInit(unsigned long long n){
     SimComplex *cmpx = malloc(sizeof(SimComplex));
     cmpx->simplices = malloc(n * sizeof(bool));
-    for(int i = 0; i<n; i++){
+    for(unsigned long long i = 0; i<n; i++){
         cmpx->simplices[i] = false;
     }
     cmpx->size = 0;
@@ -566,15 +257,15 @@ void simComplexInsert(SimComplex *cmpx, Simplex *s, int n){
 ///////////////////////
 
 // Initialise une filtration
-Filtration *filtrationInit(int size){
+Filtration *filtrationInit(unsigned long long size){
     Filtration *filt = malloc(sizeof(Filtration));
     filt->filt = malloc(size * sizeof(int));
-    filt->nums = malloc(size * sizeof(int));
-    for(int i = 0; i<size; i++){
+    filt->nums = malloc(size * sizeof(unsigned long long));
+    for(unsigned long long i = 0; i<size; i++){
         filt->filt[i] = -1;
         filt->nums[i] = -1;
     }
-    
+    filt->max_name = 0;
     filt->size = size;
     return filt;
 }
@@ -587,10 +278,14 @@ void filtrationFree(Filtration *filtration){
 }
 
 // Ajoute un simplexe à une filtration
-void filtrationInsert(Filtration *filtration, Simplex *s, int n, int k, int num){
+void filtrationInsert(Filtration *filtration, Simplex *s, int n, int k, 
+  unsigned long long num){
     int id = simplexId(s, n);
     filtration->filt[id] = k;
     filtration->nums[id] = num;
+
+    // Mise à jour du nom maximal
+    if (num+1 > filtration->max_name) filtration->max_name = num+1;
 }
 
 // Teste si un simplexe est dans une filtration
@@ -602,11 +297,9 @@ bool filtrationContains(Filtration *filtration, Simplex *s, int n){
 // n'a de sens et ne fonctionne que lorsque la fonction de nommage est injective
 void filtrationPrint(Filtration *filt, int n, bool sorted){
     int *sortByName = calloc(simplexMax(n), sizeof(int));
-    
     if (sorted){
         for(int i=0; i<filt->size; i++){
             if (filt->filt[i] != -1){
-                Simplex s = simplexFromId(i, n);
                 sortByName[filt->nums[i]] = i;
             }
         }
@@ -618,17 +311,19 @@ void filtrationPrint(Filtration *filt, int n, bool sorted){
     for(int r = 0; r<filt->size; r++){
         if (filt->filt[sortByName[r]] != -1){
             Simplex s = simplexFromId(sortByName[r], n);
-            printf("Simplex %d (dans K_%d): ", filt->nums[sortByName[r]], 
+            printf("Simplex %lld (dans K_%d): ", filt->nums[sortByName[r]], 
                 filt->filt[sortByName[r]]);
             simplexPrint(&s);
             printf("\n");
         }
     }
+
+    printf("Nom max : %lld\n", filt->max_name);
 }
 
 // Renvoie le tableau des identifiants des simplexes dans la filtration
-int *reverseIdAndSimplex(Filtration *filt, int max_nums){
-    int *reversed = malloc(max_nums*sizeof(int));
+int *reverseIdAndSimplex(Filtration *filt){
+    int *reversed = malloc(filt->max_name*sizeof(int));
     for(int i=0; i<filt->size; i++){
         if(filt->filt[i] != -1)
             reversed[filt->nums[i]] = i; 
@@ -639,8 +334,8 @@ int *reverseIdAndSimplex(Filtration *filt, int max_nums){
 }
 
 // Renvoie le plus grand nom de simplexe + 1 dans une filtration
-int filtrationMaxName(Filtration *filt){
-    int max = 0;
+unsigned long long filtrationMaxName(Filtration *filt){
+    unsigned long long max = 0;
     for(int i=0; i<filt->size; i++){
         if (filt->nums[i] > max){
             max = filt->nums[i];
@@ -666,7 +361,7 @@ void filtrationToFile(Filtration *filtration, Point* pts, int n, char *filename)
     for(int i=0;i<filtration->size;i++){
         if(filtration->filt[i] != -1){
             Simplex s = simplexFromId(i, n);
-            fprintf(f, "t %d %d %d %d\n", s.i, s.j, s.k, filtration->nums[i]);
+            fprintf(f, "t %d %d %d %lld\n", s.i, s.j, s.k, filtration->nums[i]);
         }
     }
 
