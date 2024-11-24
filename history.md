@@ -625,10 +625,56 @@ Dans les trucs qu'il faut faire :
 
 On va construire les VR par incrémentation par secondes et on renomme les fichiers de points par example_pts.txt
 
-## 22/10/24 
+## 22/10/24
 
 On a trié et recup tt les infos pour calculer les trucs sur marseille, on va calculer la plus grande distance entre deux point pour savoir quand arreter la boucle while
 
 ## 19/11/24
 
 Représentation sur la carte des stations de marseille + les morts de 1d simplexes avec evaluation rapide des statistiques
+
+Important : Pourquoi j'ai que la naissance d'un seul 1d et pas plus ?
+
+pts.txt : [lat] [long] [weight] [nb_line]
+
+Pour améliorer la recherche, trouver un moyen d'importer les fichiers textes vers des bases de données 
+
+# 23/11/24
+
+On utilise https://www.convertcsv.com/csv-to-sql.htm pour faire les conversions en sql
+
+Commande pour obtenir tous les arrets d'une ligne nommé "A" : 
+
+SELECT * FROM stops JOIN stop_times ON stops.stop_id = stop_times.stop_id WHERE stop_times.trip_id = (SELECT DISTINCT trip_id FROM trips WHERE route_id = (SELECT route_id FROM routes WHERE route_short_name = "A") LIMIT 1);
+
+Pour avoir le temps moyen d'attente 
+
+SELECT TIMEDIFF(MAX(arrival_time), MIN(arrival_time)) / (COUNT(arrival_time)-1) AS mean_val FROM stop_times WHERE trip_id = (SELECT DISTINCT trip_id FROM trips WHERE route_id = (SELECT route_id FROM routes WHERE route_short_name = "A") LIMIT 1);
+
+Pour chq station de la ligne line:61 en prenant que ce sont les mm tps ds les deux sens de circulation
+
+<!-- SELECT stop_id, TIMEDIFF(MAX(arrival_time), MIN(arrival_time)) / (COUNT(arrival_time)-1) AS mean_val FROM stop_times WHERE trip_id in (SELECT trip_id FROM trips WHERE route_id = "line:61" AND direction_id = 0) GROUP BY stop_id; -->
+
+SELECT stop_id, AVG(Elapsed) FROM (SELECT stop_id, TIMEDIFF(Lead(arrival_time, 1) OVER(PARTITION BY stop_id ORDER BY arrival_time), arrival_time) as Elapsed  FROM stop_times WHERE stop_times.trip_id IN (SELECT trip_id FROM trips WHERE route_id = (SELECT route_id FROM routes WHERE route_short_name = "A") AND direction_id = 0)) as t GROUP BY stop_id;
+
+La commande qui renvoie long lat avg tps d'attente et le nom de la station :
+
+SELECT stop_lon, stop_lat, cast(AVG(avg_waiting_time) as dec(8, 4)) as waiting_time, stop_name 
+   FROM stops 
+      JOIN 
+         (
+            SELECT stop_id as stp, AVG(Elapsed) as avg_waiting_time FROM (SELECT stop_id, TIMEDIFF(Lead(arrival_time, 1) OVER(PARTITION BY stop_id ORDER BY arrival_time), arrival_time) as Elapsed  FROM stop_times WHERE stop_times.trip_id IN (SELECT trip_id FROM trips WHERE route_id IN (SELECT route_id FROM routes WHERE route_short_name = "A" OR route_short_name = "B"))) as t GROUP BY stop_id
+         ) times 
+      ON stops.stop_id = times.stp GROUP BY stop_name
+   INTO OUTFILE '/mnt/Partage/Cours/TIPE_2024-25/Code/SourceData/toulouse/toulouse_pts.txt' FIELDS TERMINATED BY ' ';
+
+
+# 24/11/24 
+
+Attention : Mis en lumière par toulouse mais on construit notre complexe simplicial tant que on atteint pas une des distances max du problèmes, mais ca ne prend pas en compte que si la dist_max < aux poids des sommets alors ils ne sont jamais traité 
+
+Obtenir le fichier des shapes : 
+
+SELECT route_short_name, shape_id,shape_pt_lon,shape_pt_lat,shape_pt_sequence FROM (SELECT shp.shape_id,shape_pt_lat,shape_pt_lon,shape_pt_sequence, route_id FROM (SELECT DISTINCT shape_id, route_id FROM trips WHERE route_id IN (SELECT route_id FROM routes WHERE route_short_name IN ("A", "B")) AND direction_id = 0) shp JOIN shapes ON shapes.shape_id = shp.shape_id) infos JOIN routes ON infos.route_id = routes.route_id INTO OUTFILE '/mnt/Partage/Cours/TIPE_2024-25/Code/SourceData/toulouse/toulouse_shapes.txt' FIELDS TERMINATED BY ' ';
+
+Pour les distances sur toulouse, elles me paraissent particulièrement grande (~250mn de moyenne) sans raison apparante

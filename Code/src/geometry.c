@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 14-09-2024 13:55:46
- *  Last modified : 12-11-2024 15:29:04
+ *  Last modified : 24-11-2024 23:30:37
  *  File : geometry.c
  */
 #include <stdio.h>
@@ -74,7 +74,7 @@ PointCloud *pointCloudLoad(char *filename, char *dist_filename){
 
     for(int i = 0; i < size; i++){
         float weigth;
-        fscanf(file, "%f %f %f", &(pointCloud->pts[i].x), 
+        fscanf(file, "%f %f %f %*[^\n]", &(pointCloud->pts[i].x), 
             &(pointCloud->pts[i].y), &weigth);
         pointCloud->weights[i] = weigth;
 
@@ -110,7 +110,6 @@ PointCloud *pointCloudLoad(char *filename, char *dist_filename){
             }
         }
     }
-
 
     return pointCloud;
 };

@@ -1,7 +1,7 @@
 '''
  Contact : Elowan - elowarp@gmail.com
  Creation : 10-09-2024 17:13:53
- Last modified : 19-11-2024 16:19:15
+ Last modified : 24-11-2024 23:58:33
  File : repr.py
 '''
 #%%
@@ -12,11 +12,6 @@ import plotly.express as px
 import sys
 import pandas as pd
 import gudhi
-
-marseille = {
-                "lat":43.29695,
-                "lon":5.38107,
-            }
 
 def repr_pointCloud(filename):
     # Charger le fichier de triangulation
@@ -137,24 +132,41 @@ def print_stats(filename):
     print("1d : {:.3} {:.4}".format(np.median(death_1d), np.std(death_1d)))
 
 def repr_map(filename, simplexes=[]):
-    lat, long, _ = np.loadtxt("data/"+filename+"_pts.txt", skiprows=1, unpack=True)
+    lon, lat = np.loadtxt("data/"+filename+"_pts.txt", skiprows=1, 
+                            unpack=True, usecols=[0, 1])
+    line, shape_id, shape_lon, shape_lat, shape_pt_seq = \
+        np.loadtxt("data/"+filename+"_shapes.txt", skiprows=0, unpack=True, dtype="str")
+        
     # pts_x, pts_y, dist = np.loadtxt("data/"+filename+"_dist.txt", skiprows=1, unpack=True)
 
-    distance = []
+    # distance = []
     # total = 0
-    # for i in range(len(long)-1):
+    # for i in range(len(lon)-1):
     #     if (total < len(dist)):
     #         distance.append(str(dist[total]))
-    #         total += len(long) - 1 - i
+    #         total += len(lon) - 1 - i
 
     # distance.append("0")
+
+    lines = {}
+    
+    for i in range(len(line)):
+        line_name = str(line[i])
+        if line_name not in lines:
+            lines[line_name] = {
+                "lat": [],
+                "lon": []
+            }
+        
+        lines[line_name]["lat"].append(float(shape_lat[i]))
+        lines[line_name]["lon"].append(float(shape_lon[i]))
 
 
     fig = go.Figure()
 
     fig.add_trace(go.Scattermap(
             lat=lat,
-            lon=long,
+            lon=lon,
             mode='markers',
             marker=go.scattermap.Marker(
                 size=9
@@ -163,12 +175,13 @@ def repr_map(filename, simplexes=[]):
         ))
     
     
-    x = [long[i] for i in simplexes]
+    x = [lon[i] for i in simplexes]
     y = [lat[i] for i in simplexes]
 
     fig.add_trace(go.Scattermap(lon=x, lat=y, fill="toself"))
 
-    fig.add_trace(go.Scattermap(lon=long, lat=lat, mode="lines", text=distance))
+    for key, value in lines.items():
+        fig.add_trace(go.Scattermap(lon=value["lon"], lat=value["lat"], mode="lines", name="Ligne {}".format(key)))
 
 
     fig.update_layout(
@@ -176,9 +189,12 @@ def repr_map(filename, simplexes=[]):
         hovermode='closest',
         map=dict(
             bearing=0,
-            center=marseille,
+            center = {
+                "lon": float(np.mean(lon)), 
+                "lat" :float(np.mean(lat))
+            },
             pitch=0,
-            zoom=12
+            zoom=11.9
         ),
     )
 
@@ -189,10 +205,11 @@ if __name__ == "__main__":
         print("Il faut au moins le nom d'une ville !")
         exit(1)
     
-    marseille_simplex = [18, 23, 25, 18]
-    example_simplex = [0, 2, 3, 0]
-    # repr_PD("exportedPD/" + sys.argv[1] + ".dat")
-    repr_map(sys.argv[1], marseille_simplex)
-    # print_stats(sys.argv[1])
+    # marseille_simplex = [18, 23, 25, 18]
+    # example_simplex = [0, 2, 3, 0]
+    toulouse_simplex = [26, 28, 36, 26]
+    repr_PD("exportedPD/" + sys.argv[1] + ".dat")
+    repr_map(sys.argv[1], toulouse_simplex)
+    print_stats(sys.argv[1])
     
 # %%

@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 10-09-2024 16:33:19
- *  Last modified : 12-11-2024 16:43:10
+ *  Last modified : 24-11-2024 22:37:55
  *  File : persDiag.c
  */
 #include <stdio.h>
@@ -30,12 +30,14 @@ SimComplex *VRSimplex(PointCloud *X, float t){
     
     int count = 0;
     for(int i = 0; i<n; i++){
-        if (X->weights[i] < t){
+        // Condition pour considérer un point d'un VR weighted
+        if (X->weights[i] < t){ 
             // Ajoute le simplexe {i}
             Simplex *s_i = simplexInit(-1, -1, i);
             addSimplex(K, s_i, n, &count);
 
             for(int j = i+1; j<n; j++){
+                // Même condition
                 if (X->weights[j]<t){
                     // Ajoute le simplexe {j} s'il est pas déjà présent
                     Simplex *s_j = simplexInit(-1, -1, j);
@@ -94,7 +96,6 @@ Filtration *buildFiltration(PointCloud *X){
     unsigned long long max_simplex = simplexMax(n); // Nombre maximal de simplexes possible
     float eps = 0.5; // Epsilon pour la filtration ie 1seconde
     float dist_max = maxDistOfPointCloud(X); // Distance maximale entre deux points
-
     // Initialisation de la filtration
     Filtration *filt = filtrationInit(max_simplex);
 
