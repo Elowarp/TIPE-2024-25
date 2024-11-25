@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 08-10-2024 17:08:19
- *  Last modified : 24-11-2024 23:55:42
+ *  Last modified : 25-11-2024 13:22:37
  *  File : main.c
  */
 #include <stdio.h>
@@ -52,10 +52,14 @@ int main(int argc, char *argv[]){
     }
 
     // Routine principale
+    printf("Chargement de l'ensemble des points...\n");
     PointCloud *X = pointCloudLoad(pts_filename, dist_filename);
+    printf("Construction d'une filtration...\n");
     Filtration *filt = buildFiltration(X);
+    printf("Construction du diagramme de persistance...\n");
     PersistenceDiagram *pd = PDCreate(filt, X);
     
+    printf("Exportation du diagramme de persistance...\n");
     PDExport(pd, pd_filename, false);
 
     PDFree(pd);
@@ -64,5 +68,6 @@ int main(int argc, char *argv[]){
     free(pts_filename);
     free(dist_filename);
     free(pd_filename);
+    printf("Job done\n");
     return 0;
 }

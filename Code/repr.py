@@ -1,7 +1,7 @@
 '''
  Contact : Elowan - elowarp@gmail.com
  Creation : 10-09-2024 17:13:53
- Last modified : 24-11-2024 23:58:33
+ Last modified : 25-11-2024 21:40:06
  File : repr.py
 '''
 #%%
@@ -132,9 +132,9 @@ def print_stats(filename):
     print("1d : {:.3} {:.4}".format(np.median(death_1d), np.std(death_1d)))
 
 def repr_map(filename, simplexes=[]):
-    lon, lat = np.loadtxt("data/"+filename+"_pts.txt", skiprows=1, 
+    lat, lon = np.loadtxt("data/"+filename+"_pts.txt", skiprows=1, 
                             unpack=True, usecols=[0, 1])
-    line, shape_id, shape_lon, shape_lat, shape_pt_seq = \
+    line, shape_id, shape_lat, shape_lon, shape_pt_seq = \
         np.loadtxt("data/"+filename+"_shapes.txt", skiprows=0, unpack=True, dtype="str")
         
     # pts_x, pts_y, dist = np.loadtxt("data/"+filename+"_dist.txt", skiprows=1, unpack=True)
@@ -175,10 +175,11 @@ def repr_map(filename, simplexes=[]):
         ))
     
     
-    x = [lon[i] for i in simplexes]
-    y = [lat[i] for i in simplexes]
+    triangles_x = [[lon[j] for j in simplexes[i] ] for i in range(len(simplexes))]
+    triangles_y = [[lat[j] for j in simplexes[i] ] for i in range(len(simplexes))]
 
-    fig.add_trace(go.Scattermap(lon=x, lat=y, fill="toself"))
+    for i in range(len(triangles_x)):
+        fig.add_trace(go.Scattermap(lon=triangles_x[i], lat=triangles_y[i], fill="toself"))
 
     for key, value in lines.items():
         fig.add_trace(go.Scattermap(lon=value["lon"], lat=value["lat"], mode="lines", name="Ligne {}".format(key)))
@@ -205,11 +206,11 @@ if __name__ == "__main__":
         print("Il faut au moins le nom d'une ville !")
         exit(1)
     
-    # marseille_simplex = [18, 23, 25, 18]
+    marseille_simplex = [[0, 4, 19, 0], [3, 8, 13, 3], [7, 19, 28, 7]]
     # example_simplex = [0, 2, 3, 0]
-    toulouse_simplex = [26, 28, 36, 26]
+    # toulouse_simplex = [[12, 16, 27, 12], [7, 8, 30, 7], [16, 31, 32, 16], [11, 25, 33, 11], [5, 24, 29, 5]]
     repr_PD("exportedPD/" + sys.argv[1] + ".dat")
-    repr_map(sys.argv[1], toulouse_simplex)
+    repr_map(sys.argv[1], marseille_simplex)
     print_stats(sys.argv[1])
     
 # %%

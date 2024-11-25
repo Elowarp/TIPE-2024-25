@@ -659,14 +659,25 @@ SELECT stop_id, AVG(Elapsed) FROM (SELECT stop_id, TIMEDIFF(Lead(arrival_time, 1
 
 La commande qui renvoie long lat avg tps d'attente et le nom de la station :
 
-SELECT stop_lon, stop_lat, cast(AVG(avg_waiting_time) as dec(8, 4)) as waiting_time, stop_name 
+```sql
+SELECT stop_lat, stop_lon, cast(AVG(avg_waiting_time) as dec(8, 4)) as waiting_time, stop_name 
    FROM stops 
       JOIN 
          (
-            SELECT stop_id as stp, AVG(Elapsed) as avg_waiting_time FROM (SELECT stop_id, TIMEDIFF(Lead(arrival_time, 1) OVER(PARTITION BY stop_id ORDER BY arrival_time), arrival_time) as Elapsed  FROM stop_times WHERE stop_times.trip_id IN (SELECT trip_id FROM trips WHERE route_id IN (SELECT route_id FROM routes WHERE route_short_name = "A" OR route_short_name = "B"))) as t GROUP BY stop_id
+            SELECT stop_id as stp, AVG(Elapsed) as avg_waiting_time 
+            FROM (
+               SELECT stop_id, TIMEDIFF(Lead(arrival_time, 1) OVER(PARTITION BY stop_id ORDER BY arrival_time), arrival_time) as Elapsed  
+               FROM stop_times 
+               WHERE 
+                  stop_times.trip_id IN (
+                     SELECT trip_id FROM trips WHERE route_id IN (SELECT route_id FROM routes WHERE route_short_name IN ("M1", "M2"))
+                  )
+            ) as t 
+            GROUP BY stop_id
          ) times 
       ON stops.stop_id = times.stp GROUP BY stop_name
    INTO OUTFILE '/mnt/Partage/Cours/TIPE_2024-25/Code/SourceData/toulouse/toulouse_pts.txt' FIELDS TERMINATED BY ' ';
+```
 
 
 # 24/11/24 
@@ -675,6 +686,27 @@ Attention : Mis en lumière par toulouse mais on construit notre complexe simpli
 
 Obtenir le fichier des shapes : 
 
-SELECT route_short_name, shape_id,shape_pt_lon,shape_pt_lat,shape_pt_sequence FROM (SELECT shp.shape_id,shape_pt_lat,shape_pt_lon,shape_pt_sequence, route_id FROM (SELECT DISTINCT shape_id, route_id FROM trips WHERE route_id IN (SELECT route_id FROM routes WHERE route_short_name IN ("A", "B")) AND direction_id = 0) shp JOIN shapes ON shapes.shape_id = shp.shape_id) infos JOIN routes ON infos.route_id = routes.route_id INTO OUTFILE '/mnt/Partage/Cours/TIPE_2024-25/Code/SourceData/toulouse/toulouse_shapes.txt' FIELDS TERMINATED BY ' ';
+```sql
+SELECT route_short_name, shape_id,shape_pt_lat,shape_pt_lon,shape_pt_sequence 
+   FROM (
+      SELECT shp.shape_id,shape_pt_lat,shape_pt_lon,shape_pt_sequence, route_id 
+      FROM (
+         SELECT DISTINCT shape_id, route_id 
+         FROM trips 
+         WHERE route_id IN (
+            SELECT route_id 
+            FROM routes 
+            WHERE route_short_name IN ("M1", "M2")
+         ) AND direction_id = 0
+      ) shp 
+      JOIN shapes ON shapes.shape_id = shp.shape_id
+   ) infos 
+   JOIN routes ON infos.route_id = routes.route_id 
+   INTO OUTFILE '/mnt/Partage/Cours/TIPE_2024-25/Code/SourceData/marseille/marseille_shapes.txt' FIELDS TERMINATED BY ' ';
+```
 
 Pour les distances sur toulouse, elles me paraissent particulièrement grande (~250mn de moyenne) sans raison apparante
+
+Indeed : J'ai inversé lat et lon donc on prend comme convention lat, lon 
+
+On utilise : https://github.com/jamesrwilliams/gtfs-to-sql/blob/master/sql/load-gtfs.sql Pour transformer un dossier GTFS en sql pour faire nos requetes 

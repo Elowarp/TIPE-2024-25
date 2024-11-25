@@ -87,21 +87,44 @@
 
 \begin{frame}
     \frametitle{Résultats so far so good}
-    Pour marseille 
-    \begin{figure}
-        \includegraphics[width=0.7\textwidth]{pd_marseille}
-        \centering
-        \caption{Diagramme de persistance}
+    % \begin{figure}
+    %     \includegraphics[width=0.7\textwidth]{pd_marseille}
+    %     \centering
+    %     \caption{Diagramme de persistance}
+    % \end{figure}
+
+    \begin{figure}[h]
+        \begin{minipage}[c]{.45\linewidth}
+            \centering
+            \includegraphics[width=1.2\textwidth]{pd_marseille}
+            \caption{Diagramme de persistance de Marseille}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{.45\linewidth}
+            \centering
+            \includegraphics[width=1.2\textwidth]{pd_toulouse}
+            \caption{Diagramme de persistance de Toulouse}
+        \end{minipage}
     \end{figure}
 \end{frame}
 
 \begin{frame}
     \frametitle{Résultats so far so good}
-    Pour marseille 
-    \begin{figure}
-        \includegraphics[width=0.6\textwidth]{marseille_carte}
-        \centering
-        \caption{Carte des zones les moins biens deservies de marseille}
+    Carte des zones où il est le moinds facile de rejoindre une station de métro en voiture ou velo,
+    et où le temps d'attente en station est le plus haut.
+
+    \begin{figure}[h]
+        \begin{minipage}[c]{.42\linewidth}
+            \centering
+            \includegraphics[width=1.1\textwidth]{marseille_carte}
+            \caption{Marseille}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{.42\linewidth}
+            \centering
+            \includegraphics[width=1\textwidth]{toulouse_carte}
+            \caption{Toulouse}
+        \end{minipage}
     \end{figure}
 \end{frame}
 
@@ -109,10 +132,8 @@
     \frametitle{Conclusion}
     Restant :
     \itemize{
-        \item Compréhension des résultats précédents + correction du programme
-        si necéssaire
-        \item PreTraitement des informations sur Paris/Toulouse/Rennes 
-        \item Conclure
+        \item PreTraitement des informations sur Paris/Rennes (environ 20mn)
+        \item Mieux capter les nuances et interprétation dans notre exemple
     }
     
 \end{frame}
