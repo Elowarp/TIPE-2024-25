@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 10-09-2024 16:23:55
- *  Last modified : 05-11-2024 22:42:48
+ *  Last modified : 26-11-2024 15:46:07
  *  File : persDiag.h
  */
 #ifndef PERSDIAG_H
@@ -18,6 +18,8 @@ typedef struct {
     int *dims;
     Tuple *pairs;
     unsigned long long size_pairs;
+    Simplex *death1D; // Simplexes tuant des 1D homologies
+    int size_death1D;
     int size_dims;
 } PersistenceDiagram;
 
@@ -30,7 +32,7 @@ extern Tuple *extractPairsFilt(int *low, Filtration *filt,
     unsigned long long *size_pairs, int *reversed);
 
 PersistenceDiagram *PDCreate(Filtration *filtration, PointCloud *X);
-void PDExport(PersistenceDiagram *pd, char *filename, bool bigger_dims);
+void PDExport(PersistenceDiagram *pd, char *filename, char *death_filename, bool bigger_dims);
 void PDFree(PersistenceDiagram *pd);
 
 #endif

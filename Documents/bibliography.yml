@@ -29,3 +29,10 @@ PH_roadmap:
     - Peter Grindrod
     - Heather A Harrington
   url: https://epjdatascience.springeropen.com/articles/10.1140/epjds/s13688-017-0109-5
+
+PH_invitation:
+  type: web
+  title: Une invitation à l'homologie persistante
+  author:
+    - Henri Paul de Saint-Gervais
+  url: https://analysis-situs.math.cnrs.fr/Une-invitation-a-l-homologie-persistante.html

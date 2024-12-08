@@ -710,3 +710,13 @@ Pour les distances sur toulouse, elles me paraissent particulièrement grande (~
 Indeed : J'ai inversé lat et lon donc on prend comme convention lat, lon 
 
 On utilise : https://github.com/jamesrwilliams/gtfs-to-sql/blob/master/sql/load-gtfs.sql Pour transformer un dossier GTFS en sql pour faire nos requetes 
+
+# 3/12/24
+
+Nous avons un problème dans les statistiques : les temps d'aparrition sont incohérents, en effet cela doit surement venir de la notation des simplexes qui ne tient pas compte du temps d'apparition, seulement de l'ordre d'apparition : On change donc le nom d'un simplexe en fonction de son rang d'apparition.
+
+Après implémentation, on est sur des ordres de grandeurs de la minute qui est bcp plus cohérent avec notre pb.
+
+Et rapport ens 95% fini yey 
+
+Passage entier sur la conversion de données GTSL en filtration

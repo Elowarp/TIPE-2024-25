@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 10-09-2024 16:33:19
- *  Last modified : 24-11-2024 22:37:55
+ *  Last modified : 03-12-2024 15:59:34
  *  File : persDiag.c
  */
 #include <stdio.h>
@@ -79,14 +79,25 @@ SimComplex *VRSimplex(PointCloud *X, float t){
     return K;
 }
 
+// Renvoie la distance maximale à considérer lors de la création
+// d'une filtration
 float maxDistOfPointCloud(PointCloud *X){
-    float max = 0;
+    // Calcule la distance maximale 
+    float max_d = 0;
     for(int i=0; i<X->size; i++){
         for(int j=i+1; j<X->size; j++){
-            if (max < dist(i, j, X)) max = dist(i, j, X);
+            if (max_d < dist(i, j, X)) max_d = dist(i, j, X);
         }
     }
-    return max;
+
+    // Calcule le poids maximal
+    float max_w = 0;
+    for(int i=0; i<X->size; i++){
+        if(X->weights[i]>max_w) max_w = X->weights[i];
+    }
+
+    // Retourne la distance maximale à considérer
+    return max_d + 2*max_w;
 }
 
 // Renvoie une filtration associée à un nuage de points via la VR complexe 
@@ -94,8 +105,8 @@ float maxDistOfPointCloud(PointCloud *X){
 Filtration *buildFiltration(PointCloud *X){
     int n = X->size;
     unsigned long long max_simplex = simplexMax(n); // Nombre maximal de simplexes possible
-    float eps = 0.5; // Epsilon pour la filtration ie 1seconde
-    float dist_max = maxDistOfPointCloud(X); // Distance maximale entre deux points
+    float eps = 1; // Epsilon pour la filtration ie 1seconde
+    float dist_max = maxDistOfPointCloud(X); // Distance maximale à considérer
     // Initialisation de la filtration
     Filtration *filt = filtrationInit(max_simplex);
 
@@ -118,7 +129,7 @@ Filtration *buildFiltration(PointCloud *X){
 
                     // Si le simplexe n'a jamais été rencontré
                     if (!filtrationContains(filt, &simp, n)){
-                        filtrationInsert(filt, &simp, n, nb_complex, nb_simplex);
+                        filtrationInsert(filt, &simp, n, (int) t, nb_simplex);
                         nb_simplex++;
                     }
                 }
@@ -274,19 +285,28 @@ PersistenceDiagram *PDCreate(Filtration *filtration, PointCloud *X){
             pd->pairs[i].y = -1;
     }
 
-    // Récupération des dimensions des simplexes et donc les catégorises en 
+    // Récupération des dimensions des simplexes et donc catégorises les 
     // classes d'homologie
     
     printf("Affichage des simplexes tuant des 1D homologies\n");
     pd->dims = malloc(pd->size_pairs * sizeof(int));
     for(unsigned long long i=0; i<pd->size_pairs; i++){
         Simplex s = simplexFromId(pairs[i].x, X->size);
+        
         pd->dims[i] = dimSimplex(&s);
-
+        if(dimSimplex(&s) == 1) pd->size_death1D++;
+    }
+    
+    // Rajoute les temps de naissance des tueurs de classes 1D 
+    pd->death1D = malloc(pd->size_death1D * sizeof(Simplex));
+    int c = 0;
+    for(unsigned long long i=0; i<pd->size_pairs; i++){
+        Simplex s = simplexFromId(pairs[i].x, X->size);
         Simplex death_s = simplexFromId(pairs[i].y, X->size);
-        if(dimSimplex(&s) == 1){
-            simplexPrint(&death_s);
-            printf("\n");
+        if(dimSimplex(&s) == 1)
+        {
+            pd->death1D[c] = death_s;
+            c++;
         }
     }
 
@@ -302,7 +322,8 @@ PersistenceDiagram *PDCreate(Filtration *filtration, PointCloud *X){
 }
 
 // Exporte un diagramme de persistance dans un fichier
-void PDExport(PersistenceDiagram *pd, char *filename, bool bigger_dims){
+void PDExport(PersistenceDiagram *pd, char *filename, char *death_filename,
+  bool bigger_dims){
     FILE *f = fopen(filename, "w");
     if (f == NULL){
         print_err("Erreur lors de l'ouverture du fichier");
@@ -320,6 +341,14 @@ void PDExport(PersistenceDiagram *pd, char *filename, bool bigger_dims){
     }
 
     fclose(f);
+
+    // Ecriture des simplexes tuant les classes 1D
+    FILE *f_death = fopen(death_filename, "w");
+    for(int i = 0; i<pd->size_death1D; i++)
+        fprintf(f_death, "%d %d %d\n", pd->death1D[i].i, 
+            pd->death1D[i].j, pd->death1D[i].k);
+    
+    fclose(f_death);
     printf("Diagram exported at %s\n", filename);
 }
 

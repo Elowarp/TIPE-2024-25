@@ -1,3 +1,15 @@
+'''
+ Contact : Elowan - elowarp@gmail.com
+ Creation : 06-11-2024 10:52:34
+ Last modified : 08-12-2024 20:48:49
+ File : retrieve_data.py
+ 
+ Ce fichier permet depuis un fichier d'une liste de points selon la norme 
+ donnée par le projet de récupérer toutes les distances nécessaires au 
+ calcul des classes d'homologies. Elle utilise l'api de Geoapify, dont 
+ on supposera la clé apparaitre dans un fichier .env à la racine du 
+ dossier Code.
+'''
 import datetime
 import requests
 import numpy as np

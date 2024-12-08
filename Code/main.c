@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 08-10-2024 17:08:19
- *  Last modified : 25-11-2024 13:22:37
+ *  Last modified : 26-11-2024 15:50:47
  *  File : main.c
  */
 #include <stdio.h>
@@ -35,13 +35,17 @@ int main(int argc, char *argv[]){
     
     char *pts_filename = malloc((strlen(name) + 14)*sizeof(char)); 
     char *pd_filename = malloc((strlen(name) + 16)*sizeof(char));
+    char *death_filename = malloc((strlen(name) + 22)*sizeof(char));
 
     strcpy(pts_filename, "data/");
     strcpy(pd_filename, "exportedPD/");
+    strcpy(death_filename, "exportedPD/");
     strcat(pts_filename, name);
     strcat(pd_filename, name);
+    strcat(death_filename, name);
     strcat(pts_filename, "_pts.txt");
     strcat(pd_filename, ".dat");
+    strcat(death_filename, "_death.txt");
     
     char *dist_filename = NULL;
     if (!euclidean){
@@ -60,7 +64,7 @@ int main(int argc, char *argv[]){
     PersistenceDiagram *pd = PDCreate(filt, X);
     
     printf("Exportation du diagramme de persistance...\n");
-    PDExport(pd, pd_filename, false);
+    PDExport(pd, pd_filename, death_filename, false);
 
     PDFree(pd);
     filtrationFree(filt);
@@ -68,6 +72,6 @@ int main(int argc, char *argv[]){
     free(pts_filename);
     free(dist_filename);
     free(pd_filename);
-    printf("Job done\n");
+    printf("Fin des calculs et de l'exportation\n");
     return 0;
 }
