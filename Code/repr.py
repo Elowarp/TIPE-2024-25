@@ -1,7 +1,7 @@
 '''
  Contact : Elowan - elowarp@gmail.com
  Creation : 10-09-2024 17:13:53
- Last modified : 08-12-2024 20:42:44
+ Last modified : 17-12-2024 17:36:38
  File : repr.py
 '''
 
@@ -52,7 +52,7 @@ def repr_map(filename):
                             unpack=True, usecols=[0, 1])
 
     # Récupération des formes des lignes de métros
-    line, shape_id, shape_lat, shape_lon, shape_pt_seq = \
+    line, color, shape_lat, shape_lon, shape_pt_seq = \
         np.loadtxt("data/"+filename+"_shapes.txt", skiprows=0, unpack=True, dtype="str")
 
     # Récupération des zones de faiblesse
@@ -60,6 +60,7 @@ def repr_map(filename):
     
     simplexes = [[int(s_i[i]), int(s_j[i]), int(s_k[i]), int(s_i[i])] 
         for i in range(len(s_i))]
+    # simplexes = []
 
     # Création du dict des formes nom_ligne_metro : [coordonnées]
     lines = {}
@@ -68,11 +69,13 @@ def repr_map(filename):
         if line_name not in lines:
             lines[line_name] = {
                 "lat": [],
-                "lon": []
+                "lon": [],
+                "color": "#" + color[i]
             }
         
         lines[line_name]["lat"].append(float(shape_lat[i]))
         lines[line_name]["lon"].append(float(shape_lon[i]))
+        
 
 
     fig = go.Figure()
@@ -95,12 +98,12 @@ def repr_map(filename):
 
     for i in range(len(triangles_x)):
         fig.add_trace(go.Scattermap(lon=triangles_x[i], lat=triangles_y[i], 
-            fill="toself", name="Zone {}".format(i)))
+            fill="toself", name="Zone {}".format(i), fillcolor="#9CAF88"))
 
     # Affichage des tracés des lignes
     for key, value in lines.items():
         fig.add_trace(go.Scattermap(lon=value["lon"], lat=value["lat"], 
-            mode="lines", name="Ligne {}".format(key)))
+            mode="lines", name="Ligne {}".format(key), line=dict(color = value["color"])))
 
 
     fig.update_layout(
@@ -129,7 +132,7 @@ if __name__ == "__main__":
         print("Il faut au moins le nom d'une ville !")
         exit(1)
     
-    repr_PD(sys.argv[1])
+    # repr_PD(sys.argv[1])
     repr_map(sys.argv[1])
-    print_stats(sys.argv[1])
+    # print_stats(sys.argv[1])
     

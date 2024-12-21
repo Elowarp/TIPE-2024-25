@@ -639,7 +639,7 @@ pts.txt : [lat] [long] [weight] [nb_line]
 
 Pour améliorer la recherche, trouver un moyen d'importer les fichiers textes vers des bases de données 
 
-# 23/11/24
+## 23/11/24
 
 On utilise https://www.convertcsv.com/csv-to-sql.htm pour faire les conversions en sql
 
@@ -670,7 +670,7 @@ SELECT stop_lat, stop_lon, cast(AVG(avg_waiting_time) as dec(8, 4)) as waiting_t
                FROM stop_times 
                WHERE 
                   stop_times.trip_id IN (
-                     SELECT trip_id FROM trips WHERE route_id IN (SELECT route_id FROM routes WHERE route_short_name IN ("M1", "M2"))
+                     SELECT trip_id FROM trips WHERE route_id IN (SELECT route_id FROM routes WHERE route_short_name IN ("M1", "M2") AND route_type = 1)
                   )
             ) as t 
             GROUP BY stop_id
@@ -679,12 +679,11 @@ SELECT stop_lat, stop_lon, cast(AVG(avg_waiting_time) as dec(8, 4)) as waiting_t
    INTO OUTFILE '/mnt/Partage/Cours/TIPE_2024-25/Code/SourceData/toulouse/toulouse_pts.txt' FIELDS TERMINATED BY ' ';
 ```
 
-
-# 24/11/24 
+## 24/11/24
 
 Attention : Mis en lumière par toulouse mais on construit notre complexe simplicial tant que on atteint pas une des distances max du problèmes, mais ca ne prend pas en compte que si la dist_max < aux poids des sommets alors ils ne sont jamais traité 
 
-Obtenir le fichier des shapes : 
+Obtenir le fichier des shapes :
 
 ```sql
 SELECT route_short_name, shape_id,shape_pt_lat,shape_pt_lon,shape_pt_sequence 
@@ -709,9 +708,9 @@ Pour les distances sur toulouse, elles me paraissent particulièrement grande (~
 
 Indeed : J'ai inversé lat et lon donc on prend comme convention lat, lon 
 
-On utilise : https://github.com/jamesrwilliams/gtfs-to-sql/blob/master/sql/load-gtfs.sql Pour transformer un dossier GTFS en sql pour faire nos requetes 
+On utilise : https://github.com/jamesrwilliams/gtfs-to-sql/blob/master/sql/load-gtfs.sql Pour transformer un dossier GTFS en sql pour faire nos requetes
 
-# 3/12/24
+## 3/12/24
 
 Nous avons un problème dans les statistiques : les temps d'aparrition sont incohérents, en effet cela doit surement venir de la notation des simplexes qui ne tient pas compte du temps d'apparition, seulement de l'ordre d'apparition : On change donc le nom d'un simplexe en fonction de son rang d'apparition.
 
@@ -720,3 +719,26 @@ Après implémentation, on est sur des ordres de grandeurs de la minute qui est 
 Et rapport ens 95% fini yey 
 
 Passage entier sur la conversion de données GTSL en filtration
+
+## 8/12/24
+
+J'ai remanié le dossier et réparé les tests du persDiag.c
+
+SELECT stop_lat, stop_lon, cast(AVG(avg_waiting_time) as dec(15, 4)) as waiting_time, stop_name 
+   FROM stops 
+      JOIN 
+         (
+            SELECT stop_id as stp, AVG(Elapsed) as avg_waiting_time 
+            FROM (
+               SELECT stop_id, TIMEDIFF(Lead(arrival_time, 1) OVER(PARTITION BY stop_id ORDER BY arrival_time), arrival_time) as Elapsed  
+               FROM stop_times 
+               WHERE 
+                  stop_times.trip_id IN (
+                     SELECT trip_id FROM trips WHERE route_id IN (SELECT route_id FROM routes WHERE route_short_name IN ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14") and route_type = 1)
+                  )
+            ) as t 
+            GROUP BY stop_id
+         ) times 
+      ON stops.stop_id = times.stp GROUP BY stop_name INTO OUTFILE '/mnt/Partage/Cours/TIPE_2024-25/Code/SourceData/paris/paris_pts.txt' FIELDS TERMINATED BY ' '
+
+le tracé des lignes de metro ici https://data.iledefrance-mobilites.fr/explore/dataset/traces-des-lignes-de-transport-en-commun-idfm/information/?disjunctive.route_type

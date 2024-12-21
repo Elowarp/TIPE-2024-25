@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 24-09-2024 16:57:12
- *  Last modified : 05-11-2024 22:33:11
+ *  Last modified : 08-12-2024 21:26:39
  *  File : tests_geometry.c
  */
 #include <stdio.h>
@@ -31,6 +31,6 @@ void test_geometry(){
     assert(s2.j == 0);
     assert(s2.k == 2);
 
-    free(s);
-
+    simplexFree(s);
+    
 }

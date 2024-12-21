@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 08-10-2024 17:01:34
- *  Last modified : 12-11-2024 15:43:57
+ *  Last modified : 21-12-2024 16:20:10
  *  File : tests_persDiag.c
  */
 #include <stdio.h>
@@ -101,7 +101,7 @@ void tests_persDiag(){
         }
     }
 
-    int **testBoundary = buildBoundaryMatrix(reversed, 23, n);
+    int **testBoundary = buildBoundaryMatrix(reversed, base_filt->max_name, n);
 
     // Teste de l'égalité de la matrice
     for(int i=0; i<23; i++){
@@ -236,7 +236,7 @@ void tests_persDiag(){
     }
 
     // Tests de l'exportation
-    PDExport(pd, "exportedPD/pd_test.dat", true);
+    PDExport(pd, "exportedPD/test.dat", "exportedPD/test_death.txt", true);
 
     // Libération de la mémoire
     for(int i=0; i<11; i++) simplexFree(simPts[i]);

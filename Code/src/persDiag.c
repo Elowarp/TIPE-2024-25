@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 10-09-2024 16:33:19
- *  Last modified : 03-12-2024 15:59:34
+ *  Last modified : 21-12-2024 16:19:50
  *  File : persDiag.c
  */
 #include <stdio.h>
@@ -192,13 +192,16 @@ int **reduceMatrix(int **boundary, unsigned long long n, int *low){
 }
 
 // Construit la matrice de bordure associée à une filtration
-int **buildBoundaryMatrix(int *reversed, unsigned long long n, int nb_pts){
-    int **boundary = malloc(n * sizeof(int*));
+// reversed est le tableau des identifiants des simplexes dans la filtration 
+// nb_pts est le nb de points dans l'ensemble
+// max_name est le nom maximal attribué dans une filtration
+int **buildBoundaryMatrix(int *reversed, unsigned long long max_name, int nb_pts){
+    int **boundary = malloc(max_name * sizeof(int*));
     
-    for(unsigned long long i = 0; i<n; i++){
-        boundary[i] = malloc(n * sizeof(int));
+    for(unsigned long long i = 0; i<max_name; i++){
+        boundary[i] = malloc(max_name * sizeof(int));
         
-        for(unsigned long long j = 0; j<n; j++){
+        for(unsigned long long j = 0; j<max_name; j++){
             Simplex s1 = simplexFromId(reversed[i], nb_pts);
             Simplex s2 = simplexFromId(reversed[j], nb_pts);
             if (isFaceOf(&s1, &s2)) boundary[i][j] = 1;

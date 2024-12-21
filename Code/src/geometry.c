@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 14-09-2024 13:55:46
- *  Last modified : 24-11-2024 23:30:37
+ *  Last modified : 21-12-2024 16:24:13
  *  File : geometry.c
  */
 #include <stdio.h>
@@ -277,6 +277,9 @@ void filtrationFree(Filtration *filtration){
 }
 
 // Ajoute un simplexe à une filtration
+// n est le nombre de points de l'espace
+// k est le l'identifiant du complexe dans lequel s apparait en premier
+// num est le numéro utilisé pour l'ordre total
 void filtrationInsert(Filtration *filtration, Simplex *s, int n, int k, 
   unsigned long long num){
     int id = simplexId(s, n);
@@ -333,15 +336,15 @@ int *reverseIdAndSimplex(Filtration *filt){
 }
 
 // Renvoie le plus grand nom de simplexe + 1 dans une filtration
-unsigned long long filtrationMaxName(Filtration *filt){
-    unsigned long long max = 0;
-    for(int i=0; i<filt->size; i++){
-        if (filt->nums[i] > max){
-            max = filt->nums[i];
-        }
-    }
-    return max+1;
-}
+// unsigned long long filtrationMaxName(Filtration *filt){
+//     unsigned long long max = 0;
+//     for(int i=0; i<filt->size; i++){
+//         if (filt->nums[i] > max){
+//             max = filt->nums[i];
+//         }
+//     }
+//     return max+1;
+// }
 
 // Ecrit une filtration dans un fichier
 void filtrationToFile(Filtration *filtration, Point* pts, int n, char *filename){
