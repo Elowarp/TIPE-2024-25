@@ -1,5 +1,4 @@
-#import "@preview/diverential:0.2.0"
-#import math
+#import "@preview/cetz:0.3.4"
 #set heading(numbering: "I.1.1")
 #set text(
   font: "New Computer Modern"
@@ -25,6 +24,7 @@
     ]
 )
 
+#set par(justify: true)
 #show table.cell.where(x:0): strong
 #show table.cell.where(y:0): strong
 
@@ -47,6 +47,9 @@
     cadre("Théorème", content, "#0F084B")
 }
 
+// Constantes 
+#let ensPts = "X" 
+
 #align(center, text(17pt)[
     *TIPE : Etude de couvertures de réseaux de métros, application de l'homologie persistante*
 ])
@@ -60,18 +63,24 @@
 #align(center)[
     *Abstract*
 
-    Nous nous proposons ici d'étudier les différentes disparités dans les réseaux métropolitain de plusieurs grandes villes, dans le sens où l'on veut détecter les zones spatiales les plus en besoin de dévéloppement de transports en commun. Cela grâce une approche utilisant de l'analyse topologique, l'homologie persistante, qui se veut dans notre cas être une approche plus pertinente que l'étude des distances spaciales entre les stations de métros.
+    Nous nous proposons ici d'étudier les différentes disparités dans les réseaux métropolitains de plusieurs grandes villes, nous voulons détecter les zones spatiales les plus en déficit de transports en commun. Pour cela, nous adopterons une approche analytique utilisant la topologie, _l'homologie persistante_.
 ]
 = Définitions <Definitions>
 
-L'exemple suivant est tiré de@PH_invitation.
+_Note: Est ce que c'est considéré comme du plagiat ? (Extrait notice XENS : Les textes et figures sont l’œuvre du candidat. Les reproductions et les copies ne sont pas acceptées, tout plagiat (« action d’emprunter un passage de tout auteur en les donnant pour sien. ») est une forme de contrefaçon et constitue un délit et donc une fraude, il est susceptible d’être sanctionné en tant que telle suivant la procédure disciplinaire.)_
+
 
 #grid(
     columns: (47%, 47%),
     column-gutter: 6%,
-    [Prenons comme exemple le style artistique du pointillisme. Lorsque l'on regarde une oeuvre d'art, comme le tableau de Seurat @Seurat, nous voyons bien plus qu'un grand nombre de points, nous voyons des formes et des objets. D'une discrétisation, nous en faisons un _continuum_ de formes. L'homologie persistante va chercher à former cela.
+    [L'exemple suivant est tiré de @PH_invitation.
+        
+    Prenons comme exemple le style artistique du pointillisme. Lorsque l'on regarde une oeuvre d'art, comme le tableau de Seurat en @Seurat, nous voyons bien plus qu'un grand nombre de points, nous voyons des formes et des objets. D'une discrétisation, nous en faisons un _continuum_ de formes. 
     
-    D'un ensemble de points dans un espace muni d'une distance, nous n'allons pas chercher à reconstituer la forme qu'aurait eu l'objet discrétisé mais plutôt d'avoir des caractéristiques de celui ci. ],
+    L'homologie persistante va, à partir d'une discrétisation, chercher à fournir un suivi d'évolution des formes que l'on pourrait distinguer de cet ensemble.
+    
+    // D'un ensemble de points dans un espace muni d'une distance, nous n'allons pas chercher à reconstituer la forme qu'aurait eu l'objet discrétisé mais plutôt d'avoir des caractéristiques de celui ci. 
+    ],
     [
         #figure(
             image("../images/Georges_Seurat.jpg", width: 100%),
@@ -81,125 +90,218 @@ L'exemple suivant est tiré de@PH_invitation.
 
 )
 
-Nous chercherons ici seulement des caractérisations de "trous" dans un espace, afin de détecter les trous de couverture dans un réseau métropolitain, réseau transformé en un espace de $bb(R)^2$ où chaque point correspond à une station de métro. 
+Nous chercherons ici seulement à caractériser les "trous" dans un espace, afin de détecter les trous de couverture dans un réseau métropolitain, étant défini ici comme un espace de $bb(R)^2$ où chaque point correspond à une station de métro. 
 
 == Constructions géométriques
 
-Voyons désormais comment formaliser cela, commençons par définir tous nos outils : 
+Afin d'utiliser l'homologie persistante, nous devons définir certaines notions géométriques, nous noterons dans la suite #ensPts l'ensemble des points de $bb(R)^2$ que l'on considère.
+
+// Voyons désormais comment formaliser cela, commençons par définir tous nos outils : 
+
+// #def[
+//     Un _simplexe_ est l'analogue du triangle à $k$ dimensions, c'est l'objet le plus simple qu'il est possible de définir en $k$ dimensions.
+// ]
 
 #def[
-    Un _simplexe_ est l'analogue du triangle à $k$ dimensions, c'est l'objet le plus simple qu'il est possible de définir en $k$ dimensions.
+    Un simplexe $sigma$ de dimension $k$ correspond à l'enveloppe convexe de $k+1$ points de #ensPts non inclus dans un même sous-espace affine de dimension $k-1$.
+
+    On définit un simplexe de dimension 0 comme un point de #ensPts.
 ]
 
-Par exemple, un simplexe en dimension 0 est un point, en dimension 1 c'est un segment, en dimension 3 c'est une pyramide et ainsi de suite.
+Par exemple, un simplexe de dimension 1 est un segment et un simplexe de dimension 3 est un trièdre.
 
-_Remarque : On dit que $sigma_i$ est une face de $sigma_j$ si $sigma_j$ fait parti des bords du simplexe défini par $sigma_i$, donc $sigma_i$ est nécessairement de dimension supérieure de 1 à $sigma_j$. Un point est donc une face d'un segment (en particulier, une extrémité)._
+_Remarque : On dit que $sigma_i$ est une face de $sigma_j$ si et seulement si $sigma_j subset sigma_i$ et la dimension de $sigma_i$ est strictement supérieure à celle de $sigma_j$._
 
-On a donc naturellement la définition suivante :
+#figure(
+    cetz.canvas({
+        import cetz.draw: *
+        scale(2)
+        let p1 = (-1, 0, 0)
+        let p2 = (1, 0, 0)
+        let p3 = (0, 0, 1)
+        let t = (0, 1, 0)
+        let trièdre = {
+            line(p1, t, p2, p1, name:"face1")
+            line(p1, t, p3, p1, name:"face2", fill: red.transparentize(75%))
+            line(p1, t, stroke: 3pt)
+            line(p2, t, p3, p2, name:"face3", )
+
+            // content("face1", $sigma$, anchor:"mid")
+            // line(p1, t, p3, p1, name:"blue",
+            //     fill: color.mix((blue, 20%), white))
+            // line(p2, t, p3, p2, name:"line",
+            //     fill: color.mix((red, 20%), white))
+            // content(("line.start", 5%, "line.end"), $sigma$, anchor:"mid")
+        }
+
+        // rotate(z: -deg)
+        // rotate(origin: t, y: 20deg)
+        // rotate(y: 45deg)
+        trièdre
+    }),
+caption: [Ce trièdre est un simplexe $sigma$ de dimension 3, où le triangle rouge représente un simplexe $tau$ de dimension 2 mais aussi une face de $sigma$ dans le sens de la remarque précédente. Notons que l'arête en gras est un simplexe de dimension 1 et est une face de $sigma$ et $tau$.]
+)
+
 
 #def[
     Un _complexe simplicial_ est un ensemble de simplexes.
 ]
 
-On donne une représentation de plusieurs complexes simplicaux @Filtration_ex.
+// On donne une représentation de plusieurs complexes simplicaux @Filtration_ex.
 
-Afin de pouvoir caractériser des changements, il faut pouvoir définir deux états différents à comparer, une filtration permet alors d'ordonner ces différents états de façon à en étudier les changements. 
+// Afin de pouvoir caractériser des changements, il faut pouvoir définir deux états différents à comparer, une filtration permet alors d'ordonner ces différents états de façon à en étudier les changements. 
 
 #def[
-    Une _filtration_ est une application qui à un entier $i$ associe un complexe simplicial $K_i$ de telle sorte que $forall j in [|0, i|]$ le complexe simplicial $K_j$ est inclus dans $K_i$
+    Une _filtration_ est une application qui à un entier $i$ associe un complexe simplicial $K_i$ de telle sorte que $forall j in [|0, i|]$, $K_j subset K_i$
 ]
+
+Observons sur @Filtration_ex les trois notions précédemment définies. Chaque $K_i$ est un complexe simplicial, la suite $(K_i)_(i=0)^4$ est une filtration et tous les points, segments et faces (ici grisées) sont des simplexes de dimension 0, 1 et 2 respectivement. 
 
 #figure(
     image("../images/filtration.png"),
-    caption: [Représentation d'une filtration où $K_0 subset K_1 subset K_2 subset K_3 subset K_4$, tiré de@PH_resource_coverage]
+    caption: [Représentation d'une filtration où $K_0 subset K_1 subset K_2 subset K_3 subset K_4$, tiré de @PH_resource_coverage (à refaire)]
 )<Filtration_ex>
 
-Grâce à cette definition, nous sommes capable de quantifier les changements d'un complexe à l'autre, comme la création de cycles (dans $K_2$, il apparait un cycle $(0,1,2,3)$ après avoir rajouté $(0,3)$ à $K_1$) ou la destruction de composantes connexes (dans $K_0$ tous les simplexes 0D sont dans des composantes connexes différentes alors que dans $K_1$ ils sont tous dans la même, on a "cassé" les composantes connexes de 1, 2 et 3).
+// Grâce à cette definition, nous sommes capables de quantifier les changements d'un complexe à l'autre, comme la création de cycles (dans $K_2$, il apparait un cycle $(0,1,2,3, 0)$ après avoir rajouté $(0,3)$ à $K_1$) ou la destruction de composantes connexes (dans $K_0$, tous les simplexes 0D sont dans des composantes connexes différentes alors que dans $K_1$ ils sont tous dans la même, on a "tué" les composantes connexes de 1, 2 et 3).
 
-Le problème que nous avons est que nous voulons analyser un ensemble de point discret, et non pas une filtration déjà existante, il nous faut alors créer une filtration depuis un ensemble de points. Cela va se faire via une construction incrémentale de complexes simplicials, par soucis d'implémentation, nous choisissons comme dans@PH_resource_coverage les complexes de Vietoris-Rips pondérés : 
+Nous observons qu'une filtration permet d'ajouter une notion de "temporalité" dans un ensemble de points. Nous sommes capable de noter quels événements surviennent entre deux complexes à la suite, par exemple l'apparition d'un cycle entre $K_1$ et $K_2$ (le cycle (0,1,2,3)) ou l'apparition d'un simplexe de dimension 2 entre $K_2$ et $K_3$ (la face grisée).
+
+On introduit de plus un ordre total $<$ sur l'ensemble des simplexes d'une filtration. 
 
 #def[
-    Soient un ensemble $X = (x_i)_(i=0)^n$ de points de poids $(w_i)_(i=0)^n$ et une distance $d$, on définit le complexe simplicial pondéré Vietoris-Rips au rang $r$ $V_r^w (X, bb(R)^2, d)$ comme l'ensemble des simplexes $(x_i_0, ..., x_i_k)$ tels que : 
+    Soient une filtration $K_0 subset K_1 subset ... subset K_p$ et deux simplexes $sigma in K_i$ et $tau in K_j$, on a 
+
+    $ cases("soit" i < j, "sinon" i=j "et" sigma "est une face de" tau) => sigma < tau $
+
+    Si aucun des deux cas n'est réalisé alors le choix de l'ordre entre les deux simplexes est arbitraire.
+]
+
+#figure(
+    cetz.canvas({
+        import cetz.draw: *
+        scale(2)
+
+        let p1 = (0, 0)
+        let p2 = (1, 0)
+        let p3 = (0.5, 1)
+
+        line(p1, p2, p3)
+
+    }),
+    caption: [Exemple de filtration avec un ordre défini sur celui ci, pas terminé]
+)
+
+
+
+Il y a un problème : nous voulons analyser un ensemble de points discrets, et non pas une filtration déjà existante, il nous faut alors créer une filtration depuis un ensemble de points. Cela va se faire via une construction incrémentale de complexes simpliciaux via les complexes de Vietoris-Rips pondérés. Ainsi d'après @PH_resource_coverage :
+
+#def[
+    Soient un ensemble $X = (x_i)_(i=0)^n$ de points associés à des poids $(w_i)_(i=0)^n$ et une distance $d$, on définit le complexe simplicial pondéré de Vietoris-Rips au rang $r$, noté $V_r (X, d)$, comme l'ensemble des simplexes $(x_i_0, ..., x_i_k)$ tels que : 
     #align(center)[
-        - $forall j in [|0, k|], w_i_k < r$
-        - $forall (j,l) in [|0, k|]^2, d(x_i_j, x_i_k) + w_i_j + w_i_k < 2t$
+        $
+        cases(
+            forall j in [|0, k|]\, w_i_j < r,
+            forall (j,l) in [|0, k|]^2\, d(x_i_j, x_i_k) + w_i_j + w_i_k < 2r
+        )
+        $
     ]  
 ]
 
-Ainsi plus on augmente $r$, plus le complexe possède des simplexes, on en donne une représentation @VR.
+Ainsi plus on augmente $r$, plus le complexe possède des simplexes, on en donne une représentation @VR. (_Note : Remarque par M.Ni pas comprise_)
 
 #figure(
     image("../images/cech.png"),
     caption: [Construction d'un complexe simplicial avec un $r$ grandissant de gauche à droite]
 ) <VR>
 
-Donc $r$ est le rayon des boules bleues, et un simplexe est considéré dès lors que les boules associées à ces sommets se rencontrent.
+Ici, $r$ est le rayon des boules bleues, et un simplexe est considéré dès lors que les boules associées à ces sommets se rencontrent.
+
+Pour définir formellement des "trous", nous devons définir les opérateurs de bords :
 
 #def[
-    On définit une _classe d'homologie de dimension k (kD)_ comme la représentation d'un trou en dimension $k$.
+    On définit un complexe de chaînes comme la donnée d'une suite 
+    
+    $ ... attach(arrow, t:delta_(k+2)) C_(k+1) attach(arrow, t:delta_(k+1)) C_k attach(arrow, t:delta_(k)) C_(k-1) attach(arrow, t:delta_(k-1)) ... $
+
+    Où chaque $C_k$ est un groupe abélien et $delta_k$ est une morphisme de groupes tel que $delta_k compose delta_(k+1) = 0$
+    
+    On appelle $delta_k$ un _opérateur de bords_.
 
     //A des liens avec les varités, ça peut etre cool de savoir mais pas obligatoire i guess
 ]
 
-Ainsi une classe d'homologie 0D représente des points connectés, une classe d'homologie 1D représente un trou qui est entouré par un chemin fermé de points connectés ($K_2$ dans @Filtration_ex par exemple) et une classe d'homologie 2D représenterait par exemple une pyramide d'intérieur vide. 
+#def[
+    On définit alors les _classes d'homologie de dimension $k$_ comme le groupe de Ker$(delta_k)$ quotienté par Im$(delta_(k+1))$:
 
-Ainsi, grâce à ces définitions, nous sommes capables, depuis un ensemble $X = {x_i}$ de points fini de poids $(w_i)_i$, de créer une filtration et de l'étudier afin de trouver les classes d'homologie 1D qui représentent pour nous les zones critiques de couverture.
+    $ H_k = "Ker"(delta_k) \/ "Im"(delta_(k+1)) $
 
-== Interprétation de résultats via l'homologie persistante 
+    Celle ci représente les "trous" en dimension $k$
+]
 
-Nous voulons pouvoir détecter les classes d'homologie 1D, c'est à dire les "trous", dans la couverture d'un réseau de transports d'une grande ville. Pour cela, l'homologie persistante nous propose plusieurs affichages graphique afin de rendre compte de ces caractéristiques, nous nous concentrerons sur une seule : _le diagramme de persistance (PD)_
+On peut voir que $H_0$ représente des points connectés, $H_1$ représente un trou qui est entouré par un chemin fermé de points connectés ($K_2$ dans @Filtration_ex par exemple) et $H_2$ représenterait par exemple une pyramide d'intérieur vide. 
 
-Ce diagramme retrace les "événements" qui sont arrivés lors du parcours d'une filtration. Prenons par exemple le diagramme de persistance associé à la filtration de @Filtration_ex
+Pour notre usage, nous voulons calculer $H_0$ les temps moyens pour se rendre à une station de métros et $H_1$ qui représente les zones critiques de couverture du réseau.
 
-#figure(
-    image("../images/pd_filtration_ex.png", width:50%),
-    caption: [Diagramme de persistance de @Filtration_ex, tiré de@PH_resource_coverage]
-) <PD_ex>
+// Ainsi, grâce à ces définitions, nous sommes capables, depuis un ensemble $X = {x_i}$ de points fini de poids $(w_i)_i$, de créer une filtration et de l'étudier afin de trouver $H_1$ qui représentent, pour notre cas d'usage, les zones critiques de couverture.
 
-Les chiffres en abscisse et en ordonnée représente l'indice d'un complexe simplicial dans la filtration. En particulier, l'abscisse donne l'indice du simplexe où la classe d'homologie est apparue et l'ordonnée celle où elle disparait (si elle disparait, si elle ne disparait pas, elle à une ordonnée de $+infinity$).
+// == Interprétation de résultats via l'homologie persistante 
 
-Ainsi, nous remarquons qu'en $K_0$ il y a la naissance de 4 classes 0D (4 composantes connexes) là où en $K_1$ il n'y en a plus qu'une (d'où la mort de 3 d'entre elle en ordonnée 1, et la dernière qui ne meurt jamais, en $+infinity$). De plus, il y a la création d'un cycle d'intérieur vide (classe 1D) en $K_2$ et que celui ci est complétement rempli en $K_4$.
+// Nous voulons pouvoir détecter les classes d'homologie 1D, c'est à dire les "trous", dans la couverture d'un réseau de transports d'une grande ville. Pour cela, l'homologie persistante nous propose plusieurs affichages graphique afin de rendre compte de ces caractéristiques, nous nous concentrerons sur une seule : _le diagramme de persistance (PD)_
 
-En reprenant ce qui a été dit précédemment, les classes 0D représentent les composantes connexes vivantes au cours de la filtration, c'est à dire des sous ensembles de stations reliées entre elles. Ainsi un simplexe tuant une homologie 0D (liaison de deux composantes connexes) au rang $r$ représente le fait qu'il est possible à partir de ce rang de se rendre d'une station à l'autre sans prendre le métro.
+// Ce diagramme retrace les "événements" qui sont arrivés lors du parcours d'une filtration. Prenons par exemple le diagramme de persistance associé à la filtration de @Filtration_ex
 
-Ces simplexes tueurs vont créer des homologies 1D à partir d'un certain moment : des zones entre nos stations reliées. Comprenant qu'il est plus simple de passer par les stations de metros pour aller à une autre station du cycle plutot que de se déplacer au centre de la zone.
+// #figure(
+//     image("../images/pd_filtration_ex.png", width:50%),
+//     caption: [Diagramme de persistance de @Filtration_ex, tiré de@PH_resource_coverage]
+// ) <PD_ex>
 
-C'est exactement ce qui nous intéresse : ces zones décritent par les cycles représentent les zones critiques où les personnes sont le moins bien deservies par le réseau de métros, où c'est le plus compliqué de se rendre à une station de métro en prenant en compte le déplacement vers la station (pied ou voiture) et le temps d'attente moyen en station. 
+// Les chiffres en abscisse et en ordonnée représente l'indice d'un complexe simplicial dans la filtration. En particulier, l'abscisse donne l'indice du simplexe où la classe d'homologie est apparue et l'ordonnée celle où elle disparait (si elle disparait, si elle ne disparait pas, elle à une ordonnée de $+infinity$).
+
+// Ainsi, nous remarquons qu'en $K_0$ il y a la naissance de 4 classes 0D (4 composantes connexes) là où en $K_1$ il n'y en a plus qu'une (d'où la mort de 3 d'entre elle en ordonnée 1, et la dernière qui ne meurt jamais, en $+infinity$). De plus, il y a la création d'un cycle d'intérieur vide (classe 1D) en $K_2$ et que celui ci est complétement rempli en $K_4$.
+
+// En reprenant ce qui a été dit précédemment, les classes 0D représentent les composantes connexes vivantes au cours de la filtration, c'est à dire des sous ensembles de stations reliées entre elles. Ainsi un simplexe tuant une homologie 0D (liaison de deux composantes connexes) au rang $r$ représente le fait qu'il est possible à partir de ce rang de se rendre d'une station à l'autre sans prendre le métro.
+
+// Ces simplexes tueurs vont créer des homologies 1D à partir d'un certain moment : des zones entre nos stations reliées. Comprenant qu'il est plus simple de passer par les stations de metros pour aller à une autre station du cycle plutot que de se déplacer au centre de la zone.
+
+// C'est exactement ce qui nous intéresse : ces zones décritent par les cycles représentent les zones critiques où les personnes sont le moins bien deservies par le réseau de métros, où c'est le plus compliqué de se rendre à une station de métro en prenant en compte le déplacement vers la station (pied ou voiture) et le temps d'attente moyen en station. 
 
 = Méthode
 
-De ce qui précède nous pouvons en extraire une méthode générale pour notre problème. Celle ci se décompose en 5 étapes :
+Pour trouver les zones critiques, nous pouvons appliquer la méthode suivante décrite dans @PH_resource_coverage. Celle ci se décompose en 4 étapes :
 
-- Récupération de l'ensemble des stations, leurs poids, et leurs distances entre elles
-- Transformation de ces informations en une filtration
-- Création de la matrice de bordure
-- Réduction de la matrice de bordure
-- Construction du diagramme de persistance
+- Récupération de l'ensemble des stations, leurs poids, et les distances entre elles;
+- Transformation de ces informations en une filtration;
+- Création et réduction de la matrice de bordure (définie dans la suite);
+- Récupération des simplexes "tueurs" de classes d'homologies
 
-La première étape étant développée en @Data, nous supposerons dans la suite de cette section avoir un espace muni d'une distance $((x_i)_i, d)$ et où chaque $x_i$ admet $w_i$ pour pondération.
+La première étape étant développée en #link(<Data>, "section III"), nous supposerons dans la suite de cette section avoir un espace muni d'une distance $((x_i)_i, d)$ et où chaque $x_i$ admet $w_i$ pour pondération.
 
-À l'étape 2, nous allons créer une filtration grâce à la définition donnée @Definitions.
+À l'étape 2, nous allons créer une filtration grâce à la définition donnée #link(<Definitions>, "section I").
 
-Notre but final étant de créer un diagramme de persistance, nous devons réussir à convertir notre filtration en celui ci, cela se fait grâce au théorème centrale dû à Crawley-Boevey@PH_invitation. En définissant un espace filtré comme la donnée d'un espace topologique ainsi qu'une de ses filtration, on a :
+// Notre but final étant de créer un diagramme de persistance, nous devons réussir à convertir notre filtration en celui ci, cela se fait grâce au théorème centrale dû à Crawley-Boevey @PH_invitation. En définissant un espace filtré comme la donnée d'un espace topologique ainsi qu'une de ses filtration, on a :
+
+// Depuis cette filtration, nous voulons obtenir les classes d'homologies, c'est donc le théorème suivant qui justifie entièrement cette recherche.
+
+A partir d'une filtration donnée, nous pouvons obtenir les classes d'homologie grâce au théorème qui suit :
 
 #th[
-    Tout espace vectoriel filtré de dimension finie est isomorphe à la somme directe des espaces filtrés associés à une certaine famille d'intervalles, uniquement définie. Cette famille d'intervalle est appelé un "code barre".
-
-    //Intéressant pour comprendre pq on fait tt ça
+    D'après @PH_invitation et @ComputingPH, chaque $H_k$ est isomorphe à une somme directe d'espaces filtrés associés à une certaine famille d'intervalles, définie d'une unique manière. Cette famille d'intervalles est appelé un _code barre_.
 ]
 
-Informatiquement, cela revient à créer une matrice de bordure $B$ comme défini plus bas, en créant un ordre total sur les simplexes du complexe.
-
-Cet ordre total est de telle sorte que la face d'un simplexe précède le simplexe et tout simplexe de $K_j$ précède tous les simplexes de $K_i$ tel que $i < j$.
+Informatiquement, selon @PH_roadmap, on calcule ce code barre en créant une matrice de bordure $B$ après avoir défini un ordre total sur les simplexes respectant les propriétés énoncées #link(<Definitions>, "section I")
 
 #def[
-    On définit la matrice de bordure, associée à un ordre total $sigma_0 < ... < sigma_(n-1)$ sur tous les simplexes $(sigma_i)_(i=0)^(n-1)$ de la filtration, comme $forall (i,j) in [|0, n-1|]^2$,
-    $ B[i][j] = cases("Vrai si " sigma_i "est une face de " sigma_j, "Faux sinon") $
-]
+    On définit la matrice de bordure, associée à un ordre total $sigma_0 < ... < sigma_(n-1)$ sur tous les simplexes $(sigma_i)_(i=0)^(n-1)$ de la filtration, suivant :
+    $ forall (i,j) in [|0, n-1|]^2, B[i][j] = cases("1 si" sigma_i "est une face de" sigma_j, "0 sinon") $
+]<BordureDef>
+
+_Note : D'après @ComputingPH, $B$ peut être vu comme la matrice de $delta_1$ dans la base canonique associés aux complexes de chaînes._
 
 Un exemple d'une telle matrice est donnée en @Bordure.
 
-Après avoir calculé $B$, nous voulons la "réduire" en "code barre", dans le sens où l'on peut interpréter correctement les valeurs de cette matrice avec la filtration (Grâce au théorème énoncé plus tôt). Cet algorithme est nommé _standard algorithm_ et est décrit dans@PH_roadmap par, en posant $"low"_B (j) = max({i in [|0, n-1|], B[i][j] != 0}) in bb(N) union {-1}$ :
+Après avoir calculé $B$, nous voulons la _réduire_ en code barre, dans le sens où l'on peut interpréter correctement les valeurs de cette matrice avec la filtration (grâce au théorème précédent). Le terme de _réduction_ fait ici référence au fait qu'à partir de B, nous allons vouloir attribuer à chaque simplexe la naissance d'_au plus_ une classe d'homologie, nous pouvons observer ce résultat en @BordureReduite.
+
+Cet algorithme de réduction est nommé _standard algorithm_ et est décrit dans @PH_roadmap par, en posant $"low"_B (j) = max({i in [|0, n-1|], B[i][j] != 0}) in bb(N) union {-1}$ :
 
 ```python
 StandardAlgorithm(B)
@@ -210,10 +312,17 @@ StandardAlgorithm(B)
 
 Comparons alors nos deux matrices, sur l'exemple de la filtration de @Filtration_ex (Les cases vident remplacent les zeros pour plus de lisibilité), avec ici notre ordre total sur les simplexes :
 
-#align(center)[#image(width:80pt,"../images/filtration_inj.png")]
+#figure(
+    image(width:80pt,"../images/filtration_inj.png"),
+    caption: [Nommage des simplexes (A rendre plus beau)]
+)
+
+En regardant la matrice $overline(B)$, nous remarquons que l'opération de réduction à permis d'avoir la ligne low sans répétion de nombre positifs, autrement dit, on accorde la naissance d'un simplexe à un unique autre simplexe. Ainsi le simplexe 1 donne naissance au simplexe 4, 8 donne naissance à 9 et 7 donne naissance à 10. 
+
+Par exemple, si $"low"_overline(B) (j) = i != -1$ alors on a une paire de simplexe $(sigma_i, sigma_j)$ telle que l'apparition de $sigma_i$ fait apparaitre une nouvelle classe d'homologie. Et au contraire, $sigma_j$ va la _tuer_ en apparaissant. Prenons comme exemple la filtration @Filtration_ex : dans $K_0$, le point 1 cause l'apparition d'une classe dans $H_0$ cependant l'apparition du simplexe (0,3) dans $K_2$ tue la classe de 1 dans $H_0$ mais créer une nouvelle classe dans $H_1$ (car elle crée un cycle).
 
 #grid(
-    columns: (48%, 48%),
+    columns: (45%, 45%),
     gutter: 4%,
     [
         #figure(
@@ -253,38 +362,36 @@ Comparons alors nos deux matrices, sur l'exemple de la filtration de @Filtration
             [low], [-1], [-1], [-1], [-1], [1], [2], [3], [-1], [-1], [8], [7]
             ),
             caption:[Matrice $overline(B)$, la matrice B après reduction]
-        )
+        ) <BordureReduite>
     ]
 )
 
-Regardons la 1ere ligne (celle du 0) de la matrice $B$, il y a trois 1 : en effet le simplexe 0 est à la naissance des simplexes 4, 7 et 8 (en tant qu'extrémité). De même pour donner naissance à 10, il a fallut avoir les simplexes 6, 7 et 8, d'où la présence d'un 1 dans la colonne 10 des lignes 6, 7 et 8. 
+// Regardons la 1ere ligne (celle du 0) de la matrice $B$, il y a trois 1 : en effet le simplexe 0 est à la naissance des simplexes 4, 7 et 8 (en tant qu'extrémité). De même pour donner naissance à 10, il a fallut avoir les simplexes 6, 7 et 8, d'où la présence d'un 1 dans la colonne 10 des lignes 6, 7 et 8. 
 
-En regardant la matrice $overline(B)$, nous remarquons que l'opération de réduction à permis d'avoir la ligne low sans répétion de nombre positifs, autrement dit, on accorde la naissance d'un simplexe à un unique autre simplexe. Ainsi le simplexe 1 donne naissance au simplexe 4, 8 donne naissance à 9 et 7 donne naissance à 10. 
+En revanche si $"low"_overline(B) (j) = -1$ alors l'apparition de $sigma_j$ crée une classe d'homologie : s'il existe $k$ tel que $"low"_overline(B) (k) = j$ on est dans le cas précédent, sinon la classe d'homologie n'est jamais tuée.
 
-Ainsi si $"low"_overline(B) (j) = i != -1$ alors on a une paire de simplexe $(sigma_i, sigma_j)$ tel que l'apparition de $sigma_i$ cause l'apparition d'une classe d'homologie et $sigma_j$ va, en apparaissant, la tuer. Par exemple, dans le complexe $K_0$, la naissance de 1 cause la création d'une classe 0D alors que l'apparition de 4 "tue" cette classe en création un cycle, donc en créant une classe 1D. 
+// C'est depuis cette matrice $overline(B)$ réduite que l'on construit notre diagramme de persistance comme il suit : 
 
-En revanche si $"low"_overline(B) (j) = -1$ alors son apparition cause la naissance d'une classe d'homologie, s'il existe $k$ tel que $"low"_overline(B) (k) = j$ on est dans le cas précédent, si k n'existe pas alors la classe d'homologie n'est jamais tuée.
+// #def[
+//     Un diagramme de persistance PD est un multi-ensemble de $overline(bb(R)^2)$ tel que depuis une matrice réduite $overline(B)$ on ait, en notant $"dg"(sigma) = l$ si $sigma$ apparait à partir de $K_l$ : 
 
-C'est depuis cette matrice $overline(B)$ réduite que l'on construit notre diagramme de persistance comme il suit : 
+//     $ "PD" = {("dg"(i), "dg"(j)), "tels que low"_overline(B) (j) = i""} union {("dg"(i), +infinity), "tels que low"_overline(B) (i) = -1} $
+// ]
 
-#def[
-    Un diagramme de persistance PD est un multi-ensemble de $overline(bb(R)^2)$ tel que depuis une matrice réduite $overline(B)$ on ait, en notant $"dg"(sigma) = l$ si $sigma$ apparait à partir de $K_l$ : 
+// C'est grâce à cette définition que nous arrivons au diagramme de persistance donnée en @PD_ex
 
-    $ "PD" = {("dg"(i), "dg"(j)), "tels que low"_overline(B) (j) = i""} union {("dg"(i), +infinity), "tels que low"_overline(B) (i) = -1} $
-]
-
-C'est grâce à cette définition que nous arrivons au diagramme de persistance donnée en @PD_ex
+C'est depuis cette matrice que nous sommes capables de déterminer $H_0$ ainsi que $H_1$, et donc de générer des représentations graphiques comme montré en @CarteResultat
 
 
 = Les données <Data>
 
 == Sources
 
-Ne voulant pas me baser sur des villes factices, j'ai alors décidé de trouver des sources pouvant me fournir des informations sur les stations de metros de plusieurs grandes villes de France comme Toulouse ou Marseille.
+Ne voulant pas me baser sur des villes factices, j'ai décidé de trouver des sources pouvant me fournir des informations sur les stations de metros de plusieurs grandes villes de France comme Toulouse ou Marseille.
 
-Ainsi toutes les informations relatives aux stations de metros ainsi que les temps de passages sont trouvables via le site du gouvernement : #link("https://transport.data.gouv.fr").
+Ainsi, toutes les informations relatives aux stations de metros ainsi que les temps de passages sont trouvables sur le site du gouvernement : #link("https://transport.data.gouv.fr").
 
-Ces informations servent à définir nos points et notre pondération (voir @Construction), en revanche elles ne permettent pas d'obtenir les distances entre les stations, pour cela nous utiliserons alors #link("https://www.geoapify.com") qui nous renvoie depuis des coordonnées geographiques des temps de trajets en voiture et à pied.
+Ces informations servent à définir nos points et notre pondération (voir @Construction), en revanche elles ne permettent pas d'obtenir les distances entre les stations, pour cela nous utiliserons alors #link("https://www.geoapify.com") qui nous permet d'estimer des temps de trajet en voiture et à pied.
 
 // De plus, pour la distance nous avons besoin du nombre d'habitants par arrondissement, pour cela nous utiliserons : #link("implémenté sans cette donnée")
 
@@ -298,13 +405,13 @@ Définissons dès lors nos objets :
 
 Les temps de passage des metros en station étant plus ou moins constant sur la semaine, il est cohérent d'utiliser une moyenne.
 
-De plus, dans un premier temps, nous définissons similairement à@PH_resource_coverage une distance non symétrique entre deux stations $x$ et $y$ :
+// De plus, dans un premier temps, nous définissons similairement à @PH_resource_coverage une distance non symétrique entre deux stations $x$ et $y$ :
 
-$ tilde(d)(x,y) = min(t_"marche" (x,y), t_"voiture" (x,y)) $
+// $ tilde(d)(x,y) = min(t_"marche" (x,y), t_"voiture" (x,y)) $
 
-Avec $t_"marche" (x,y)$ le temps qu'il faut en marchant pour aller de la station x à la station y, de même en voiture pour $t_"voiture" (x,y)$.
+// Avec $t_"marche" (x,y)$ le temps qu'il faut en marchant pour aller de la station x à la station y, de même en voiture pour $t_"voiture" (x,y)$.
 
-On définit finalement la distance (qui cette fois est symétrique): 
+On définit la distance similairement à @PH_resource_coverage: 
 
 // #def[
 //     On définit la distance entre deux stations de métros $x$ et $y$ comme :
@@ -315,16 +422,12 @@ On définit finalement la distance (qui cette fois est symétrique):
 // ]
 #def[
     On définit la distance entre deux stations de métros $x$ et $y$ comme :
-    $ d(x,y) = 1 / 2 (tilde(d)(x,y) + tilde(d)(y,x)) $
+    $ d(x,y) = 1 / 2 (min(t_"marche" (x,y), t_"voiture" (x,y)) + min(t_"marche" (y,x), t_"voiture" (y,x))) $
 ]
 
-Ainsi en revenant aux boules des complexes simplicaux de Vietoris-Rips, elle relate du coût en temps de prendre le métro. En particulier, $d(x,y)$ est une estimation de la moyenne de temps de trajet d'un individu de la station $x$ allant à $y$ et du trajet de $y$ à $x$.
-
-Nous pouvons alors analyser les réseaux de transport metropolitain français.
+Ainsi en revenant aux boules des complexes simplicaux de Vietoris-Rips, elle modélise le coût temporel d'un trajet "porte à porte" en utilisant le métro. 
 
 = Résultats et conclusion
-
-J'ai choisi de baser ce tipe sur les réseaux métropolitain de Toulouse et Marseille, justifiant mon choix par la présence de contacts dans ces différentes villes pour attester la cohérence de mes résultats.
 
 #figure(
     table(
@@ -347,25 +450,25 @@ J'ai choisi de baser ce tipe sur les réseaux métropolitain de Toulouse et Mars
 
 )
 
-On comprend que globalement il faut 200s (soit 3m20 environ) pour quelqu'un de se rendre d'une station à une autre (le minimum en temps entre la voiture et la marche) ce qui est effectivement cohérent avec la réalité. Les temps des classes 1D ici présent montre le temps moyen de trajet entre les deux stations les plus éloignées d'un même cycle. Donc par exemple pour marseille, il faudra en moyenne 318s (5min20s) pour rejoindre une station depuis les zones les moins biens deservies.
+On comprend que globalement il faut 200s (soit 3m20 environ) pour quelqu'un de se rendre d'une station à une autre (le minimum en temps entre la voiture et la marche) ce qui est effectivement cohérent avec la réalité. Les temps des classes 1D ici présent montre le temps moyen de trajet entre les deux stations les plus éloignées d'un même cycle. Donc par exemple pour Toulouse, il faudra en moyenne 318s (5min20s) pour rejoindre une station depuis les zones les moins biens deservies.
 
-#align(center)[#grid(
-    columns: (50%, 50%),
-    [
-        #figure(
-            image("../../Code/images/pd_toulouse.png", width:90%, alt:"Toulouse"),
-            caption: [Toulouse]
-        )
-    ],  
-    [
-        #figure(
-            image("../../Code/images/pd_marseille.png", width:90%, alt:"Marseille"),
-            caption: [Marseille]
-        )
-    ],
-)]
+// #align(center)[#grid(
+//     columns: (50%, 50%),
+//     [
+//         #figure(
+//             image("../../Code/images/pd_toulouse.png", width:90%, alt:"Toulouse"),
+//             caption: [Toulouse]
+//         )
+//     ],  
+//     [
+//         #figure(
+//             image("../../Code/images/pd_marseille.png", width:90%, alt:"Marseille"),
+//             caption: [Marseille]
+//         )
+//     ],
+// )]
 
-Ainsi via ces diagrammes de persistance, on remarque que les stations de metros pour ces deux villes sont égalements réparties en terme de temps de trajet entre deux stations (les classes 0D en rouge). Mais l'interprétation des diagrammes de persistance est assez limité dans notre cas, analysons alors directement les classes 1D se faisant tuer directement sur une carte : 
+// Ainsi via ces diagrammes de persistance, on remarque que les stations de metros pour ces deux villes sont égalements réparties en terme de temps de trajet entre deux stations (les classes 0D en rouge). Mais l'interprétation des diagrammes de persistance est assez limité dans notre cas, analysons alors directement les classes 1D se faisant tuer directement sur une carte : 
 
 #align(center)[
     #grid(
@@ -380,12 +483,12 @@ Ainsi via ces diagrammes de persistance, on remarque que les stations de metros 
             #figure(
                 image("../../Code/images/marseille.png", width: 100%),
                 caption:"Carte de Marseille"
-            )
+            )<CarteResultat>
         ]
     )
 ]
 
-Les triangles ici représentés montrent les zones où il est le plus difficile pour se rendre à une station de métro. Pour les triangles les plus gros, il peut être cohérent de croire qu'il est difficile de se rendre à ces stations de métros en revanche pour les plus petits comme à la Canebière à Marseille cela est plus dur.
+Les triangles ici représentés montrent les zones où il est le plus difficile de rejoindre une station de métro. Pour les triangles les plus gros, il peut être cohérent de croire qu'il est difficile de se rendre à ces stations de métros. En revanche, pour les plus petits cela est plus dur.
 
 Ce sont des zones où il ne circule que très peu de voitures entre les stations de métros, en effet ces zones sont uniquement pietonnes donc la distance parcourue à durée égale est necéssairement plus long à pied qu'en voiture. Donc la distance prise par notre algorithme est celle relevant de la marche à pied, d'où les zones _a priori_ plus petites que celles discutées plus haut.  
 

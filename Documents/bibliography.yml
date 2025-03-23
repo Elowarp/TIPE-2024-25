@@ -36,3 +36,16 @@ PH_invitation:
   author:
     - Henri Paul de Saint-Gervais
   url: https://analysis-situs.math.cnrs.fr/Une-invitation-a-l-homologie-persistante.html
+
+ComputingPH:
+  type: Article
+  title: Computing Persistent Homology
+  author:
+    - Afra Zomorodian
+    - Gunnar Carlsson
+  url: https://link.springer.com/article/10.1007/s00454-004-1146-y
+
+CoursHomologie:
+  type: misc 
+  title: Introduction aux théories homologiques
+  author : Jean-Yves Welschinger
