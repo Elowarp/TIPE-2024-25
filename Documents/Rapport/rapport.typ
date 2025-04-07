@@ -47,6 +47,12 @@
     cadre("Théorème " + name, content, "#0F084B")
 }
 
+#show raw.line: it => {
+  text(fill: gray)[#it.number]
+  h(1em)
+  it.body
+}
+
 // Constantes 
 #let ensPts = "X" 
 
@@ -66,9 +72,6 @@
     Nous nous proposons ici d'étudier les différentes disparités dans les réseaux métropolitains de plusieurs grandes villes, nous voulons détecter les zones spatiales les plus en déficit de transports en commun. Pour cela, nous adopterons une approche analytique utilisant la topologie, _l'homologie persistante_.
 ]
 = Définitions <Definitions>
-
-_Note: Est ce que c'est considéré comme du plagiat ? (Extrait notice XENS : Les textes et figures sont l’œuvre du candidat. Les reproductions et les copies ne sont pas acceptées, tout plagiat (« action d’emprunter un passage de tout auteur en les donnant pour sien. ») est une forme de contrefaçon et constitue un délit et donc une fraude, il est susceptible d’être sanctionné en tant que telle suivant la procédure disciplinaire.)_
-
 
 #grid(
     columns: (47%, 47%),
@@ -94,7 +97,7 @@ Nous chercherons ici seulement à caractériser les "trous" dans un espace, afin
 
 == Constructions géométriques
 
-Afin d'utiliser l'homologie persistante, nous devons définir certaines notions géométriques, nous noterons dans la suite #ensPts l'ensemble des points de $bb(R)^2$ que l'on considère.
+Afin d'utiliser l'homologie persistante, nous devons définir certaines notions géométriques, nous noterons dans la suite $#ensPts$ l'ensemble des points de $bb(R)^2$ que l'on considère.
 
 // Voyons désormais comment formaliser cela, commençons par définir tous nos outils : 
 
@@ -103,9 +106,9 @@ Afin d'utiliser l'homologie persistante, nous devons définir certaines notions 
 // ]
 
 #def[
-    Un simplexe $sigma$ de dimension $k$ correspond à l'enveloppe convexe de $k+1$ points de #ensPts non inclus dans un même sous-espace affine de dimension $k-1$.
+    Un simplexe $sigma$ de dimension $k$ (ou _$k$-simplexe_) correspond à l'enveloppe convexe de $k+1$ points de $#ensPts$ non inclus dans un même sous-espace affine de dimension $k-1$.
 
-    On définit un simplexe de dimension 0 comme un point de #ensPts.
+    On définit un simplexe de dimension 0 comme un point de $#ensPts$.
 ]
 
 Par exemple, un simplexe de dimension 1 est un segment et un simplexe de dimension 3 est un trièdre.
@@ -128,12 +131,14 @@ _Remarque : On dit que $sigma_i$ est une face de $sigma_j$ si et seulement si $s
         }
         trièdre
     }),
-caption: [Ce trièdre est un simplexe $sigma$ de dimension 3, où le triangle rouge représente un simplexe $tau$ de dimension 2 mais aussi une face de $sigma$ dans le sens de la remarque précédente. Notons que l'arête en gras est un simplexe de dimension 1 et est une face de $sigma$ et $tau$.]
+caption: [Ce trièdre est un simplexe $sigma$ de dimension 3, où le triangle rouge représente un simplexe $tau$ de dimension 2 mais aussi une face de $sigma$ dans le sens de la remarque précédente. Notons que l'arête en gras est un simplexe de dimension 1 et est une face de $sigma$ et de $tau$.]
 )
 
 
 #def[
-    Un _complexe simplicial_ est un ensemble de simplexes.
+    Un _complexe simplicial_ est un ensemble de simplexes. 
+    
+    On note $P_n (#ensPts)$ l'ensemble des parties à $n+1$ éléments de $#ensPts$ formant un complexe simplicial contenant tous les $n$-simplexes.
 ]
 
 // On donne une représentation de plusieurs complexes simplicaux @Filtration_ex.
@@ -141,15 +146,17 @@ caption: [Ce trièdre est un simplexe $sigma$ de dimension 3, où le triangle ro
 // Afin de pouvoir caractériser des changements, il faut pouvoir définir deux états différents à comparer, une filtration permet alors d'ordonner ces différents états de façon à en étudier les changements. 
 
 #def[
-    Une _filtration_ est une application qui à un entier $i$ associe un complexe simplicial $K_i$ de telle sorte que $forall j in [|0, i|]$, $K_j subset K_i$
+    Une _filtration_ est une application qui à un entier $i$ associe un complexe simplicial $K_i$ de sorte que : 
+    
+    $ forall j in [|0, i|] text(", ") K_j subset K_i $
 ]
 
-Observons sur @Filtration_ex les trois notions précédemment définies. Chaque $K_i$ est un complexe simplicial, la suite $(K_i)_(i=0)^3$ est une filtration et tous les points, segments et faces (ici en rouge) sont des simplexes de dimension 0, 1 et 2 respectivement. 
+Observons sur @Filtration_ex les notions précédemment définies. Chaque $K_i$ est un complexe simplicial, la suite $(K_i)_(i=0)^3$ est une filtration et tous les points, segments et faces (ici en rouge) sont des simplexes de dimension 0, 1 et 2 respectivement. 
 
 #figure(
     cetz.canvas({
         import cetz.draw: *
-        scale(1.2)
+        set-style(text: (size:10pt))
         let lines((x, y)) = {
             let p0 = (1+x, 0+y)
             let p1 = (0+x, 1+y)
@@ -182,9 +189,9 @@ Observons sur @Filtration_ex les trois notions précédemment définies. Chaque 
             circle(p, radius: (0.05), fill: black, name:name)
             if drawtext {
                 if anchor == "north-east"{
-                    content(name, anchor:anchor, pad(right: .7em, text($p_name$, size:16pt)))
+                    content(name, anchor:anchor, pad(right: .7em, text($p_name$)))
                 } else {
-                    content(name, anchor:anchor, pad(left: .7em, text($p_name$, size:16pt)))
+                    content(name, anchor:anchor, pad(left: .7em, text($p_name$)))
                 }
 
             }
@@ -194,10 +201,10 @@ Observons sur @Filtration_ex les trois notions précédemment définies. Chaque 
             l
             if drawtext {
                 if (id > 8) {
-                    content(str(id), anchor: "mid", text($tau_id$, size:16pt))
+                    content(str(id), anchor: "mid", text($tau_id$))
                 } else {
                     set-style(content: (frame: "circle", stroke:none, fill:white,))
-                    content(str(id), anchor: "mid", text($sigma_id$, size:16pt))
+                    content(str(id), anchor: "mid", text($sigma_id$))
                 }
             }
         }
@@ -257,18 +264,18 @@ Observons sur @Filtration_ex les trois notions précédemment définies. Chaque 
         for i in range(4){
             content(("K_",str(i),".south").join(""), 
                 anchor:"north", 
-                pad(top: 2em, text($K_#i$, size:16pt))
+                pad(top: 1em, text($K_#i$))
             )
         }
         
 
     }),
-    caption: [Représentation d'une filtration où $K_0 subset K_1 subset K_2 subset K_3$ et où chaque simplexe à été nommé : $p_i$ pour les simplexes de dimension 0; $sigma_i$ pour la dimension 1 et $tau_i$ pour la dimension 2.]
+    caption: [Représentation d'une filtration où $K_0 subset K_1 subset K_2 subset K_3$ et où chaque simplexe à été nommé : $p_i$ pour les simplexes de dimension 0; $sigma_j$ pour la dimension 1 et $tau_k$ pour la dimension 2.]
 )<Filtration_ex>
 
 // Grâce à cette definition, nous sommes capables de quantifier les changements d'un complexe à l'autre, comme la création de cycles (dans $K_2$, il apparait un cycle $(0,1,2,3, 0)$ après avoir rajouté $(0,3)$ à $K_1$) ou la destruction de composantes connexes (dans $K_0$, tous les simplexes 0D sont dans des composantes connexes différentes alors que dans $K_1$ ils sont tous dans la même, on a "tué" les composantes connexes de 1, 2 et 3).
 
-Nous observons qu'une filtration permet d'ajouter une notion de "temporalité" dans un ensemble de points. Nous sommes capable de noter quels événements surviennent entre deux complexes à la suite, par exemple l'apparition d'un cycle entre $K_1$ et $K_2$ (le cycle (0,1,2,3)) ou l'apparition d'un simplexe de dimension 2 entre $K_2$ et $K_3$ (la face rouge).
+Nous observons qu'une filtration permet d'ajouter une notion de "temporalité" dans un ensemble de points. Nous sommes capable de noter quels événements surviennent entre deux complexes à la suite, par exemple l'apparition d'un cycle entre $K_1$ et $K_2$ (le cycle $(sigma_4, sigma_5, sigma_6, sigma_7)$) ou l'apparition d'un simplexe de dimension 2 entre $K_2$ et $K_3$ (la face rouge).
 
 On introduit de plus un ordre total $<$ sur l'ensemble des simplexes d'une filtration. 
 
@@ -280,12 +287,12 @@ On introduit de plus un ordre total $<$ sur l'ensemble des simplexes d'une filtr
     Si aucun des deux cas n'est réalisé alors le choix de l'ordre entre les deux simplexes est arbitraire.
 ]
 
-Observons sur @Filtration_ex l'indexation des simplexes suivant l'ordre précédemment défini : on a bien $sigma_8$ et $sigma_7$ qui sont plus grand au sens de < que tous les autres $sigma_i$ et $p_i$ parce qu'ils apparaissent plus tard dans la filtration. Si $sigma_8$ était apparu dans $K_3$, l'ordre aurait toujours été respecté puisque $sigma_8$ est une face de $tau_9$.
+Observons sur @Filtration_ex l'indexation des simplexes suivant l'ordre précédemment défini : les simplexes $sigma_8$ et $sigma_7$ sont plus grand au sens de < que tous les autres $sigma_i$ et $p_i$ parce qu'ils apparaissent plus tard dans la filtration. Si $sigma_8$ était apparu dans $K_3$, l'ordre aurait toujours été respecté puisque $sigma_8$ est une face de $tau_9$.
 
-Il y a un problème : nous voulons analyser un ensemble de points discrets, et non pas une filtration déjà existante, il nous faut alors créer une filtration depuis un ensemble de points. Cela va se faire via une construction incrémentale de complexes simpliciaux via les complexes de Vietoris-Rips pondérés. Ainsi d'après @PH_resource_coverage :
+Il y a un problème : nous voulons analyser un ensemble de points discrets, et non une filtration déjà existante, il nous faut alors créer une filtration depuis un ensemble de points. Nous faisons cela via une construction incrémentale de complexes simpliciaux avec les complexes de Vietoris-Rips pondérés. Ainsi d'après @PH_resource_coverage :
 
 #def[
-    Soient un ensemble $X = (x_i)_(i=0)^n$ de points associés à des poids $(w_i)_(i=0)^n$ et une distance $d$, on définit le complexe simplicial pondéré de Vietoris-Rips au rang $r$, noté $V_r (X, d)$, comme l'ensemble des simplexes $(x_i_0, ..., x_i_k)$ tels que : 
+    Soient un ensemble $#ensPts = (x_i)_(i=0)^n$ de points associés à des poids $(w_i)_(i=0)^n$ et une distance $d$, on définit le complexe simplicial pondéré de Vietoris-Rips au rang $r$, noté $V_r (#ensPts, d)$, comme l'ensemble des simplexes $(x_i_0, ..., x_i_k)$ tels que : 
     #align(center)[
         $
         cases(
@@ -296,7 +303,7 @@ Il y a un problème : nous voulons analyser un ensemble de points discrets, et n
     ]  
 ]
 
-Ainsi plus on augmente $r$, plus le complexe possède des simplexes, on en donne une représentation @VR. (_Note : Remarque par M.Ni pas comprise_)
+Ainsi plus on augmente $r$, plus le complexe possède des simplexes, on en donne une représentation @VR. Pour chaque $r$ qui augmente le nombre de simplexes du complexe simplicial, nous ajoutons $V_r (#ensPts, d)$ à la filtration que l'on est en train de créer.
 
 #figure(
     image("../images/cech.png"),
@@ -312,7 +319,7 @@ Pour définir formellement des "trous", nous devons définir les opérateurs de 
     
     $ ... attach(arrow, t:delta_(k+2)) C_(k+1) attach(arrow, t:delta_(k+1)) C_k attach(arrow, t:delta_(k)) C_(k-1) attach(arrow, t:delta_(k-1)) ... $
 
-    Où chaque $C_k$ est un groupe abélien généré par les $k$-simplexes de #ensPts et $delta_k$ est une morphisme de groupes tel que $delta_k compose delta_(k+1) = 0$
+    Où chaque $C_k$ est un groupe abélien libre qui a pour base les $k$-simplexes de #ensPts et $delta_k$ est une morphisme de groupes tel que $delta_k compose delta_(k+1) = 0$
     
     On appelle $delta_k$ un _opérateur de bords_.
 
@@ -327,9 +334,9 @@ Pour définir formellement des "trous", nous devons définir les opérateurs de 
     Celle ci représente les "trous" en dimension $k$
 ]
 
-On peut voir que $H_0$ représente des points connectés, $H_1$ représente un trou qui est entouré par un chemin fermé de points connectés ($K_2$ dans @Filtration_ex par exemple) et $H_2$ représenterait par exemple une pyramide d'intérieur vide. 
+On peut voir que $H_0$ représente les composantes connexes de $#ensPts$, $H_1$ représente un trou qui est entouré par un chemin fermé de points connectés (comme le cycle $(sigma_4, sigma_5, sigma_6, sigma_7)$ dans $K_2$ dans @Filtration_ex par exemple) et $H_2$ représenterait par exemple un trièdre d'intérieur vide. 
 
-Pour notre usage, nous voulons calculer $H_0$ les temps moyens pour se rendre à une station de métros et $H_1$ qui représente les zones critiques de couverture du réseau.
+Pour notre usage, nous voulons calculer $H_0$, les temps moyens pour se rendre à une station de métros, et $H_1$ qui représente les zones critiques de couverture du réseau.
 
 // Ainsi, grâce à ces définitions, nous sommes capables, depuis un ensemble $X = {x_i}$ de points fini de poids $(w_i)_i$, de créer une filtration et de l'étudier afin de trouver $H_1$ qui représentent, pour notre cas d'usage, les zones critiques de couverture.
 
@@ -358,20 +365,18 @@ Pour notre usage, nous voulons calculer $H_0$ les temps moyens pour se rendre à
 
 == Sources
 
-Ne voulant pas me baser sur des villes factices, j'ai décidé de trouver des sources pouvant me fournir des informations sur les stations de metros de plusieurs grandes villes de France comme Toulouse ou Marseille.
-
-Ainsi, toutes les informations relatives aux stations de metros ainsi que les temps de passages sont trouvables sur le site du gouvernement : #link("https://transport.data.gouv.fr").
+On choisit de se baser uniquement sur les villes de Toulouse et de Marseille pour tester notre approche. De plus, toutes les informations relatives aux stations de metros ainsi que les temps de passages sont trouvables sur le site du gouvernement : #link("https://transport.data.gouv.fr").
 
 Ces informations servent à définir nos points et notre pondération, en revanche elles ne permettent pas d'obtenir les distances entre les stations, pour cela nous utiliserons alors #link("https://www.geoapify.com") qui nous permet d'estimer des temps de trajet en voiture et à pied.
 
 // De plus, pour la distance nous avons besoin du nombre d'habitants par arrondissement, pour cela nous utiliserons : #link("implémenté sans cette donnée")
 
-== Construction des informations importantes <Construction>
+== Points et distances <Construction>
 
 Définissons dès lors nos objets :
 
 #def[
-    Un point $x_i$, représentant une station de métro, est défini par deux données, celle de la position géographique (latitude/longitude) ainsi que son poids $w_i$. Le poids $w_i$ est égal à la moyenne du temps d'attente entre deux métros en station $x_i$ sur une semaine entière.
+    Un point $x_i$, représentant une station de métro, est défini par la données de sa position géographique (latitude/longitude) ainsi que son poids $w_i$. Le poids $w_i$ est égal à la moyenne du temps d'attente entre deux métros en station $x_i$ sur une semaine entière.
 ]
 
 Les temps de passage des metros en station étant plus ou moins constant sur la semaine, il est cohérent d'utiliser une moyenne.
@@ -417,9 +422,13 @@ Ainsi à partir de cette filtration, nous pouvons obtenir les classes d'homologi
 #th(
     "des facteurs invariants",
     [
-    D'après @PH_invitation et @ComputingPH, chaque $H_k$ est isomorphe à une somme directe d'espaces filtrés associés à une certaine famille d'intervalles, définie d'une unique manière. Cette famille d'intervalles est appelé un _code barre_.
+    D'après @PH_invitation et @ComputingPH, il existe un unique ensemble ${d_1, ..., d_p}$ d'éléments de $H_k$ définis à inversibles près tel que :
+    $ H_k tilde.eq plus.circle.big_(i=1)^p P_k (X) \/ d_i P_k (X) $
+
+    Cet ensemble est appelé _code barre_ de $H_k$
     ]
 )
+// _Note : Je ne suis pas sûr de comprendre ce que je manipule notamment les types du quotient... Les extraits sont ici : #underline(link("https://fr.wikipedia.org/wiki/Th%C3%A9or%C3%A8me_des_facteurs_invariants#A-modules_de_type_fini","Source")) et @annexe_inv. _
 
 Informatiquement, selon @PH_roadmap, on calcule ce code barre en créant une matrice de bordure $B$ après avoir défini un ordre total sur les simplexes respectant les propriétés énoncées #link(<Definitions>, "section I").
 
@@ -432,7 +441,7 @@ _Note : D'après @ComputingPH, $B$ peut être vu comme la matrice de $delta_1$ d
 
 Un exemple d'une telle matrice est donnée en @Bordure.
 
-Après avoir calculé $B$, nous voulons la _réduire_ en code barre, dans le sens où l'on peut interpréter correctement les valeurs de cette matrice avec la filtration (grâce au théorème précédent). Le terme de _réduction_ fait ici référence à la réduction de $B$ en forme normale de Smith. Dans notre cas, ce résultat s'interprète comme l'attribution à chaque simplexe de la naissance d'_au plus_ une classe d'homologie. Nous pouvons observer ce résultat en @BordureReduite.
+Après avoir calculé $B$, nous voulons la _réduire_ en un code barre, dans le sens où l'on peut interpréter correctement les valeurs de cette matrice avec la filtration (grâce au théorème précédent). Le terme de _réduction_ fait ici référence à la réduction de $B$ en forme normale de Smith. Dans notre cas, ce résultat s'interprète comme l'attribution à chaque simplexe de la naissance d'_au plus_ une classe d'homologie. Nous pouvons observer ce résultat en @BordureReduite.
 
 Cet algorithme de réduction est nommé _standard algorithm_ et est décrit dans @PH_roadmap par, en posant $"low"_B (j) = max({i in [|0, n-1|], B[i][j] != 0}) in bb(N) union {-1}$ :
 
@@ -445,92 +454,96 @@ StandardAlgorithm(B)
 
 Comparons alors nos deux matrices, sur l'exemple de la filtration de @Filtration_ex (Les cases vident remplacent les zeros pour plus de lisibilité), avec ici notre ordre total sur les simplexes :
 
-#figure(
-    cetz.canvas({
-        import cetz.draw: *
-        scale(1.2)
-        let lines((x, y)) = {
-            let p0 = (1+x, 0+y)
-            let p1 = (0+x, 1+y)
-            let p2 = (-1+x, 0+y)
-            let p3 = (0+x, -1+y)
-            (
-                "9": line(p0, p1, p2, fill: red.transparentize(75%), name:"9"), 
-                "4": line(p0, p1, name:"4"), 
-                "5": line(p1, p2, name:"5"), 
-                "6": line(p2, p3, name:"6"), 
-                "7": line(p3, p0, name:"7"), 
-                "8": line(p0, p2, name:"8"), 
-            )
-        }
-
-        let pts((x,y)) = {
-            let p0 = (1+x, 0+y)
-            let p1 = (0+x, 1+y)
-            let p2 = (-1+x, 0+y)
-            let p3 = (0+x, -1+y)
-            (
-                "0": (p0, "south-west"), 
-                "1": (p1, "south-west"), 
-                "2": (p2, "north-east"), 
-                "3": (p3, "north-east")
-            )
-        }
-
-        let draw_point(name, (p, anchor), drawtext:true) = {
-            circle(p, radius: (0.05), fill: black, name:name)
-            if drawtext {
-                if anchor == "north-east"{
-                    content(name, anchor:anchor, pad(right: .7em, text($p_name$, size:16pt)))
-                } else {
-                    content(name, anchor:anchor, pad(left: .7em, text($p_name$, size:16pt)))
-                }
-
+#grid(
+    columns: (50%, 45%),
+    gutter: 5%,
+    [#figure(
+        cetz.canvas({
+            import cetz.draw: *
+            scale(1)
+            set-style(text: (size:10pt))
+            let lines((x, y)) = {
+                let p0 = (1+x, 0+y)
+                let p1 = (0+x, 1+y)
+                let p2 = (-1+x, 0+y)
+                let p3 = (0+x, -1+y)
+                (
+                    "10": line(p0, p2, p3, fill: red.transparentize(75%), name:"10"),
+                    "9": line(p0, p1, p2, fill: red.transparentize(75%), name:"9"), 
+                    "4": line(p0, p1, name:"4"), 
+                    "5": line(p1, p2, name:"5"), 
+                    "6": line(p2, p3, name:"6"), 
+                    "7": line(p3, p0, name:"7"), 
+                    "8": line(p0, p2, name:"8"), 
+                )
             }
-        }
 
-        let draw_line(id, l, drawtext:true) = {
-            l
-            if drawtext {
-                if (id > 8) {
-                    content(str(id), anchor: "mid", text($tau_id$, size:16pt))
-                } else {
+            let pts((x,y)) = {
+                let p0 = (1+x, 0+y)
+                let p1 = (0+x, 1+y)
+                let p2 = (-1+x, 0+y)
+                let p3 = (0+x, -1+y)
+                (
+                    "0": (p0, "south-west"), 
+                    "1": (p1, "south-west"), 
+                    "2": (p2, "north-east"), 
+                    "3": (p3, "north-east")
+                )
+            }
 
-                    content(str(id), anchor: "mid", text($sigma_id$, size:16pt))
+            let draw_point(name, (p, anchor), drawtext:true) = {
+                circle(p, radius: (0.05), fill: black, name:name)
+                if drawtext {
+                    if anchor == "north-east"{
+                        content(name, anchor:anchor, pad(right: .7em, text($p_name$)))
+                    } else {
+                        content(name, anchor:anchor, pad(left: .7em, text($p_name$)))
+                    }
+
                 }
             }
-        }
 
-        group(name: "K_3", {
-            let origin = (0, 0)
+            let draw_line(id, l, drawtext:true) = {
+                l
+                if drawtext {
+                    if (id > 8) {
+                        content(str(id), anchor: "mid", text($tau_id$))
+                    } else {
 
-            draw_line(9, lines(origin).at("9"))
-            for i in range(8, 3, step:-1) {
-                draw_line(i, lines(origin).at(str(i)), drawtext: true)
+                        content(str(id), anchor: "mid", text($sigma_id$))
+                    }
+                }
             }
 
-            
-            for i in range(4) {
-                let (p, v) = pts(origin).at(str(i))
-                draw_point(str(i), (p, v), drawtext: true)
-            }
-        })
+            group(name: "K_3", {
+                let origin = (0, 0)
 
-        content(("K_3.south"), 
-                anchor:"north", 
-                pad(top: 2em, text($K_3$, size:16pt))
-            )
-    }),
-    caption: [Rappel du nommage des simplexes]
+                for i in range(10, 3, step:-1) {
+                    draw_line(i, lines(origin).at(str(i)))
+                }
+
+                for i in range(4) {
+                    let (p, v) = pts(origin).at(str(i))
+                    draw_point(str(i), (p, v))
+                }
+            })
+
+            content(("K_3.south"), 
+                    anchor:"north", 
+                    pad(top: 1em, text($K_3$))
+                )
+        }),
+        caption: [Rappel du nommage des simplexes ($p_i$ pour la dimension 0, $sigma_j$ pour la dimension 1, $tau_k$ pour la dimension 2)]
+    )   
+    ],
+    [
+        En regardant la matrice $overline(B)$, nous remarquons que l'opération de réduction à permis d'avoir la ligne low sans répétion de nombre positifs, autrement dit, on accorde la naissance d'un simplexe à un unique autre simplexe. Ainsi le simplexe 1 donne naissance au simplexe 4, 8 donne naissance à 9 et 7 donne naissance à 10. 
+    ]
 )
-
-En regardant la matrice $overline(B)$, nous remarquons que l'opération de réduction à permis d'avoir la ligne low sans répétion de nombre positifs, autrement dit, on accorde la naissance d'un simplexe à un unique autre simplexe. Ainsi le simplexe 1 donne naissance au simplexe 4, 8 donne naissance à 9 et 7 donne naissance à 10. 
-
-Par exemple, si $"low"_overline(B) (j) = i != -1$ alors on a une paire de simplexe $(sigma_i, sigma_j)$ telle que l'apparition de $sigma_i$ fait apparaitre une nouvelle classe d'homologie. Et au contraire, $sigma_j$ va la _tuer_ en apparaissant. Prenons comme exemple la filtration @Filtration_ex : dans $K_0$, le point 1 cause l'apparition d'une classe dans $H_0$ cependant l'apparition du simplexe (0,3) dans $K_2$ tue la classe de 1 dans $H_0$ mais créer une nouvelle classe dans $H_1$ (car elle crée un cycle).
 
 #grid(
     columns: (45%, 45%),
-    gutter: 4%,
+    gutter: 10%,
     [
         #figure(
             table(columns : 12, rows:11,  
@@ -546,9 +559,9 @@ Par exemple, si $"low"_overline(B) (j) = i != -1$ alors on a une paire de simple
             [8], [], [], [], [], [], [], [], [], [], [1], [1],
             [9], [], [], [], [], [], [], [], [], [], [], [],
             [10],[], [], [], [], [], [], [], [], [], [], [],
-            [low], [-1], [-1], [-1], [-1], [1], [2], [3], [3], [2], [8], [8]
+            [low], [-1], [-1], [-1], [-1], [*1*], [*2*], [*3*], [*3*], [*2*], [*8*], [*8*]
             ),
-            caption:"Matrice B non réduite"
+            caption:"Matrice B"
         ) <Bordure>
     ],
     [
@@ -566,12 +579,14 @@ Par exemple, si $"low"_overline(B) (j) = i != -1$ alors on a une paire de simple
             [8], [], [], [], [], [], [], [], [], [], [1], [],
             [9], [], [], [], [], [], [], [], [], [], [], [],
             [10],[], [], [], [], [], [], [], [], [], [], [],
-            [low], [-1], [-1], [-1], [-1], [1], [2], [3], [-1], [-1], [8], [7]
+            [low], [-1], [-1], [-1], [-1], [*1*], [*2*], [*3*], [-1], [-1], [*8*], [*7*]
             ),
             caption:[Matrice $overline(B)$, la matrice B après reduction]
         ) <BordureReduite>
     ]
 )
+
+Par exemple, si $"low"_overline(B) (j) = i != -1$ alors on a une paire de simplexe $(sigma_i, sigma_j)$ telle que l'apparition de $sigma_i$ fait apparaitre une nouvelle classe d'homologie. Et au contraire, $sigma_j$ va la _tuer_ en apparaissant. Prenons comme exemple la filtration @Filtration_ex : dans $K_0$, $p_1$ cause l'apparition d'une classe dans $H_0$ cependant l'apparition du simplexe $sigma_7$ dans $K_2$ tue la classe de $p_1$ dans $H_0$ mais créer une nouvelle classe dans $H_1$ (car elle crée un cycle).
 
 // Regardons la 1ere ligne (celle du 0) de la matrice $B$, il y a trois 1 : en effet le simplexe 0 est à la naissance des simplexes 4, 7 et 8 (en tant qu'extrémité). De même pour donner naissance à 10, il a fallut avoir les simplexes 6, 7 et 8, d'où la présence d'un 1 dans la colonne 10 des lignes 6, 7 et 8. 
 
@@ -587,7 +602,7 @@ En revanche si $"low"_overline(B) (j) = -1$ alors l'apparition de $sigma_j$ cré
 
 // C'est grâce à cette définition que nous arrivons au diagramme de persistance donnée en @PD_ex
 
-C'est depuis cette matrice que nous sommes capables de déterminer $H_0$ ainsi que $H_1$, et donc de générer des représentations graphiques comme montré en @CarteResultat
+C'est depuis cette matrice que nous sommes capables de déterminer $H_0$ et $H_1$, et donc de générer des représentations graphiques comme montré en @CarteResultat
 
 = Résultats et conclusion
 
@@ -612,7 +627,7 @@ C'est depuis cette matrice que nous sommes capables de déterminer $H_0$ ainsi q
 
 )
 
-On comprend que globalement il faut 200s (soit 3m20s) pour quelqu'un de se rendre d'une station à une autre (le minimum en temps entre la voiture et la marche) ce qui est effectivement cohérent avec la réalité. Les temps des classes 1D ici présent montre le temps moyen de trajet entre les deux stations les plus éloignées d'un même cycle. Donc par exemple pour Toulouse, il faudra en moyenne 318s (5min20s) pour rejoindre une station depuis les zones les moins biens deservies.
+On comprend que globalement il faut 200s (soit 3m20s) pour quelqu'un de se rendre d'une station à une autre (le minimum en temps entre la voiture et la marche) ce qui est effectivement cohérent avec la réalité. Les temps des classes pour la dimension 1 montrent le temps moyen de trajet entre les deux stations les plus éloignées d'un même cycle. Donc par exemple pour Toulouse, il faudra en moyenne 318s (5min20s) pour rejoindre une station depuis les zones les moins bien deservies.
 
 // #align(center)[#grid(
 //     columns: (50%, 50%),
@@ -650,15 +665,21 @@ On comprend que globalement il faut 200s (soit 3m20s) pour quelqu'un de se rendr
     )
 ]
 
-Les triangles ici représentés montrent les zones où il est le plus difficile de rejoindre une station de métro. Pour les triangles les plus gros, il peut être cohérent de croire qu'il est difficile de se rendre à ces stations de métros. En revanche, pour les plus petits cela est plus dur.
+Les triangles ici représentés montrent les zones où il est le plus difficile de rejoindre une station de métro. Pour les triangles les plus gros, il peut être cohérent de croire qu'il est difficile de se rendre à ces stations de métros. En revanche, l'interprétation est plus dure pour les plus petits triangles.
 
-Ce sont des zones où il ne circule que très peu de voitures entre les stations de métros, en effet ces zones sont uniquement pietonnes donc la distance parcourue à durée égale est necéssairement plus long à pied qu'en voiture. Donc la distance prise par notre algorithme est celle relevant de la marche à pied, d'où les zones _a priori_ plus petites que celles discutées plus haut.  
+Nous devons revenir à la définition de notre distance : celle ci prend en compte le temps minimal entre un trajet en voiture et le même trajet à pied. Les plus petites zones, comme en bout de ligne A à Toulouse, correspondent en fait à des espaces uniquement piétons dont le temps de trajet est plus court à pied qu'en voiture. Ainsi, les plus petites zones indiquent donc la même information (difficulté d'accès à ces stations) que les grandes mais à une échelle différente.
 
-Nous pouvons observer le plus gros problème de cette méthode : la méthode est pertinente pour le développement d'un réseau autre que le métropolitain (réseau de bus, par exemple). En effet, on remarque que les zones critiques sont entre les lignes de metros dessinées, mais jamais en bout de ligne, là où pourtant la disponibilité des métros est plus faible que dans l'hypercentre des villes. 
-
-Mais via cette interprétation là, je n'arrive pas à expliquer la présence du triangle au sud de Toulouse, parce qu'il est en bout de ligne, même si effectivement le temps de trajet est haut dans cette région de la ville.
-
-Ainsi, cette méthode d'analyse peut être pertinente lors d'une simulation pour la création ou l'amélioration prévue d'un réseau, afin de détecter les zones qui seront le plus en besoin avec le réseau imaginé, mais ne permet pas d'établir un tracé _optimal_ d'une ligne de métro pour satisfaire le plus de monde.
+L'homologie persistante est donc une méthode nous permettant de mettre en lumière des zones mal desservies en prenant en compte des realités plus complexes que seul le temps de trajets. Par exemple, nous prenons en compte les temps d'attente en station mais nous aurions pu aussi prendre en compte la densité de population autour de ces stations. Cette caractéristique peut être une possibilité d'ouverture de ce sujet car celle ci joue intuitivement un rôle dans le temps d'attente en station et donc dans la difficulté de prendre un métro.
 
 
 #bibliography("../bibliography.yml", style: "american-physics-society")
+
+// = Annexe
+// _Partie temporaire pour plus de compréhension_
+// == Théorème des invariants <annexe_inv>
+// Source de @ComputingPH : 
+
+// #image("../images/image1.png")
+// #image("../images/image2.png")
+// #image("../images/image3.png")
+// #image("../images/image4.png")

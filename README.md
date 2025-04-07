@@ -2,7 +2,7 @@
 
 ## Rapides explications
 
-Repo contenant tous mes fichiers pour mon TIPE 24-25 sur le thème "Transition, transformation, **conversion**".
+Repo contenant tous mes fichiers pour mon TIPE 24-25 sur le thème "Transition, transformation, conversion".
 
 Je maintiens un fichier `history.md` contenant toutes les modifications jours par jours ainsi que mes réfléxions sur ce tipe/code.
 

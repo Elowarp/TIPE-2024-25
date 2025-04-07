@@ -4,6 +4,10 @@ L'homologie : Façon d'associer des objets algébriques (groupes) à d'autres ob
 
 Groupe d'homologie : les formes ayant un même nombre de trous de même dimension.
 
+Groupe abélien libre : Groupe abélien qui possède une base (Tout element du groupe s'écrit comme une CL des elements de cette base à coef entier)
+
+Torsion : Admet un ordre fini
+
 Quotienter un groupe : Doit être normal (xH=Hx) => c'est le cas pour les C_k car ils sont abéliens
 
 X : Espace topologique
