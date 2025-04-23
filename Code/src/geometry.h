@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 14-09-2024 22:16:49
- *  Last modified : 12-11-2024 15:24:47
+ *  Last modified : 23-04-2025 21:52:06
  *  File : geometry.h
  */
 #ifndef GEOMETRY_H
@@ -85,5 +85,6 @@ extern bool filtrationContains(Filtration *filtration, Simplex *s, int n);
 extern void filtrationPrint(Filtration *filt, int n, bool sorted);
 extern void filtrationToFile(Filtration *filtration, Point* pts, int n, char *filename);
 extern unsigned long long filtrationMaxName(Filtration *filtration);
+int *reverseIdAndSimplex(Filtration *filt);
 
 #endif

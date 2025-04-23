@@ -49,3 +49,9 @@ CoursHomologie:
   type: misc 
   title: Introduction aux théories homologiques
   author : Jean-Yves Welschinger
+
+FormeSmith:
+  type: misc
+  title: Forme Normale de Smith
+  author: Yoann Demesmay
+  url: https://agreg-maths.fr/uploads/versions/4367/Forme%20normale%20de%20Smith.pdf

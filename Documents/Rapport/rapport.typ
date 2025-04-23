@@ -12,7 +12,7 @@
     header: context [
         #set align(right)
         #set text(9pt)
-        Etude de couvertures de réseaux de métros
+        Étude de couvertures de réseaux de métros
 
     ],
     footer: context [
@@ -38,6 +38,7 @@
 #set par(justify: true)
 #show table.cell.where(x:0): strong
 #show table.cell.where(y:0): strong
+#set figure.caption(separator: " : ")
 
 #let cadre(name, content, color) = {
     rect(
@@ -58,6 +59,13 @@
     cadre("Théorème " + name, content, "#0F084B")
 }
 
+#let code(source, title:"Func", lang:"python") = {
+    rect(stroke: (left: gray + 0.2em))[
+        #text(title, font:"DejaVu Sans Mono", size:0.8em)\
+        #raw(source, lang:lang)
+    ]
+}
+
 #show raw.line: it => {
   text(fill: gray)[#it.number]
   h(1em)
@@ -70,7 +78,7 @@
 #let tls = "Ville B"
 
 #align(center, text(17pt)[
-    *TIPE : Etude de couvertures de réseaux de métros, application de l'homologie persistante*
+    *TIPE : Étude de couvertures de réseaux de métros, application de l'homologie persistante*
 ])
 
 #align(center)[Elowan H\
@@ -128,7 +136,7 @@ Afin d'utiliser l'homologie persistante, nous devons définir certaines notions 
 
 Par exemple, un simplexe de dimension 1 est un segment et un simplexe de dimension 3 est un trièdre.
 
-_Remarque : On dit que $sigma_i$ est une face de $sigma_j$ si et seulement si $sigma_j subset sigma_i$ et la dimension de $sigma_i$ est strictement supérieure à celle de $sigma_j$._
+_Remarque : On dit que $sigma_i$ est une face de $sigma_j$ si et seulement si $sigma_i subset sigma_j$ et la dimension de $sigma_i$ $dim(sigma_i)$ est égale à $dim(sigma_j) - 1$._
 
 #figure(
     cetz.canvas({
@@ -152,8 +160,6 @@ caption: [Ce trièdre est un simplexe $sigma$ de dimension 3, où le triangle ro
 
 #def[
     Un _complexe simplicial_ est un ensemble de simplexes. 
-    
-    On note $P_n (#ensPts)$ l'ensemble des parties à $n+1$ éléments de $#ensPts$ formant un complexe simplicial contenant tous les $n$-simplexes.
 ]
 
 // On donne une représentation de plusieurs complexes simplicaux @Filtration_ex.
@@ -285,7 +291,7 @@ Observons sur la @Filtration_ex les notions précédemment définies. Chaque $K_
         
 
     }),
-    caption: [Représentation d'une filtration où $K_0 subset K_1 subset K_2 subset K_3$ et où chaque simplexe a été nommé : $p_i$ pour les simplexes de dimension 0; $sigma_j$ pour la dimension 1 et $tau_k$ pour la dimension 2.]
+    caption: [Représentation d'une filtration où $K_0 subset K_1 subset K_2 subset K_3$ et où chaque simplexe a été nommé : $p_i$ pour les simplexes de dimension 0, $sigma_j$ pour la dimension 1 et $tau_k$ pour la dimension 2.]
 )<Filtration_ex>
 
 // Grâce à cette definition, nous sommes capables de quantifier les changements d'un complexe à l'autre, comme la création de cycles (dans $K_2$, il apparait un cycle $(0,1,2,3, 0)$ après avoir rajouté $(0,3)$ à $K_1$) ou la destruction de composantes connexes (dans $K_0$, tous les simplexes 0D sont dans des composantes connexes différentes alors que dans $K_1$ ils sont tous dans la même, on a "tué" les composantes connexes de 1, 2 et 3).
@@ -301,10 +307,10 @@ On introduit de plus un ordre total $prec.curly.eq$ sur l'ensemble des simplexes
 
     Si aucun des deux cas n'est réalisé alors le choix de l'ordre entre les deux simplexes est arbitraire. 
     
-    On définit donc l'ordre total $prec.curly.eq$ telle que $sigma_i prec.curly.eq sigma_j <=> i<=j$
+    On définit donc l'ordre total $prec.curly.eq$ tel que $sigma_i prec.curly.eq sigma_j <=> i<=j$
 ]
 
-Observons sur la @Filtration_ex l'indexation des simplexes suivant l'ordre précédemment défini : les simplexes $sigma_8$ et $sigma_7$ sont plus grand au sens de $prec.curly.eq$ que tous les autres $sigma_i$ et $p_i$ parce qu'ils apparaissent plus tard dans la filtration. De plus, si $sigma_8$ était apparu dans $K_3$, l'ordre aurait toujours été respecté puisque $sigma_8$ est une face de $tau_9$.
+Observons sur la @Filtration_ex l'indexation des simplexes suivant l'ordre précédemment défini : les simplexes $sigma_8$ et $sigma_7$ sont plus grands au sens de $prec.curly.eq$ que tous les autres $sigma_i$ et $p_i$ parce qu'ils apparaissent plus tard dans la filtration. De plus, si $sigma_8$ était apparu dans $K_3$, l'ordre aurait toujours été respecté puisque $sigma_8$ est une face de $tau_9$.
 
 Il y a un problème : nous voulons analyser un ensemble de points discrets, et non une filtration déjà existante, il nous faut alors créer une filtration depuis un ensemble de points. Nous faisons cela via une construction incrémentale de complexes simpliciaux avec les complexes de Vietoris-Rips pondérés. Ainsi d'après @PH_resource_coverage :
 
@@ -314,7 +320,7 @@ Il y a un problème : nous voulons analyser un ensemble de points discrets, et n
         $
         cases(
             forall j in [|0, k|]\, w_i_j < r,
-            forall (j,l) in [|0, k|]^2\, d(x_i_j, x_i_k) + w_i_j + w_i_k < 2r
+            forall (j,l) in [|0, k|]^2\, d(x_i_j, x_i_l) + w_i_j + w_i_l < 2r
         )
         $
     ]  
@@ -387,7 +393,7 @@ Pour notre usage, nous voulons calculer $H_0$, les temps moyens pour se rendre �
 #[
     #show link: underline
 
-    On choisit de se baser uniquement sur des vraies villes, que l'on nommera #mrs et #tls par la suite, pour tester notre approche. De plus, toutes les informations relatives aux stations de metros ainsi que les temps de passages sont trouvables sur #link("https://transport.data.gouv.fr")[le site du gouvernement].
+    On choisit de se baser uniquement sur des vraies villes, que l'on nommera #mrs et #tls par la suite, pour tester notre approche. De plus, toutes les informations relatives aux stations de métros ainsi que les temps de passages sont trouvables sur #link("https://transport.data.gouv.fr").
 
     Ces informations servent à définir nos points et notre pondération, en revanche elles ne permettent pas d'obtenir les distances entre les stations, pour cela nous utiliserons alors #link("https://www.geoapify.com")[geoapify] qui nous permet d'estimer des temps de trajet en voiture et à pied.
 
@@ -398,10 +404,10 @@ Pour notre usage, nous voulons calculer $H_0$, les temps moyens pour se rendre �
 Définissons dès lors nos objets :
 
 #def[
-    Un point $x_i$, représentant une station de métro, est défini par la données de sa position géographique (latitude/longitude) ainsi que son poids $w_i$. Le poids $w_i$ est égal à la moyenne du temps d'attente entre deux métros en station $x_i$ sur une semaine entière.
+    Un point $x_i$, représentant une station de métro, est défini par la donnée de sa position géographique (latitude/longitude) ainsi que son poids $w_i$. Le poids $w_i$ est égal à la moyenne du temps d'attente entre deux métros en station $x_i$ sur une semaine entière.
 ]
 
-Les temps de passage des metros en station étant plus ou moins constant sur la semaine, il est cohérent d'utiliser une moyenne.
+Les temps de passage des métros en station étant plus ou moins constant sur la semaine, il est cohérent d'utiliser une moyenne.
 
 // De plus, dans un premier temps, nous définissons similairement à @PH_resource_coverage une distance non symétrique entre deux stations $x$ et $y$ :
 
@@ -419,11 +425,11 @@ On définit la distance similairement à @PH_resource_coverage:
 //     _(Temporairement P(x) = 1 $forall x$, donc $d = tilde(d)$)_
 // ]
 #def[
-    On définit la distance entre deux stations de métros $x$ et $y$ comme :
+    On définit la distance entre deux stations de métro $x$ et $y$ comme :
     $ d(x,y) = 1 / 2 (min(t_"marche" (x,y), t_"voiture" (x,y)) + min(t_"marche" (y,x), t_"voiture" (y,x))) $
 ]
 
-Ainsi en revenant aux boules des complexes simplicaux de Vietoris-Rips, elle modélise le coût temporel d'un trajet "porte à porte" en utilisant le métro. 
+Ainsi en revenant aux boules des complexes simplicaux de Vietoris-Rips, la distance modélise le coût temporel d'un trajet "porte à porte" entre les stations (en voiture ou à pied).
 
 = Méthode
 
@@ -464,18 +470,19 @@ _Note : D'après @ComputingPH, $B$ peut être vu comme la matrice de $delta_1$ d
 
 Un exemple d'une telle matrice est donnée en @Bordure.
 
-Après avoir calculé $B$, nous voulons la _réduire_ à un code barre, dans le sens où l'on peut interpréter correctement les valeurs de cette matrice avec la filtration (grâce au théorème précédent). Le terme de _réduction_ fait ici référence à la réduction de $B$ en forme normale de Smith. Dans notre cas, ce résultat s'interprète comme l'attribution à chaque simplexe de la naissance d'_au plus_ une classe d'homologie. Nous pouvons observer ce résultat en @BordureReduite.
+Après avoir calculé $B$, nous voulons la _réduire_ à un code barre, dans le sens où par lecture matricielle, grâce au théorème précédement, nous pouvons donner un temps de vie à chaque simplexe par l'attribution d'un unique antécédent à chacun de ceux-ci. Le terme de _réduction_ fait ici référence à la réduction de $B$ en forme normale de Smith. Nous pouvons observer ce résultat en @BordureReduite.
 
 Cet algorithme de réduction est nommé _standard algorithm_ et est décrit dans @PH_roadmap par, en posant $"low"_B (j) = max({i in [|0, n-1|], B[i][j] != 0}) in bb(N) union {-1}$ :
 
-```python
-StandardAlgorithm(B)
-    for j in [|0, n-1|]:
-        while (il existe i < j avec low_B(i) = low_B(j)):
-            ajouter colonne i de B à colonne j
-```
+#code("for j allant de n-1 à 0:
+    while (il existe i < j avec low_B(i) = low_B(j)):
+        ajouter colonne i de B à colonne j modulo 2",
+    title: "StandardAlgorithm(B)"
+)
 
-Comparons alors nos deux matrices, sur l'exemple de la filtration de @Filtration_ex (Les cases vident remplacent les zeros pour plus de lisibilité et les colonnes/lignes vides ont été omises), avec ici notre ordre total sur les simplexes :
+_Notons que cet algorithme a pour complexité temporelle $O(n^3)$ au pire._ 
+
+Comparons alors nos deux matrices, sur l'exemple de la filtration de @Filtration_ex (Les cases vides remplacent les zeros pour plus de lisibilité et les colonnes/lignes vides ont été omises), avec ici notre ordre total sur les simplexes :
 
 #grid(
     columns: (50%, 45%),
@@ -576,13 +583,13 @@ Comparons alors nos deux matrices, sur l'exemple de la filtration de @Filtration
 #set table(inset: (right:1em, left: 1em))
 
 #grid(
-    columns: (45%, 45%),
-    gutter: 10%,
+    columns: (50%, 50%),
+    gutter: 0%,
     [
         #figure(
-            table(columns : 9,
+            table(columns : 10,
             table.header(
-                table.cell([], stroke: none), table.cell(colspan:8, [*Enfants*], stroke: none),
+                table.cell(colspan:10, [*Enfants*], stroke: none),
             ),
             table.cell(
                 rowspan:10,
@@ -592,6 +599,12 @@ Comparons alors nos deux matrices, sur l'exemple de la filtration de @Filtration
                 *Parents*
             ]),
             [],  [4], [5], [6], [7], [8], [9], [10],
+            table.cell(
+                rowspan:10,
+                align: horizon,
+                stroke: none,
+                rotate(-90deg, reflow: true)[]
+            ),
             [0], [1], [], [], [1], [1], [], [],
             [1], [1], [1], [], [], [], [], [],
             [2], [], [1], [1], [], [1], [], [],
@@ -601,17 +614,17 @@ Comparons alors nos deux matrices, sur l'exemple de la filtration de @Filtration
             [6], [], [], [], [], [], [], [1],
             [7], [], [], [], [], [], [], [1],
             [8], [], [], [], [], [], [1], [1],
-            table.cell(colspan: 9, [], stroke:none),
-            table.cell(stroke:none, []), [*low*], [*1*], [*2*], [*3*], [*3*], [*2*], [*8*], [*8*]
+            table.cell(colspan: 10, [], stroke:none),
+            table.cell(stroke:none, []), [*low*], [*1*], [*2*], [*3*], [*3*], [*2*], [*8*], [*8*], table.cell(stroke:none, [])
             ),
             caption:"Matrice B"
         ) <Bordure>        
     ],
     [
         #figure(
-            table(columns : 9,
+            table(columns : 10,
             table.header(
-                table.cell([], stroke: none), table.cell(colspan:8, [*Enfants*], stroke: none),
+                table.cell(colspan:10, [*Enfants*], stroke: none),
             ),
             table.cell(
                 rowspan:10,
@@ -622,6 +635,12 @@ Comparons alors nos deux matrices, sur l'exemple de la filtration de @Filtration
             ]
             ),
             [],  [4], [5], [6], [7], [8], [9], [10],
+            table.cell(
+                rowspan:10,
+                align: horizon,
+                stroke: none,
+                rotate(-90deg, reflow: true)[]
+            ),
             [0], [1], [], [], [], [], [], [],
             [1], [1], [1], [], [], [], [], [],
             [2], [], [1], [1], [], [], [], [],
@@ -631,15 +650,15 @@ Comparons alors nos deux matrices, sur l'exemple de la filtration de @Filtration
             [6], [], [], [], [], [], [], [1],
             [7], [], [], [], [], [], [], [1],
             [8], [], [], [], [], [], [1], [],
-            table.cell(colspan: 9, [], stroke:none),
-            table.cell(stroke:none, []), [*low*], [*1*], [*2*], [*3*], [-1], [-1], [*8*], [*7*]
+            table.cell(colspan: 10, [], stroke:none),
+            table.cell(stroke:none, []), [*low*], [*1*], [*2*], [*3*], [-1], [-1], [*8*], [*7*], table.cell(stroke:none, [])
             ),
             caption:[Matrice $overline(B)$, la matrice B après reduction]
         ) <BordureReduite>
     ]
 )
 
-Par exemple, si $"low"_overline(B) (j) = i != -1$ alors on a une paire de simplexe $(sigma_i, sigma_j)$ telle que l'apparition de $sigma_i$ fait apparaitre une nouvelle classe d'homologie. Et au contraire, $sigma_j$ va la _tuer_ en apparaissant. Prenons comme exemple la filtration @Filtration_ex : dans $K_0$, $p_1$ cause l'apparition d'une classe dans $H_0$ cependant l'apparition du simplexe $sigma_7$ dans $K_2$ tue la classe de $p_1$ dans $H_0$ mais créer une nouvelle classe dans $H_1$ (car elle crée un cycle).
+Par exemple, si $"low"_overline(B) (j) = i != -1$ alors on a une paire de simplexes $(sigma_i, sigma_j)$ telle que l'apparition de $sigma_i$ fait apparaitre une nouvelle classe d'homologie. Et au contraire, $sigma_j$ va la _tuer_ en apparaissant. Prenons comme exemple la filtration @Filtration_ex : dans $K_0$, $p_1$ cause l'apparition d'une classe dans $H_0$ cependant l'apparition du simplexe $sigma_7$ dans $K_2$ tue la classe de $p_1$ dans $H_0$ mais crée une nouvelle classe dans $H_1$ (car elle crée un cycle).
 
 // Regardons la 1ere ligne (celle du 0) de la matrice $B$, il y a trois 1 : en effet le simplexe 0 est à la naissance des simplexes 4, 7 et 8 (en tant qu'extrémité). De même pour donner naissance à 10, il a fallut avoir les simplexes 6, 7 et 8, d'où la présence d'un 1 dans la colonne 10 des lignes 6, 7 et 8. 
 
@@ -656,6 +675,38 @@ En revanche si $"low"_overline(B) (j) = -1$ alors l'apparition de $sigma_j$ cré
 // C'est grâce à cette définition que nous arrivons au diagramme de persistance donnée en @PD_ex
 
 C'est depuis cette matrice que nous sommes capables de déterminer $H_0$ et $H_1$, et donc de générer des représentations graphiques comme montré en @CarteResultat
+
+= Recherche
+
+La motivation de cette section vient de l'observation suivante : pour 36 stations, il faut environ 10 secondes pour calculer les classes d'homologies. Sachant que ce temps d'exécution provient majoritairement de la complexité temporelle du standard algorithm, nous cherchons à optimiser la complexité de celui ci : $O(n^3) = O(2^(3|#ensPts|))$ ($n$ étant le nombre total de simplexes possibles $=2^(|#ensPts|)$).
+
+L'optimisation que l'on propose provient de deux observations :
+- $B$ est une matrice creuse (beaucoup de cases vides);
+- L'opération de somme de colonnes (ligne 3) agit seulement sur une matrice extraite ne dépendant que de la dimension des simplexes. 
+
+Le premier point explique l'utilisation de liste d'adjacence à une matrice d'adjacence.
+
+Justifions maintenant le deuxième point, soit $d in [|0, |#ensPts| - 1|]$, considérons la matrice extraite :
+$ B_d = (B_(i,j))_(i,j in I) "telle que " I = {(i,j) in [|0,n-1|], dim(sigma_i) = d "et "dim(sigma_j)=d+1 } $
+
+On note $phi$ la correspondance entre les indices des deux matrices : $(B_d)_(phi(i,j)) = B_(i,j)$
+
+Supposons que l'on exécute la ligne 3 de l'algorithme, alors $"low"(j)="low"(i) = k$, on pose $sigma_i$, $sigma_j$ et $sigma_k$ les simplexes associés. Donc $sigma_k$ est une face de $sigma_i$ et $sigma_j$, donc par définition 
+$ dim(sigma_k) + 1 = dim(sigma_i) = dim(sigma_j) $
+
+Donc la ligne $L_k$ et les deux colonnes $C_i$ et $C_j$ sont considérées dans $B_(d)$ ($d = dim(sigma_k)$). De plus, toutes les lignes ayant un coefficient non nul dans les colonnes $C_i$ ou $C_j$ le sont aussi puisqu'un coefficient non nul revient à être une face, donc de dimension $d$. 
+
+Ainsi l'opération de somme des colonnes $C_i + C_j$ dans $B$ (ligne 3) est équivalent à celle de $C_i' + C_j'$ dans $B_d$ avec $phi(i,j) = (i',j')$.
+
+Ainsi, au lieu d'exécuter l'algorithme sur la matrice creuse $B$, on peut l'exécuter sur les matrices extraites $B_d$ plus petites et moins creuses c'est à dire localiser les modifications.
+
+On en déduit cet algorithme où $B$ est modifié par effet de bords sur les $B_d$ : 
+
+#code("L <- Liste des matrices extraites B_d 
+for B_d in L:
+   StandardAlgorithm(B_d)", title:"StandardAlgorithmUpgrade(B)")
+
+Les différences de performances seront étudiées dans la partie suivante. 
 
 = Résultats et conclusion
 
@@ -723,7 +774,7 @@ Les triangles ici représentés montrent les zones où il est le plus difficile 
 
 Nous devons revenir à la définition de notre distance : celle ci prend en compte le temps minimal entre un trajet en voiture et le même trajet à pied. Les plus petites zones, comme à gauche sur la ligne bleue dans la #mrs ou en bout de ligne rouge dans la #tls, correspondent en fait à des espaces uniquement piétons dont le temps de trajet est plus court à pied qu'en voiture. Ainsi, les plus petites zones indiquent donc la même information (difficulté d'accès à ces stations) que les grandes mais à une échelle différente.
 
-L'homologie persistante est donc une méthode nous permettant de mettre en lumière des zones mal desservies en prenant en compte des realités plus complexes que seul le temps de trajets. Par exemple, nous prenons en compte les temps d'attente en station mais nous aurions pu aussi prendre en compte la densité de population autour de ces stations. Cette caractéristique peut être une possibilité d'ouverture de ce sujet car celle ci joue intuitivement un rôle dans le temps d'attente en station et donc dans la difficulté de prendre un métro.
+L'homologie persistante est donc une méthode nous permettant de mettre en lumière des zones mal desservies en prenant en compte des realités plus complexes que seul le temps de trajet. Par exemple, nous prenons en compte les temps d'attente en station mais nous aurions pu aussi prendre en compte la densité de population autour de ces stations. Cette caractéristique peut être une possibilité d'ouverture de ce sujet car celle ci joue intuitivement un rôle dans le temps d'attente en station et donc dans la difficulté de prendre un métro.
 
 
 #bibliography("../bibliography.yml", style: "american-physics-society", title:"Bibliographie")

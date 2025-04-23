@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 10-09-2024 16:33:19
- *  Last modified : 21-12-2024 16:19:50
+ *  Last modified : 23-04-2025 23:14:28
  *  File : persDiag.c
  */
 #include <stdio.h>
@@ -9,6 +9,7 @@
 
 #include "persDiag.h"
 #include "misc.h"
+#include "reduc.h"
 
 ////////////////////////////
 //    Filtrations & VR    //
@@ -145,75 +146,8 @@ Filtration *buildFiltration(PointCloud *X){
     return filt;
 }
 
-// Renvoie la matrice low associée à une matrice de bordure
-int *buildLowMatrix(int **boundary, unsigned long long n){
-    int *low = malloc(n*sizeof(int));
-    for(unsigned long long j=0; j<n; j++){
-        low[j] = -1;
-        for(unsigned long long i=0; i<n; i++)
-            if(boundary[i][j] != 0) low[j] = i;
-    }
-    return low;
-}
-
-// Renvoie l'indice de la première colonne de la matrice low ayant la même valeur
-int sameLow(int *low, int i){
-    for(int j=i-1; j>=0; j--){
-        if(low[i] == low[j] && low[i] != -1){
-            return j;
-        }
-    }
-    return -1;
-}
-
-// Met à jour la colonne j de la matrice low
-void updateLow(int **boundary, int* low, int j, int n){
-    low[j] = -1;
-    for(int i=0; i<n; i++)
-        if(boundary[i][j] != 0) low[j] = i;
-}
-
-// Standart Algorithm
-int **reduceMatrix(int **boundary, unsigned long long n, int *low){
-    int **reduced = copy_matrix(boundary, n);
-    for(unsigned long long i=0; i<n; i++){
-        int j = sameLow(low, i);
-        while(j != -1){
-            // Soustraction de la colonne j à la colonne i
-            for(unsigned long long k=0; k<n; k++){
-                reduced[k][i] = (reduced[k][i] + reduced[k][j]) % 2;
-            }
-            
-            updateLow(reduced, low, i, n);
-            j = sameLow(low, i);
-        }
-    }
-    return reduced;
-}
-
-// Construit la matrice de bordure associée à une filtration
-// reversed est le tableau des identifiants des simplexes dans la filtration 
-// nb_pts est le nb de points dans l'ensemble
-// max_name est le nom maximal attribué dans une filtration
-int **buildBoundaryMatrix(int *reversed, unsigned long long max_name, int nb_pts){
-    int **boundary = malloc(max_name * sizeof(int*));
-    
-    for(unsigned long long i = 0; i<max_name; i++){
-        boundary[i] = malloc(max_name * sizeof(int));
-        
-        for(unsigned long long j = 0; j<max_name; j++){
-            Simplex s1 = simplexFromId(reversed[i], nb_pts);
-            Simplex s2 = simplexFromId(reversed[j], nb_pts);
-            if (isFaceOf(&s1, &s2)) boundary[i][j] = 1;
-            else boundary[i][j] = 0;
-        }
-    }
-
-    return boundary;
-}
-
 // Renvoie une liste de paires correspondant aux idéntifiants des simplexes 
-// récupérés depuis la matrice réduite
+// récupérés depuis la matrice réduite O(filt->max_name)
 Tuple *extractPairsFilt(int *low, Filtration *filt, unsigned long long *size_pairs,
  int *reversed){
     Tuple *pairs = malloc(filt->max_name * sizeof(Tuple));
@@ -261,19 +195,33 @@ PersistenceDiagram *PDCreate(Filtration *filtration, PointCloud *X){
 
     // Matrice tq reversed[i] = j si le simplexe j est le i-ème simplexe de la filtration
     // Cohérent dans l'hypothèse de filtration injective
-    int *reversed = reverseIdAndSimplex(filtration);
+    int *reversed = reverseIdAndSimplex(filtration); // O(filt->max_name)
 
-    // Matrice de bordure associée à la filtration
-    int **boundary = buildBoundaryMatrix(reversed, filtration->max_name, X->size);
+    // Version 1
+    // // Matrice de bordure associée à la filtration
+    // int **boundary = buildBoundaryMatrix(reversed, filtration->max_name, X->size); //O(filt->max_name)
     
-    // Matrice low associée à la matrice de bordure
-    int *low = buildLowMatrix(boundary, filtration->max_name);
+    // // Matrice low associée à la matrice de bordure
+    // int *low = buildLowMatrix(boundary, filtration->max_name); //O(filt->max_name^2)
 
-    // Réduction de la matrice de bordure
-    int **reduced = reduceMatrix(boundary, filtration->max_name, low);
+    // // Réduction de la matrice de bordure
+    // int **reduced = reduceMatrix(boundary, filtration->max_name, low); //O(filt->max_name^3)
     
+    //Version 2
+    int D = 2;
+    boundary_mat B = buildBoundaryMatrix2(reversed, filtration->max_name, X->size);
+    db_int_list **dims = simpleByDims(B, reversed, X->size, D);
+    reduceMatrixOptimized(B, dims);
+    int **reduced = boundary_to_mat(B);
+    int *low = buildLowMatrix(reduced, filtration->max_name);
+    free_boundary(B);
+    for(int i=0; i<=D; i++){
+        free_list(dims[i]);
+    }
+    free(dims);
+
     // Extraction des paires
-    Tuple *pairs = extractPairsFilt(low, filtration, &(pd->size_pairs),
+    Tuple *pairs = extractPairsFilt(low, filtration, &(pd->size_pairs), //O(filt->max_name)
         reversed);
 
     // Assignation du rang d'apparition des simplexes dans la filtration 
@@ -315,8 +263,8 @@ PersistenceDiagram *PDCreate(Filtration *filtration, PointCloud *X){
 
     // Libération de la mémoire
     free(reversed);
-    for(unsigned long long i=0; i<filtration->max_name; i++) free(boundary[i]);
-    free(boundary);
+    // for(unsigned long long i=0; i<filtration->max_name; i++) free(boundary[i]);
+    // free(boundary);
     free(low);
     for(unsigned long long i=0; i<filtration->max_name; i++) free(reduced[i]);
     free(reduced);

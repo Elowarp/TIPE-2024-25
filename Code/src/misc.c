@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 15-09-2024 16:30:38
- *  Last modified : 12-10-2024 22:37:02
+ *  Last modified : 15-04-2025 20:31:54
  *  File : misc.c
  */
 
@@ -14,7 +14,7 @@ void print_err(char* str){
     fprintf(stderr, "[ERROR] %s", str);
 }
 
-// Copie une matrice
+// Copie une matrice O(n^2)
 int **copy_matrix(int **t, int n){
     int **copy = malloc(n * sizeof(int*));
     for(int i = 0; i<n; i++){
