@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 22-04-2025 20:23:47
- *  Last modified : 23-04-2025 22:56:15
+ *  Last modified : 24-04-2025 22:03:35
  *  File : reduc.c
  */
 #include <stdio.h>
@@ -90,9 +90,9 @@ int get_low(boundary_mat B, int j){
 // Renvoie un tableau dim de sorte que dim[i] est une liste de noms 
 // de simplexes de dimension i ; il faut que D soit la dimension maximale
 // de tous les simplexes O(nb total de simplexes^2)
-db_int_list **simpleByDims(boundary_mat B, int *reversed, int n, int D){
-    db_int_list **dims = malloc(sizeof(db_int_list*)*(D+1));
-    for(int j=0; j<=D; j++)
+db_int_list **simpleByDims(boundary_mat B, int *reversed, int n){
+    db_int_list **dims = malloc(sizeof(db_int_list*)*(DIM+1));
+    for(int j=0; j<=DIM; j++)
         dims[j] = create_list();
 
     for(int i=0; i<B.n; i++){
@@ -125,33 +125,35 @@ boundary_mat buildBoundaryMatrix2(int *reversed, unsigned long long max_name, in
 //      i correspond à la liste de simplexes de dimension i
 void reduceMatrixOptimized(boundary_mat B, db_int_list **simplexes_by_dims){   
     // Réduction de chacune des matrices par les dimensions (de 0 à D-1)
-    int D = 2; // Dimension maximale 
-    for(int d=0; d<D; d++){ 
+    for(int d=0; d<DIM; d++){ 
         // Simplexes de dimensions d+1 (cad consitituant les colonnes)
         db_int_list *simplexes = simplexes_by_dims[d+1];
-        node *c = simplexes->end;
+        node *c = simplexes->start;
 
         // Boucle sur les colonnes en décroissante, dim[d+1] itérations au pire
         while(c != NULL){ 
             int j = c->value;
+            
             node *c_i = c->prec;
-            // Boucle tant qu'il y a une colonne i qui a le même low
             while(c_i != NULL) { // dim[d] itération au pire
                 int i = c_i->value;
                 int k = get_low(B, i);
                 int k2 = get_low(B, j);
 
                 // Si la colonne a le même low
-                if (k == k2){
+                if (k == k2 && k != -1){
                     db_int_list *col = xor_list(B.s[i], B.s[j]); // O(l1 * l2)
                     free(B.s[j]);
                     B.s[j] = col;
+                    c_i = c->prec; // Recommence la lecture pour trouver les low
+                } else {
+                    c_i = c_i->prec;
+
                 }
                 
-                c_i = c_i->prec;
             }
 
-            c = c->prec;
+            c = c->next;
         }
     }
 }

@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 08-10-2024 17:08:19
- *  Last modified : 26-11-2024 15:50:47
+ *  Last modified : 24-04-2025 22:42:11
  *  File : main.c
  */
 #include <stdio.h>
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]){
     printf("Construction d'une filtration...\n");
     Filtration *filt = buildFiltration(X);
     printf("Construction du diagramme de persistance...\n");
-    PersistenceDiagram *pd = PDCreate(filt, X);
+    PersistenceDiagram *pd = PDCreateV1(filt, X);
     
     printf("Exportation du diagramme de persistance...\n");
     PDExport(pd, pd_filename, death_filename, false);

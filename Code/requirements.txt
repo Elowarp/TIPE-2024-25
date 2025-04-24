@@ -12,7 +12,7 @@ dbfread==2.0.7
 et_xmlfile==2.0.0
 fonttools==4.54.1
 greenlet==3.1.1
-gudhi==3.10.1
+gudhi==3.11.0
 idna==3.10
 isodate==0.7.2
 kaleido==0.2.1

@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 08-10-2024 17:01:34
- *  Last modified : 23-04-2025 22:48:26
+ *  Last modified : 24-04-2025 22:41:06
  *  File : tests_persDiag.c
  */
 #include <stdio.h>
@@ -92,7 +92,7 @@ void tests_persDiag(){
         X->pts[i] = (Point) {0, 0}; 
     
     
-    PersistenceDiagram *pd = PDCreate(base_filt, X);
+    PersistenceDiagram *pd = PDCreateV2(base_filt, X);
 
     c = 0;
     for(unsigned long long i=0; i<pd->size_pairs; i++){

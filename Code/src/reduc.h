@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 22-04-2025 20:23:49
- *  Last modified : 23-04-2025 22:55:29
+ *  Last modified : 24-04-2025 21:23:25
  *  File : reduc.h
  */
 #ifndef REDUC_H
@@ -24,7 +24,7 @@ int **reduceMatrix(int **boundary, unsigned long long n, int *low);
 boundary_mat buildBoundaryMatrix2(int *reversed, unsigned long long max_name, int nb_pts);
 int get_low(boundary_mat B, int j);
 void reduceMatrixOptimized(boundary_mat B, db_int_list **simplexes_by_dims);
-db_int_list **simpleByDims(boundary_mat B, int *reversed, int n, int D);
+db_int_list **simpleByDims(boundary_mat B, int *reversed, int n);
 
 // Misc
 boundary_mat boundary_init(int n);

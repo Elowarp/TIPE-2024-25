@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 23-04-2025 20:33:47
- *  Last modified : 23-04-2025 23:02:20
+ *  Last modified : 24-04-2025 21:27:05
  *  File : tests_reduc.c
  */
 #include <stdio.h>
@@ -129,8 +129,8 @@ void tests_reduc(){
 
     // Teste si la liste de listes par dimension est bonne :
     int D = 2; // Nombre de dimensions des simplexes 
-    db_int_list **dims = simpleByDims(B, reversed, N, D);
-    for(int i=0; i<=D; i++){
+    db_int_list **dims = simpleByDims(B, reversed, N);
+    for(int i=0; i<=DIM; i++){
         printf("Les simplexes de dimension %d :\n", i);
         print_list(dims[i]);
     }

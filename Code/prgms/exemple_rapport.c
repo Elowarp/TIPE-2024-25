@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "src/persDiag.h"
-#include "src/geometry.h"
-#include "src/misc.h"
+#include "../src/persDiag.h"
+#include "../src/reduc.h"
+#include "../src/geometry.h"
+#include "../src/misc.h"
 
 int main(){
+    // Filtration du rapport
     int n = 4;
     Simplex **simPts = malloc(n*sizeof(Simplex *)); 
     for(int i=0; i<n; i++) simPts[i] = simplexInit(-1, -1, i);
@@ -32,9 +34,10 @@ int main(){
     filtrationInsert(base_filt, simEdges[4], n, 3, 8);
     filtrationInsert(base_filt, simFaces[0], n, 3, 9);
     filtrationInsert(base_filt, simFaces[1], n, 4, 10);
-    
+
     int *reverse = reverseIdAndSimplex(base_filt);
     int **boundary = buildBoundaryMatrix(reverse, base_filt->max_name, n);
+    boundary_mat boundaryV2 = buildBoundaryMatrix2(reverse, base_filt->max_name, n);
 
     printf("Matrice B\n");
     printMatrix(boundary, base_filt->max_name, base_filt->max_name);
@@ -43,13 +46,41 @@ int main(){
     printf("Low\n");
     printMatrix(&low, 1, base_filt->max_name);
 
+    printf("Matrice bordure en V2\n");
+    print_boundary(boundaryV2);
+
+    int *lowV2 = malloc(sizeof(int)*base_filt->max_name);
+    for(int i=0; i<base_filt->max_name; i++)
+        lowV2[i] = get_low(boundaryV2, i);
+    
+    printf("Low V2\n");
+    printMatrix(&lowV2, 1, base_filt->max_name);
+
+    db_int_list **dims = simpleByDims(boundaryV2, reverse, n);
+    printf("Par dimensions\n");
+    for(int i=0; i<=2; i++){
+        printf("Les simplexes de dimension %d :\n", i);
+        print_list(dims[i]);
+    }
+
     int **reduced = reduceMatrix(boundary, base_filt->max_name, low);
     printf("Matrice Bbar\n");
     printMatrix(reduced, base_filt->max_name, base_filt->max_name);
 
+    reduceMatrixOptimized(boundaryV2, dims);
+    printf("Matrice BbarV2\n");
+    print_boundary(boundaryV2);
+
     int *low_reduced = buildLowMatrix(reduced, base_filt->max_name);
     printf("Low reduced\n");
     printMatrix(&low_reduced, 1, base_filt->max_name);
+
+    int *low_reducedV2 = malloc(sizeof(int)*base_filt->max_name);
+    for(int i=0; i<base_filt->max_name; i++)
+        low_reducedV2[i] = get_low(boundaryV2, i);
+    
+    printf("Low reduced V2\n");
+    printMatrix(&low_reducedV2, 1, base_filt->max_name);
 
     PersistenceDiagram *pd = malloc(sizeof(PersistenceDiagram));
 
@@ -95,5 +126,5 @@ int main(){
         }
     }
 
-    PDExport(pd, "testpd.dat", "testpddeath.dat", true);
+    PDExport(pd, "./exportedPD/rapport.dat", "./exportedPD/rapport_death.dat", true);
 }

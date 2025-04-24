@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 10-09-2024 16:23:55
- *  Last modified : 26-11-2024 15:46:07
+ *  Last modified : 24-04-2025 22:41:58
  *  File : persDiag.h
  */
 #ifndef PERSDIAG_H
@@ -31,7 +31,8 @@ extern int **reduceMatrix(int **boundary, unsigned long long n, int *low);
 extern Tuple *extractPairsFilt(int *low, Filtration *filt, 
     unsigned long long *size_pairs, int *reversed);
 
-PersistenceDiagram *PDCreate(Filtration *filtration, PointCloud *X);
+PersistenceDiagram *PDCreateV1(Filtration *filtration, PointCloud *X);
+PersistenceDiagram *PDCreateV2(Filtration *filtration, PointCloud *X);
 void PDExport(PersistenceDiagram *pd, char *filename, char *death_filename, bool bigger_dims);
 void PDFree(PersistenceDiagram *pd);
 

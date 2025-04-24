@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 10-09-2024 16:33:19
- *  Last modified : 23-04-2025 23:14:28
+ *  Last modified : 24-04-2025 22:42:24
  *  File : persDiag.c
  */
 #include <stdio.h>
@@ -189,8 +189,22 @@ Tuple *extractPairsFilt(int *low, Filtration *filt, unsigned long long *size_pai
 //  Persistance Diagram   //
 ////////////////////////////
 
+void fillPairs(PersistenceDiagram *pd, Filtration *filtration, Tuple *pairs){
+    // Assignation du rang d'apparition des simplexes dans la filtration 
+    // depuis la liste de paires
+    pd->pairs = malloc(pd->size_pairs * sizeof(Tuple));
+    for(unsigned long long i=0; i<pd->size_pairs; i++){
+    pd->pairs[i].x = filtration->filt[pairs[i].x];
+
+    if (pairs[i].y != -1)
+        pd->pairs[i].y = filtration->filt[pairs[i].y];
+    else
+        pd->pairs[i].y = -1;
+    }
+}
+
 // Crée un diagramme de persistance à partir d'une filtration injective
-PersistenceDiagram *PDCreate(Filtration *filtration, PointCloud *X){
+PersistenceDiagram *PDCreateV1(Filtration *filtration, PointCloud *X){
     PersistenceDiagram *pd = malloc(sizeof(PersistenceDiagram));
 
     // Matrice tq reversed[i] = j si le simplexe j est le i-ème simplexe de la filtration
@@ -198,48 +212,21 @@ PersistenceDiagram *PDCreate(Filtration *filtration, PointCloud *X){
     int *reversed = reverseIdAndSimplex(filtration); // O(filt->max_name)
 
     // Version 1
-    // // Matrice de bordure associée à la filtration
-    // int **boundary = buildBoundaryMatrix(reversed, filtration->max_name, X->size); //O(filt->max_name)
+    // Matrice de bordure associée à la filtration
+    int **boundary = buildBoundaryMatrix(reversed, filtration->max_name, X->size); //O(filt->max_name)
     
-    // // Matrice low associée à la matrice de bordure
-    // int *low = buildLowMatrix(boundary, filtration->max_name); //O(filt->max_name^2)
+    // Matrice low associée à la matrice de bordure
+    int *low = buildLowMatrix(boundary, filtration->max_name); //O(filt->max_name^2)
 
-    // // Réduction de la matrice de bordure
-    // int **reduced = reduceMatrix(boundary, filtration->max_name, low); //O(filt->max_name^3)
-    
-    //Version 2
-    int D = 2;
-    boundary_mat B = buildBoundaryMatrix2(reversed, filtration->max_name, X->size);
-    db_int_list **dims = simpleByDims(B, reversed, X->size, D);
-    reduceMatrixOptimized(B, dims);
-    int **reduced = boundary_to_mat(B);
-    int *low = buildLowMatrix(reduced, filtration->max_name);
-    free_boundary(B);
-    for(int i=0; i<=D; i++){
-        free_list(dims[i]);
-    }
-    free(dims);
+    // Réduction de la matrice de bordure
+    int **reduced = reduceMatrix(boundary, filtration->max_name, low); //O(filt->max_name^3)
 
-    // Extraction des paires
     Tuple *pairs = extractPairsFilt(low, filtration, &(pd->size_pairs), //O(filt->max_name)
         reversed);
-
-    // Assignation du rang d'apparition des simplexes dans la filtration 
-    // depuis la liste de paires
-    pd->pairs = malloc(pd->size_pairs * sizeof(Tuple));
-    for(unsigned long long i=0; i<pd->size_pairs; i++){
-        pd->pairs[i].x = filtration->filt[pairs[i].x];
-
-        if (pairs[i].y != -1)
-            pd->pairs[i].y = filtration->filt[pairs[i].y];
-        else
-            pd->pairs[i].y = -1;
-    }
+    fillPairs(pd, filtration, pairs);
 
     // Récupération des dimensions des simplexes et donc catégorises les 
     // classes d'homologie
-    
-    printf("Affichage des simplexes tuant des 1D homologies\n");
     pd->dims = malloc(pd->size_pairs * sizeof(int));
     for(unsigned long long i=0; i<pd->size_pairs; i++){
         Simplex s = simplexFromId(pairs[i].x, X->size);
@@ -263,11 +250,76 @@ PersistenceDiagram *PDCreate(Filtration *filtration, PointCloud *X){
 
     // Libération de la mémoire
     free(reversed);
-    // for(unsigned long long i=0; i<filtration->max_name; i++) free(boundary[i]);
-    // free(boundary);
+    for(unsigned long long i=0; i<filtration->max_name; i++) free(boundary[i]);
+    free(boundary);
     free(low);
     for(unsigned long long i=0; i<filtration->max_name; i++) free(reduced[i]);
     free(reduced);
+
+    return pd;
+}
+
+PersistenceDiagram *PDCreateV2(Filtration *filtration, PointCloud *X){
+    PersistenceDiagram *pd = malloc(sizeof(PersistenceDiagram));
+
+    // Tableau tq reversed[i] = k avec i l'indice du simplexe j dans 
+    // la filtration
+    int *reversed = reverseIdAndSimplex(filtration); // O(filt->max_name)
+
+    // Matrice de bordure
+    boundary_mat B = buildBoundaryMatrix2(reversed, filtration->max_name, X->size);
+
+    // Tableau ou chaque case contient une liste des simplexes de dimension
+    // egale a l'indice
+    db_int_list **dims = simpleByDims(B, reversed, X->size);
+
+    // Reduction
+    reduceMatrixOptimized(B, dims);
+
+    // Remplissage du tableau low
+    int *low = malloc(sizeof(int)*(filtration->max_name));
+    for(unsigned long long int i=0; i<filtration->max_name; i++)
+        low[i] = get_low(B, i);
+
+    // Tableau des paires (s_i, s_j) de la matrice réduite
+    Tuple *pairs = extractPairsFilt(low, filtration, &(pd->size_pairs), //O(filt->max_name)
+        reversed);
+    
+    // Rempli les paires de (K_i, K_j) associés aux paires précédentes
+    fillPairs(pd, filtration, pairs);
+
+    // Récupération des dimensions des simplexes et donc catégorises les 
+    // classes d'homologie
+    pd->dims = malloc(pd->size_pairs * sizeof(int));
+    for(unsigned long long i=0; i<pd->size_pairs; i++){
+        Simplex s = simplexFromId(pairs[i].x, X->size);
+        
+        pd->dims[i] = dimSimplex(&s);
+        if(dimSimplex(&s) == 1) pd->size_death1D++;
+    }
+    
+    // Rajoute les temps de naissance des tueurs de classes 1D 
+    pd->death1D = malloc(pd->size_death1D * sizeof(Simplex));
+    int c = 0;
+    for(unsigned long long i=0; i<pd->size_pairs; i++){
+        Simplex s = simplexFromId(pairs[i].x, X->size);
+        Simplex death_s = simplexFromId(pairs[i].y, X->size);
+        if(dimSimplex(&s) == 1)
+        {
+            pd->death1D[c] = death_s;
+            c++;
+        }
+    }
+    
+        
+    free(reversed);
+    free_boundary(B);
+    for(int i=0; i<=DIM; i++){
+        free_list(dims[i]);
+    }
+    free(dims);
+    free(low);
+    free(pairs);
 
     return pd;
 }

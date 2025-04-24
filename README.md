@@ -28,7 +28,7 @@ pip install -r requirements.txt
 
 Pour compiler le C, un simple `make` fera l'affaire.
 
-Maintenant un fichier `main` est crée, celui ci prend 1 à 2 arguments, le premier qui est obligatoire est celui du nom de la ville (par exemple `marseille`). Le programme ira chercher de lui meme les fichiers relatifs au nom de la ville dans le dossier `data/` (en l'occurrence `marseille_pts.txt` et `marseille_dist.txt` si l'option `-e` n'est pas ajoutée à la commande). 
+Maintenant un fichier `main` est crée, celui ci prend 1 à 2 arguments, le premier qui est obligatoire est celui du nom de la ville (par exemple `marseille`). Le programme ira chercher de lui meme les fichiers relatifs au nom de la ville dans le dossier `data/` (en l'occurrence `marseille_pts.txt` et `marseille_dist.txt` si l'option `-e` n'est pas ajoutée à la commande).
 
 Les informations sur les classes d'homologies ainsi que les simplexes tuant des 1D classes se retrouvent exportées dans `exportedPD/` en tant que `nomville.dat` et `nomville_death.txt` respectivement.
 
