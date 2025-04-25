@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 08-10-2024 17:08:19
- *  Last modified : 24-04-2025 22:42:11
+ *  Last modified : 25-04-2025 21:22:21
  *  File : main.c
  */
 #include <stdio.h>
@@ -72,6 +72,8 @@ int main(int argc, char *argv[]){
     free(pts_filename);
     free(dist_filename);
     free(pd_filename);
+    free(death_filename);
+    free(name);
     printf("Fin des calculs et de l'exportation\n");
     return 0;
 }

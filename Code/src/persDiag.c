@@ -1,11 +1,12 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 10-09-2024 16:33:19
- *  Last modified : 24-04-2025 22:42:24
+ *  Last modified : 25-04-2025 22:06:35
  *  File : persDiag.c
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "persDiag.h"
 #include "misc.h"
@@ -67,8 +68,8 @@ SimComplex *VRSimplex(PointCloud *X, float t){
                             simplexFree(s_jk);
                         }
                         simplexFree(s_ij);
-                        simplexFree(s_j);
                     }
+                    simplexFree(s_j);
                 }
             }
             simplexFree(s_i);
@@ -181,13 +182,22 @@ Tuple *extractPairsFilt(int *low, Filtration *filt, unsigned long long *size_pai
         count++;
     }
     
-    pairs = realloc(pairs, *size_pairs * sizeof(Tuple));
-    return pairs;
+    Tuple *pairs_resized = realloc(pairs, *size_pairs * sizeof(Tuple));
+    assert(pairs_resized != NULL);
+    return pairs_resized;
 }
 
 ////////////////////////////
 //  Persistance Diagram   //
 ////////////////////////////
+
+PersistenceDiagram *persDiag_create(){
+    PersistenceDiagram *pd = malloc(sizeof(PersistenceDiagram));
+    pd->size_death1D = 0;
+    pd->size_death1D = 0;
+    pd->size_pairs = 0;
+    return pd;
+}
 
 void fillPairs(PersistenceDiagram *pd, Filtration *filtration, Tuple *pairs){
     // Assignation du rang d'apparition des simplexes dans la filtration 
@@ -205,28 +215,33 @@ void fillPairs(PersistenceDiagram *pd, Filtration *filtration, Tuple *pairs){
 
 // Crée un diagramme de persistance à partir d'une filtration injective
 PersistenceDiagram *PDCreateV1(Filtration *filtration, PointCloud *X){
-    PersistenceDiagram *pd = malloc(sizeof(PersistenceDiagram));
+    PersistenceDiagram *pd = persDiag_create();
 
     // Matrice tq reversed[i] = j si le simplexe j est le i-ème simplexe de la filtration
     // Cohérent dans l'hypothèse de filtration injective
+    printf("reversed\n");
     int *reversed = reverseIdAndSimplex(filtration); // O(filt->max_name)
 
-    // Version 1
     // Matrice de bordure associée à la filtration
+    printf("boundary\n");
     int **boundary = buildBoundaryMatrix(reversed, filtration->max_name, X->size); //O(filt->max_name)
     
     // Matrice low associée à la matrice de bordure
+    printf("low\n");
     int *low = buildLowMatrix(boundary, filtration->max_name); //O(filt->max_name^2)
 
     // Réduction de la matrice de bordure
-    int **reduced = reduceMatrix(boundary, filtration->max_name, low); //O(filt->max_name^3)
+    printf("reduced\n");
+    reduceMatrix(boundary, filtration->max_name, low); //O(filt->max_name^3)
 
+    printf("pairs\n");
     Tuple *pairs = extractPairsFilt(low, filtration, &(pd->size_pairs), //O(filt->max_name)
         reversed);
     fillPairs(pd, filtration, pairs);
 
     // Récupération des dimensions des simplexes et donc catégorises les 
     // classes d'homologie
+    printf("dims\n");
     pd->dims = malloc(pd->size_pairs * sizeof(int));
     for(unsigned long long i=0; i<pd->size_pairs; i++){
         Simplex s = simplexFromId(pairs[i].x, X->size);
@@ -236,6 +251,7 @@ PersistenceDiagram *PDCreateV1(Filtration *filtration, PointCloud *X){
     }
     
     // Rajoute les temps de naissance des tueurs de classes 1D 
+    printf("deathD1\n");
     pd->death1D = malloc(pd->size_death1D * sizeof(Simplex));
     int c = 0;
     for(unsigned long long i=0; i<pd->size_pairs; i++){
@@ -253,14 +269,12 @@ PersistenceDiagram *PDCreateV1(Filtration *filtration, PointCloud *X){
     for(unsigned long long i=0; i<filtration->max_name; i++) free(boundary[i]);
     free(boundary);
     free(low);
-    for(unsigned long long i=0; i<filtration->max_name; i++) free(reduced[i]);
-    free(reduced);
-
+    free(pairs);
     return pd;
 }
 
 PersistenceDiagram *PDCreateV2(Filtration *filtration, PointCloud *X){
-    PersistenceDiagram *pd = malloc(sizeof(PersistenceDiagram));
+    PersistenceDiagram *pd = persDiag_create();
 
     // Tableau tq reversed[i] = k avec i l'indice du simplexe j dans 
     // la filtration
@@ -359,5 +373,6 @@ void PDExport(PersistenceDiagram *pd, char *filename, char *death_filename,
 void PDFree(PersistenceDiagram *pd){
     free(pd->dims);
     free(pd->pairs);
+    free(pd->death1D);
     free(pd);
 }

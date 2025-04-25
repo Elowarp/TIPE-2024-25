@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 14-09-2024 22:16:49
- *  Last modified : 23-04-2025 21:52:06
+ *  Last modified : 25-04-2025 21:44:41
  *  File : geometry.h
  */
 #ifndef GEOMETRY_H
@@ -36,9 +36,8 @@ typedef struct {
 } SimComplex;
 
 typedef struct {
-    int *x;
-    int *y;
-    int size;
+    int x;
+    int y;
 } Tuples;
 
 typedef struct {

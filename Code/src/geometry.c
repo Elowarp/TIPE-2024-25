@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 14-09-2024 13:55:46
- *  Last modified : 21-12-2024 16:24:13
+ *  Last modified : 25-04-2025 21:40:59
  *  File : geometry.c
  */
 #include <stdio.h>
@@ -55,10 +55,12 @@ bool pointAreEqual(Point p1, Point p2){
 };
 
 // Libère un nuage de points
-void pointCloudFree(PointCloud *pointCloud){
-    free(pointCloud->pts);
-    free(pointCloud->weights);
-    free(pointCloud);
+void pointCloudFree(PointCloud *X){
+    free(X->pts);
+    free(X->weights);
+    for(int i=0; i<X->size; i++) free(X->dist[i]);
+    free(X->dist);
+    free(X);
 };
 
 PointCloud *pointCloudLoad(char *filename, char *dist_filename){
@@ -97,6 +99,8 @@ PointCloud *pointCloudLoad(char *filename, char *dist_filename){
                 pointCloud->dist[i][j] = weigth;
             }
         }
+
+        fclose(dist_file);
 
         for(int i=0; i<size;i++)
             for(int j=0; j<i+1; j++)

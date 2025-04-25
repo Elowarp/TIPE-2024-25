@@ -78,7 +78,7 @@
 #let tls = "Ville B"
 
 #align(center, text(17pt)[
-    *TIPE : Étude de couvertures de réseaux de métros, application de l'homologie persistante*
+    *TIPE : Étude de couvertures de réseaux de métros, application de l'homologie persistante et optimisation*
 ])
 
 #align(center)[Elowan H\
@@ -96,28 +96,8 @@
 ]
 = Définitions <Definitions>
 
-_Intro à changer je pense_
-
-#grid(
-    columns: (47%, 47%),
-    column-gutter: 6%,
-    [L'exemple suivant est tiré de @PH_invitation.
-        
-    Prenons comme exemple le style artistique du pointillisme. Lorsque l'on regarde une oeuvre d'art, comme le tableau de Seurat en @Seurat, nous voyons bien plus qu'un grand nombre de points, nous voyons des formes et des objets. D'une discrétisation, nous en faisons un _continuum_ de formes. 
+L'homologie persistante est une _méthode de calcul_  qui, à partir d'une discrétisation, cherche à fournir une description des caractéristiques que l'on pourrait distinguer de cet ensemble. 
     
-    L'homologie persistante est une _méthode de calcul_  qui, à partir d'une discrétisation, cherche à fournir un descriptif des caractéristiques que l'on pourrait distinguer de cet ensemble. 
-    
-    // D'un ensemble de points dans un espace muni d'une distance, nous n'allons pas chercher à reconstituer la forme qu'aurait eu l'objet discrétisé mais plutôt d'avoir des caractéristiques de celui ci. 
-    ],
-    [
-        #figure(
-            image("../images/Georges_Seurat.jpg", width: 100%),
-            caption: "La scène à la Grande Jatte - Printemps (Georges Seurat, 1888)"
-        )<Seurat>
-    ]
-
-)
-
 Nous chercherons ici seulement à caractériser les "trous" dans un espace, afin de détecter les trous de couverture dans un réseau métropolitain, ici modélisé comme un nuage de points de $bb(R)^2$, dont chaque élément est une station de métro.
 
 Afin d'utiliser l'homologie persistante, nous devons définir certaines notions géométriques, nous noterons dans la suite #ensPts l'ensemble des points de $bb(R)^2$ que l'on considère.
@@ -466,7 +446,7 @@ Informatiquement, selon @PH_roadmap, on calcule ce code barre en créant une mat
     $ forall (i,j) in [|0, n-1|]^2, B[i][j] = cases("1 si" sigma_i "est une face de" sigma_j, "0 sinon") $
 ]<BordureDef>
 
-_Note : D'après @ComputingPH, $B$ peut être vu comme la matrice de $delta_1$ dans la base associée à $C_1$._
+_Note : D'après @ComputingPH, $B$ peut être vu comme la somme des matrice des $delta_k$ dans la base concaténée des bases des $C_k$._
 
 Un exemple d'une telle matrice est donnée en @Bordure.
 
@@ -474,8 +454,8 @@ Après avoir calculé $B$, nous voulons la _réduire_ à un code barre, dans le 
 
 Cet algorithme de réduction est nommé _standard algorithm_ et est décrit dans @PH_roadmap par, en posant $"low"_B (j) = max({i in [|0, n-1|], B[i][j] != 0}) in bb(N) union {-1}$ :
 
-#code("for j allant de n-1 à 0:
-    while (il existe i < j avec low_B(i) = low_B(j)):
+#code("for j allant de 0 à n-1:
+    while (il existe i < j avec low[i] = low[j]):
         ajouter colonne i de B à colonne j modulo 2",
     title: "StandardAlgorithm(B)"
 )
@@ -658,9 +638,7 @@ Comparons alors nos deux matrices, sur l'exemple de la filtration de @Filtration
     ]
 )
 
-Par exemple, si $"low"_overline(B) (j) = i != -1$ alors on a une paire de simplexes $(sigma_i, sigma_j)$ telle que l'apparition de $sigma_i$ fait apparaitre une nouvelle classe d'homologie. Et au contraire, $sigma_j$ va la _tuer_ en apparaissant. Prenons comme exemple la filtration @Filtration_ex : dans $K_0$, $p_1$ cause l'apparition d'une classe dans $H_0$ cependant l'apparition du simplexe $sigma_7$ dans $K_2$ tue la classe de $p_1$ dans $H_0$ mais crée une nouvelle classe dans $H_1$ (car elle crée un cycle).
-
-// Regardons la 1ere ligne (celle du 0) de la matrice $B$, il y a trois 1 : en effet le simplexe 0 est à la naissance des simplexes 4, 7 et 8 (en tant qu'extrémité). De même pour donner naissance à 10, il a fallut avoir les simplexes 6, 7 et 8, d'où la présence d'un 1 dans la colonne 10 des lignes 6, 7 et 8. 
+Par exemple, si $"low"_overline(B) (j) = i != -1$ alors on a une paire de simplexes $(sigma_i, sigma_j)$ telle que l'apparition de $sigma_i$ fait apparaitre une nouvelle classe d'homologie. Et au contraire, $sigma_j$ va la _tuer_ en apparaissant. Prenons comme exemple la filtration @Filtration_ex : dans $K_2$, $sigma_7$ cause l'apparition d'une classe dans $H_1$ (car elle crée un cycle) cependant l'apparition du simplexe $tau_10$ dans $K_4$ tue la classe de $sigma_7$ dans $H_1$ (car elle "remplit" le contenu du cycle)
 
 En revanche si $"low"_overline(B) (j) = -1$ alors l'apparition de $sigma_j$ crée une classe d'homologie : s'il existe $k$ tel que $"low"_overline(B) (k) = j$ on est dans le cas précédent, sinon la classe d'homologie n'est jamais tuée.
 
@@ -676,7 +654,7 @@ En revanche si $"low"_overline(B) (j) = -1$ alors l'apparition de $sigma_j$ cré
 
 C'est depuis cette matrice que nous sommes capables de déterminer $H_0$ et $H_1$, et donc de générer des représentations graphiques comme montré en @CarteResultat
 
-= Recherche
+= Recherche d'optimisation
 
 La motivation de cette section vient de l'observation suivante : pour 36 stations, il faut environ 10 secondes pour calculer les classes d'homologies. Sachant que ce temps d'exécution provient majoritairement de la complexité temporelle du standard algorithm, nous cherchons à optimiser la complexité de celui ci : $O(n^3) = O(2^(3|#ensPts|))$ ($n$ étant le nombre total de simplexes possibles $=2^(|#ensPts|)$).
 
@@ -684,7 +662,7 @@ L'optimisation que l'on propose provient de deux observations :
 - $B$ est une matrice creuse (beaucoup de cases vides);
 - L'opération de somme de colonnes (ligne 3) agit seulement sur une matrice extraite ne dépendant que de la dimension des simplexes. 
 
-Le premier point explique l'utilisation de liste d'adjacence à une matrice d'adjacence.
+Le premier point influence le choix d'utilisation de listes d'adjacences à une matrice d'adjacence, en particulier des double listes chaînées ordonnées.
 
 Justifions maintenant le deuxième point, soit $d in [|0, |#ensPts| - 1|]$, considérons la matrice extraite :
 $ B_d = (B_(i,j))_(i,j in I) "telle que " I = {(i,j) in [|0,n-1|], dim(sigma_i) = d "et "dim(sigma_j)=d+1 } $
@@ -694,22 +672,26 @@ On note $phi$ la correspondance entre les indices des deux matrices : $(B_d)_(ph
 Supposons que l'on exécute la ligne 3 de l'algorithme, alors $"low"(j)="low"(i) = k$, on pose $sigma_i$, $sigma_j$ et $sigma_k$ les simplexes associés. Donc $sigma_k$ est une face de $sigma_i$ et $sigma_j$, donc par définition 
 $ dim(sigma_k) + 1 = dim(sigma_i) = dim(sigma_j) $
 
-Donc la ligne $L_k$ et les deux colonnes $C_i$ et $C_j$ sont considérées dans $B_(d)$ ($d = dim(sigma_k)$). De plus, toutes les lignes ayant un coefficient non nul dans les colonnes $C_i$ ou $C_j$ le sont aussi puisqu'un coefficient non nul revient à être une face, donc de dimension $d$. 
+La ligne $L_k$ ainsi que les deux colonnes $C_i$ et $C_j$ sont alors considérées dans $B_(d)$ ($d = dim(sigma_k)$). De plus, toutes les lignes ayant un coefficient non nul dans les colonnes $C_i$ ou $C_j$ le sont aussi puisqu'un coefficient non nul revient à être une face, donc de dimension $d$. 
 
 Ainsi l'opération de somme des colonnes $C_i + C_j$ dans $B$ (ligne 3) est équivalent à celle de $C_i' + C_j'$ dans $B_d$ avec $phi(i,j) = (i',j')$.
 
-Ainsi, au lieu d'exécuter l'algorithme sur la matrice creuse $B$, on peut l'exécuter sur les matrices extraites $B_d$ plus petites et moins creuses c'est à dire localiser les modifications.
+Ainsi, au lieu d'exécuter l'algorithme sur la matrice creuse $B$, on peut l'exécuter sur les matrices extraites $B_d$ plus petites et moins creuses, on localise les modifications.
 
 On en déduit cet algorithme où $B$ est modifié par effet de bords sur les $B_d$ : 
 
-#code("L <- Liste des matrices extraites B_d 
-for B_d in L:
-   StandardAlgorithm(B_d)", title:"StandardAlgorithmUpgrade(B)")
+#code("dims <- Tableau des simplexes où dims[i] contient la liste des simplexes de dim=i
+for toute dimension d à considérer:
+    for chaque simplexe j de dims[d] de façon croissante
+        while il existe i tel que low[j] = low[k]:
+            ajouter colonne i de B à colonne j modulo 2
+", title:"StandardAlgorithmUpgrade(B)")
 
-Les différences de performances seront étudiées dans la partie suivante. 
+Le calcul de la complexité ne permettant pas d'avoir une meilleure borne, on note que cette algorithme est en $O(2^(3|#ensPts|))$ au pire, mais bien moins en utilisation. Voir @resultatOpti.
 
 = Résultats et conclusion
 
+== Résultats de l'homologie persitante
 #figure(
     table(
         columns: (auto, auto, auto, auto),
@@ -732,24 +714,6 @@ Les différences de performances seront étudiées dans la partie suivante.
 )
 
 On comprend que globalement il faut 200s (soit 3m20s) pour quelqu'un de se rendre d'une station à une autre (le minimum en temps entre la voiture et la marche) ce qui est effectivement cohérent avec la réalité. Les temps des classes pour la dimension 1 montrent le temps moyen de trajet entre les deux stations les plus éloignées d'un même cycle. Donc par exemple pour #tls, il faudra en moyenne 318s (5min20s) pour rejoindre une station depuis les zones les moins bien deservies.
-
-// #align(center)[#grid(
-//     columns: (50%, 50%),
-//     [
-//         #figure(
-//             image("../../Code/images/pd_toulouse.png", width:90%, alt:"Toulouse"),
-//             caption: [Toulouse]
-//         )
-//     ],  
-//     [
-//         #figure(
-//             image("../../Code/images/pd_marseille.png", width:90%, alt:"Marseille"),
-//             caption: [Marseille]
-//         )
-//     ],
-// )]
-
-// Ainsi via ces diagrammes de persistance, on remarque que les stations de metros pour ces deux villes sont égalements réparties en terme de temps de trajet entre deux stations (les classes 0D en rouge). Mais l'interprétation des diagrammes de persistance est assez limité dans notre cas, analysons alors directement les classes 1D se faisant tuer directement sur une carte : 
 
 #align(center)[
     #grid(
@@ -774,8 +738,21 @@ Les triangles ici représentés montrent les zones où il est le plus difficile 
 
 Nous devons revenir à la définition de notre distance : celle ci prend en compte le temps minimal entre un trajet en voiture et le même trajet à pied. Les plus petites zones, comme à gauche sur la ligne bleue dans la #mrs ou en bout de ligne rouge dans la #tls, correspondent en fait à des espaces uniquement piétons dont le temps de trajet est plus court à pied qu'en voiture. Ainsi, les plus petites zones indiquent donc la même information (difficulté d'accès à ces stations) que les grandes mais à une échelle différente.
 
-L'homologie persistante est donc une méthode nous permettant de mettre en lumière des zones mal desservies en prenant en compte des realités plus complexes que seul le temps de trajet. Par exemple, nous prenons en compte les temps d'attente en station mais nous aurions pu aussi prendre en compte la densité de population autour de ces stations. Cette caractéristique peut être une possibilité d'ouverture de ce sujet car celle ci joue intuitivement un rôle dans le temps d'attente en station et donc dans la difficulté de prendre un métro.
+== Résultat de l'optimisation
 
+#figure(
+    grid(columns: (50%, 50%),
+    image("../images/analyse_cmpx.png"),
+    image("../images/analyse_cmpx_log.png")
+    ),
+    caption: "Temps d'exécution des deux algorithmes précédents, avec une échelle linéaire à gauche et logarithmique à droite."
+)<resultatOpti>
+
+On observe une nette amélioration entre la version avant optimisation et celle après, cependant, même si la figure de gauche montre la différence ressentie lors de l'exécution, celle de droite montre que nous restons quand même en complexité exponentiel en le nombre d'éléments de #ensPts.
+
+Notons que le stockage en liste d'adjacence permet un plus grand nombres d'éléments tandis que la matrice d'adjacence pose beaucoup plus de problèmes. Ici, l'étude s'arrête pour un nombre d'éléments égale à 65 puisqu'il faut plus de 16go de ram pour stocker la matrice à une taille au dessus (ma limite physique).
+
+L'homologie persistante est donc une méthode nous permettant de mettre en lumière des zones mal desservies en prenant en compte des realités plus complexes que seul le temps de trajet. Par exemple, nous prenons en compte les temps d'attente en station mais nous aurions pu aussi prendre en compte la densité de population autour de ces stations. Cette caractéristique peut être une possibilité d'ouverture de ce sujet car celle ci joue intuitivement un rôle dans le temps d'attente en station et donc dans la difficulté de prendre un métro.
 
 #bibliography("../bibliography.yml", style: "american-physics-society", title:"Bibliographie")
 

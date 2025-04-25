@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 22-04-2025 20:23:47
- *  Last modified : 24-04-2025 22:03:35
+ *  Last modified : 25-04-2025 22:23:03
  *  File : reduc.c
  */
 #include <stdio.h>
@@ -63,21 +63,19 @@ int **buildBoundaryMatrix(int *reversed, unsigned long long max_name, int nb_pts
 }
 
 // Standart Algorithm O(n^3)
-int **reduceMatrix(int **boundary, unsigned long long n, int *low){
-    int **reduced = copy_matrix(boundary, n); // O(n^2)
+void reduceMatrix(int **boundary, unsigned long long n, int *low){
     for(unsigned long long i=0; i<n; i++){ 
         int j = sameLow(low, i); // O(n)
         while(j != -1){ // O(n) * O(n)
             // Soustraction de la colonne j à la colonne i
             for(unsigned long long k=0; k<n; k++){
-                reduced[k][i] = (reduced[k][i] + reduced[k][j]) % 2;
+                boundary[k][i] = (boundary[k][i] + boundary[k][j]) % 2;
             }
             
-            updateLow(reduced, low, i, n);
+            updateLow(boundary, low, i, n);
             j = sameLow(low, i);
         }
     }
-    return reduced;
 }
 
 // Récupère le plus grand indice de ligne tq la case est non nulle
@@ -130,7 +128,7 @@ void reduceMatrixOptimized(boundary_mat B, db_int_list **simplexes_by_dims){
         db_int_list *simplexes = simplexes_by_dims[d+1];
         node *c = simplexes->start;
 
-        // Boucle sur les colonnes en décroissante, dim[d+1] itérations au pire
+        // Boucle sur les colonnes en croissant, dim[d+1] itérations au pire
         while(c != NULL){ 
             int j = c->value;
             

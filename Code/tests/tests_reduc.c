@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 23-04-2025 20:33:47
- *  Last modified : 24-04-2025 21:27:05
+ *  Last modified : 25-04-2025 22:08:36
  *  File : tests_reduc.c
  */
 #include <stdio.h>
@@ -166,10 +166,10 @@ void tests_reduc(){
 
     // Teste si la matrice de la V1 est bien réduite
     int *low = buildLowMatrix(trueBoundary, n);
-    int **reducedV1 = reduceMatrix(trueBoundary, n, low);
+    reduceMatrix(trueBoundary, n, low);
     for(int i=0; i<n; i++){
         for(int j=0; j<n; j++)
-            assert(reducedV1[i][j] == true_reduced[i][j]);
+            assert(trueBoundary[i][j] == true_reduced[i][j]);
     }
 
     // Teste si la matrice de la V2 est bien réduite
@@ -199,7 +199,7 @@ void tests_reduc(){
     true_low_reduced[20] = 15;
     true_low_reduced[22] = 21;
 
-    int *test_low_reducedV1 = buildLowMatrix(reducedV1, n);
+    int *test_low_reducedV1 = buildLowMatrix(trueBoundary, n);
     int *test_low_reducedV2 = buildLowMatrix(reducedV2, n);
 
     for(int j=0; j<23; j++){
@@ -232,9 +232,9 @@ void tests_reduc(){
     free(test_lowV2);
     for(int i=0; i<n; i++){
         free(true_reduced[i]);
-        free(reducedV1[i]);
         free(reducedV2[i]);
     }
+    free(reducedV2);
     for(int i=0; i<=D; i++)
         free_list(dims[i]);
     free(dims);
