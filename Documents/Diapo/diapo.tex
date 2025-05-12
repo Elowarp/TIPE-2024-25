@@ -1,64 +1,95 @@
 \documentclass{beamer}
 \usepackage{graphicx}
 \usepackage{listingsutf8}
+\usepackage{mathtools}
+\usepackage{appendixnumberbeamer}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
 \lstset{basicstyle=\ttfamily,breaklines=true}
 \graphicspath{ {../images/} }
 \usetheme{metropolis}
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{footline}[appendixframenumber]
 
 \begin{document}
 
-\title{Analyse de couverture urbaine par homologie persistante : cas du 
-    développement des transports publics}
+\title{Étude de couvertures de réseaux de métros, application de 
+l'homologie persistante et optimisation.}
 \author{Elowan ; 10381}
 \date{\today}
 
 \maketitle
 
 \begin{frame}
-    \frametitle{Le but}    
+    \frametitle{La méthode}    
     \textbf{Trouver les zones les moins biens desservies par un réseau de métros.}
     
-    En convertissant des données géographiques en représentation géométrique
-    puis en effectuant une analyse topologique de l'espace représenté.
+    Les principales étapes : 
+    \itemize{
+        \item Convertir les données géographique en espace métrique
+        \item Trouver les trous dans cet espace
+        \item Afficher ces zones 
+    }
 
-    \begin{figure}
-        % \includegraphics[width=\textwidth]{filtration}
-        \centering
-        \caption{Carte vers représentation géoQ vers cartes avec triangles}
-    \end{figure}
+    % \begin{figure}
+    %     % \includegraphics[width=\textwidth]{filtration}
+    %     \centering
+    %     \caption{Carte avec pts metros vers repr avec triangles}
+    % \end{figure}
     
     
 \end{frame}
 
 \begin{frame}
-    \frametitle{Plus en détail : l'homologie persistante}
+    \frametitle{Plus en détail, reconnaitre un trou : l'homologie persistante}
+    Chercher à faire des chemins, puis reduire ces chemins sans jamais le rompre  
     \begin{figure}
-        % \includegraphics[width=\textwidth]{filtration}
+        \begin{tikzpicture}
+            \begin{axis}[
+                axis equal image,
+                axis lines=middle,
+                xmax=18,zmax=5,
+                ticks=none,
+                clip bounding box=upper bound,
+                colormap/blackwhite
+                ]
+
+                \addplot3[domain=0:360,y domain=0:320, samples=50,surf,z buffer=sort]
+                ({(12 + 3 * cos(x)) * cos(y)} ,
+                {(12 + 3 * cos(x)) * sin(y)},
+                {3 * sin(x)});
+            \end{axis}
+        \end{tikzpicture}
+        \begin{tikzpicture}
+            \shade[ball color = gray!40, opacity = 0.4] (0,0) circle (2cm);
+            \draw (0,0) circle (2cm);
+            \draw (-2,0) arc (180:360:2 and 0.6);
+            \draw[dashed] (2,0) arc (0:180:2 and 0.6);
+            \fill[fill=black] (0,0) circle (1pt);
+        \end{tikzpicture}
         \centering
-        \caption{Tore discrétisé, avec un zoom sur une partie du tore}
+        \caption{Un tore contenant deux trous et un cercle contenant 0 trou}
     \end{figure}
 \end{frame}
 
 \begin{frame}
     \frametitle{Définitions}
     \begin{block}{Simplexe}
-        Généralisation du triangle en dimension $n$, c'est l'objet le plus simple 
-        que l'on puisse construire qui ait $n$ dimension
+        Un simplexe $\sigma$ de dimension $k$ (ou $k$-simplexe) correspond à l'enveloppe convexe de $k+1$ points de $X$ non inclus dans un sous-espace affine de dimension $k-1$.
     \end{block}
 
     \begin{block}{Face}
-        La face de $\sigma$ un simplexe de dimension $n$ est un simplexe $\sigma'$
-        de dimension $n-1$ constituant $\sigma$.
+        On dit que $\sigma_i$ est une face de $\sigma_j$ si et seulement si $\sigma_i \subset \sigma_j$ et la dimension de $\sigma_i$ dim$(\sigma_i)$ est égale à dim$(\sigma_j) - 1$.
     \end{block}
 
     \begin{block}{Complexe simplicial}
-        Un ensemble de simplexes de dimension non forcément égales
+        Un ensemble de simplexes.
     \end{block}
 
     \begin{figure}
-        % \includegraphics[width=\textwidth]{filtration}
+        \includegraphics[width=0.2\textwidth]{../images/SimpFaceCompl.png}
         \centering
-        \caption{Exemple de complexe simplicial, avec des simplexes de différentes dim et faces}
+        \caption{Exemple de complexe simplicial}
     \end{figure}
     
 \end{frame}
@@ -66,19 +97,41 @@
 \begin{frame}
     \frametitle{Définitions}
     \begin{block}{Filtration}
-        Suite croissante pour l'inclusion de complexes simplicials
+        Suite croissante pour l'inclusion de complexes simpliciaux
     \end{block}
 
     \begin{figure}
-        \includegraphics[width=\textwidth]{filtration}
+        \includegraphics[width=0.5\textwidth]{../images/filtration_ex.png}
         \centering
         \caption{Exemple de filtration}
     \end{figure}
-
+\end{frame}
+\begin{frame}
+    \frametitle{Définitions}
     \begin{block}{Classe d'homologie}
         Intuitivement, elle représente un trou en dimension $n$
 
     \end{block}
+
+    \begin{figure}
+        \begin{tikzpicture}
+            \begin{axis}[
+                axis equal image,
+                axis lines=middle,
+                xmax=18,zmax=5,
+                ticks=none,
+                clip bounding box=upper bound,
+                colormap/blackwhite
+                ]
+
+                \addplot3[domain=0:360,y domain=0:320, samples=50,surf,z buffer=sort]
+                ({(12 + 3 * cos(x)) * cos(y)} ,
+                {(12 + 3 * cos(x)) * sin(y)},
+                {3 * sin(x)});
+            \end{axis}
+        \end{tikzpicture}
+        \caption{Exemple de classes d'homologies}
+    \end{figure}
 \end{frame}
 
 \begin{frame}
@@ -92,81 +145,199 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Théorème central}
-\end{frame}
-
-\begin{frame}
     \frametitle{Définition de la distance}
     
     \begin{block}{Distance}
         On définit la distance $d$ entre deux stations de metro $x$ et $y$ : 
-        $$ d(x,y) = \frac{1}{2}(min(t_{pied}(x,y), t_{voiture}(x,y)) + min(t_{pied}(y,x), t_{voiture}(y,x)))$$
+        $$ d(x,y) = \frac{1}{2}(min(t_{pied}(x,y), t_{voit}(x,y)) + min(t_{pied}(y,x), t_{voit}(y,x)))$$
     \end{block}
 \end{frame}
 
 \begin{frame}
     \frametitle{Définition des complexes pondérés de Vietoris-Rips}
-    
+    \begin{block}{Complexe Simplicial pondéré de Vietoris-Rips}
+        On le définit au rang $r$, comme l'ensemble des simplexes $(x_{i_0}, ..., x_{i_k})$ tels que : 
+        $$
+            \begin{cases}
+                \forall j \in [|0, k|], poids_{i_j} < r\\
+                \forall (j,l) \in [|0, k|]^2, d(x_{i_j}, x_{i_l}) + poids_{i_j} + poids_{i_l} < 2r
+            \end{cases}
+        $$
+    \end{block}
+
+    \begin{figure}
+        \includegraphics[width=0.8\textwidth]{../images/cech.png}
+        \caption{Image repr les vietoris rips, tiré de \textit{Persitent homology for resource coverage: A case study of access to polling sites}}
+    \end{figure}
     
 \end{frame}
 
 \begin{frame}
-    \frametitle{Lien entre les complexes et les stations de métros}
-    
-    
-\end{frame}
+    \frametitle{Préparatif de l'algorithme : Ordre total sur les simplexes}
+    Soient une filtration $K_0 \subset K_1 \subset ... \subset K_p$ et l'ensemble $S$ de tous les simplexes apparaissant dans la filtration. On indice $S$ de sorte que pour tout $\sigma_i$ et $\sigma_j$ de $S$: 
 
-\begin{frame}
-    \frametitle{Récupération des données}
-    Pour le calcul des temps de trajet :  apidocs.geoapify.com
-
-    Pour la récupération des stations et des temps d'attentes moyens : transport.data.gouv.fr
-\end{frame}
-
-\begin{frame}
-    \frametitle{Prératif de l'algorithme : Ordre total sur les simplexes}
+    $$ 
+    \begin{rcases}
+        \text{Si } \sigma_i \in K_{k_i} \text{ et } \sigma_j \in K_{k_j} \text{ avec } k_i < k_j\\
+        \text{Sinon si } \sigma_i \text{ est une face de } \sigma_j
+    \end{rcases}\Rightarrow i < j 
+    $$
+    L'ordre total est déduit de cet indiçage.
 \end{frame}
 
 
 \begin{frame}
     \frametitle{Préparatif de l'algorithme : Matrice de brodure}
+    \fontsize{8}{10}\selectfont
+    \begin{figure}[h]
+        \centering
+        \begin{minipage}[c]{0.45\linewidth}
+            \centering
+            \includegraphics[width=0.6\textwidth]{"../images/notationSimplexe.png"} 
+        \end{minipage}
+        \hfill
+        \begin{tabular}{ c | c | c | c | c | c | c | c }
+                & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\ \hline
+            0   & 1 &   &   & 1 & 1 &   &    \\ \hline
+            1   & 1 & 1 &   &   &   &   &    \\ \hline
+            2   &   & 1 & 1 &   & 1 &   &    \\ \hline
+            3   &   &   & 1 & 1 &   &   &    \\ \hline
+            4   &   &   &   &   &   & 1 &    \\ \hline
+            5   &   &   &   &   &   & 1 &    \\ \hline
+            6   &   &   &   &   &   &   & 1  \\ \hline
+            7   &   &   &   &   &   &   & 1  \\ \hline
+            8   &   &   &   &   &   & 1 & 1  \\ \hline
+            \textbf{low} & \textbf{1} & \textbf{2} & \textbf{3} & 
+            \textbf{3} & \textbf{2} & \textbf{8} & \textbf{8}
+        \end{tabular}
+        
+        \caption{Exemple de matrice de bordure associé à un ordre total}
+    \end{figure}
 \end{frame}
 
 
 \begin{frame}[fragile]
     \frametitle{Application de l'algorithme}
-      \begin{lstlisting}
-for j=1 to n do
-    while il existe i < j avec Low(i) = j do
-        Ajouter la colonne i a j
+    \begin{block}{Algorithme Standard}
+        \fontsize{9.5}{10}\selectfont
+        \begin{lstlisting}
+for j allant de 0 a n-1:
+    while (il existe i < j avec low[i] = low[j]):
+        ajouter colonne i de B a colonne j modulo 2
       \end{lstlisting}
-  \end{frame}
+    \end{block}
+\end{frame}
 
 
 \begin{frame}
     \frametitle{Compréhension du résultat en sortie}
+    \fontsize{8}{10}\selectfont
+    \begin{figure}
+        \begin{math}
+        \begin{array}{cc}
+            \begin{tabular}{ c | c | c | c | c | c | c | c }
+                  & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\ \hline
+                0 & 1 &   &   & 1 & 1 &   &    \\ \hline
+                1 & 1 & 1 &   &   &   &   &    \\ \hline
+                2 &   & 1 & 1 &   & 1 &   &    \\ \hline
+                3 &   &   & 1 & 1 &   &   &    \\ \hline
+                4 &   &   &   &   &   & 1 &    \\ \hline
+                5 &   &   &   &   &   & 1 &    \\ \hline
+                6 &   &   &   &   &   &   & 1  \\ \hline
+                7 &   &   &   &   &   &   & 1  \\ \hline
+                8 &   &   &   &   &   & 1 & 1  \\ \hline
+                \textbf{low} & \textbf{1} & \textbf{2} & \textbf{3} & 
+                \textbf{3} & \textbf{2} & \textbf{8} & \textbf{8}
+            \end{tabular} & 
+            \begin{tabular}{ c | c | c | c | c | c | c | c }
+                  & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\ \hline
+                0 & 1 &   &   &   &   &   &    \\ \hline
+                1 & 1 & 1 &   &   &   &   &    \\ \hline
+                2 &   & 1 & 1 &   &   &   &    \\ \hline
+                3 &   &   & 1 &   &   &   &    \\ \hline
+                4 &   &   &   &   &   & 1 & 1  \\ \hline
+                5 &   &   &   &   &   & 1 & 1  \\ \hline
+                6 &   &   &   &   &   &   & 1  \\ \hline
+                7 &   &   &   &   &   &   & 1  \\ \hline
+                8 &   &   &   &   &   & 1 &     \\ \hline
+                \textbf{low} & \textbf{1} & \textbf{2} & \textbf{3} & 
+                \textbf{-1} & \textbf{-1} & \textbf{8} & \textbf{7}
+            \end{tabular}
+        \end{array}
+        \end{math}
+        \caption{Matrice initiale et reduite}
+    \end{figure}
 \end{frame}
 
 \begin{frame}
-    \frametitle{Résultats et conclusion}
+    \frametitle{Optimisation}
+    Remarques à l'initiative de la recherche d'optimisation :
+    \begin{itemize}
+        \item La matrice est creuse ;
+        \item L'opération de somme de colonnes laisse invariante tous les simplexes de dimension différente.
+    \end{itemize}
 
+    Modifications apportées :
+    \begin{itemize}
+        \item Représentation de la matrice en liste d'adjacence
+        \item Application de l'algorithme sur des matrices extraites et non la totale : Programmation dynamique
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Algorithme optimisé}
+    \begin{block}{Algorithme Standard optimisé}
+        \fontsize{9.5}{10}\selectfont
+        \begin{lstlisting}
+dims <- Tableau des simplexes ou dims[i] contient la liste des simplexes de dimension i
+for toute dimension d a considerer:
+    for chaque simplexe j de dims[d]
+        while (il existe i tel que low[j] = low[i]):
+            ajouter colonne i de B a colonne j modulo 2
+      \end{lstlisting}
+    \end{block}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Résultats}
+    \begin{figure}%
+        \centering
+        \includegraphics[width=0.8\textwidth]{../images/analyse_cmpx.png}
+        \caption{Ordonnée linéaire}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Résultats}
+    \begin{figure}%
+        \centering
+        \includegraphics[width=0.8\textwidth]{../images/analyse_cmpx_log.png}
+        \caption{Ordonnée logarithmique}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Résultats}
     \begin{figure}[h]
         \begin{minipage}[c]{.42\linewidth}
             \centering
-            \includegraphics[width=1.1\textwidth]{../../Code/images/marseille.png}
+            \includegraphics[width=1.3\textwidth]{../../Code/images/marseille.png}
             \caption{Marseille}
         \end{minipage}
         \hfill
         \begin{minipage}[c]{.42\linewidth}
             \centering
-            \includegraphics[width=1\textwidth]{../../Code/images/toulouse.png}
+            \includegraphics[width=1.3\textwidth]{../../Code/images/toulouse.png}
             \caption{Toulouse}
         \end{minipage}
     \end{figure}
 \end{frame}
 
+\appendix
+
 \begin{frame}
-    \frametitle{Annexe}
+    \frametitle{Annexe : Définition}
     \begin{block}{Définition d'une variété}
         
     \end{block}
@@ -208,5 +379,10 @@ for j=1 to n do
     \end{figure}
 \end{frame}
 
+\begin{frame}
+    \frametitle{Annexe : Récupération des données}
+    Pour le calcul des temps de trajet :  apidocs.geoapify.com
 
+    Pour la récupération des stations et des temps d'attentes moyens : transport.data.gouv.fr
+\end{frame}
 \end{document}
