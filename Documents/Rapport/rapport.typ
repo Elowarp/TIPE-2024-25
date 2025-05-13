@@ -28,8 +28,7 @@
     let hd = heading
     let elmt = it.element 
     if elmt != none and elmt.func() == hd {
-        link(elmt.location(), "section "+elmt.numbering.first())
-
+        link(elmt.location(), "section " + numbering(elmt.numbering, ..counter(hd).at(elmt.location())))
     } else {
         it
     }
@@ -89,11 +88,9 @@
     title: [Sommaire]
 )
 
-#align(center)[
-    *Résumé*
+#align(center)[*Résumé*]
+Nous nous proposons ici d'étudier les différentes disparités dans les réseaux métropolitains de plusieurs grandes villes, nous allons détecter les zones spatiales les plus en déficit de transports en commun. Pour cela, nous adopterons une approche analytique utilisant la topologie : _l'homologie persistante_.
 
-    Nous nous proposons ici d'étudier les différentes disparités dans les réseaux métropolitains de plusieurs grandes villes, nous allons détecter les zones spatiales les plus en déficit de transports en commun. Pour cela, nous adopterons une approche analytique utilisant la topologie : _l'homologie persistante_.
-]
 = Définitions <Definitions>
 
 L'homologie persistante est une _méthode de calcul_  qui, à partir d'une discrétisation, cherche à fournir une description des caractéristiques que l'on pourrait distinguer de cet ensemble. 
@@ -310,7 +307,7 @@ Ainsi plus on augmente $r$, plus le complexe possède des simplexes, on en donne
 
 #figure(
     image("../images/cech.png"),
-    caption: [Construction d'un complexe simplicial avec un $r$ grandissant de gauche à droite]
+    caption: [Construction d'un complexe simplicial avec un $r$ grandissant de gauche à droite, tiré de @PH_resource_coverage]
 ) <VR>
 
 Ici, $r$ est le rayon des boules bleues, et un simplexe est considéré dès lors que les boules associées à ces sommets se rencontrent.
@@ -452,7 +449,7 @@ Un exemple d'une telle matrice est donnée en @Bordure.
 
 Après avoir calculé $B$, nous voulons la _réduire_ à un code barre, dans le sens où par lecture matricielle, grâce au théorème précédement, nous pouvons donner un temps de vie à chaque simplexe par l'attribution d'un unique antécédent à chacun de ceux-ci. Le terme de _réduction_ fait ici référence à la réduction de $B$ en forme normale de Smith. Nous pouvons observer ce résultat en @BordureReduite.
 
-Cet algorithme de réduction est nommé _standard algorithm_ et est décrit dans @PH_roadmap par, en posant $"low"_B (j) = max({i in [|0, n-1|], B[i][j] != 0}) in bb(N) union {-1}$ :
+Cet algorithme de réduction est nommé _standard algorithm_ et est décrit dans @PH_roadmap par, en posant $n$ le nombre de simplexes et $"low"_B (j) = max({i in [|0, n-1|], B[i][j] != 0}) in bb(N) union {-1}$ :
 
 #code("for j allant de 0 à n-1:
     while (il existe i < j avec low[i] = low[j]):
@@ -462,7 +459,7 @@ Cet algorithme de réduction est nommé _standard algorithm_ et est décrit dans
 
 _Notons que cet algorithme a pour complexité temporelle $O(n^3)$ au pire._ 
 
-Comparons alors nos deux matrices, sur l'exemple de la filtration de @Filtration_ex (Les cases vides remplacent les zeros pour plus de lisibilité et les colonnes/lignes vides ont été omises), avec ici notre ordre total sur les simplexes :
+Comparons alors nos deux matrices, sur l'exemple de la filtration de la @Filtration_ex (Les cases vides remplacent les zeros pour plus de lisibilité et les colonnes/lignes vides ont été omises), avec ici notre ordre total sur les simplexes :
 
 #grid(
     columns: (50%, 45%),
@@ -478,7 +475,6 @@ Comparons alors nos deux matrices, sur l'exemple de la filtration de @Filtration
                 let p2 = (-1+x, 0+y)
                 let p3 = (0+x, -1+y)
                 (
-                    "10": line(p0, p2, p3, fill: red.transparentize(75%), name:"10"),
                     "9": line(p0, p1, p2, fill: red.transparentize(75%), name:"9"), 
                     "4": line(p0, p1, name:"4"), 
                     "5": line(p1, p2, name:"5"), 
@@ -542,7 +538,7 @@ Comparons alors nos deux matrices, sur l'exemple de la filtration de @Filtration
             group(name: "K_3", {
                 let origin = (0, 0)
 
-                for i in range(10, 3, step:-1) {
+                for i in range(9, 3, step:-1) {
                     draw_line(i, lines(origin).at(str(i)))
                 }
 
@@ -567,9 +563,9 @@ Comparons alors nos deux matrices, sur l'exemple de la filtration de @Filtration
     gutter: 0%,
     [
         #figure(
-            table(columns : 10,
+            table(columns : 9,
             table.header(
-                table.cell(colspan:10, [*Enfants*], stroke: none),
+                table.cell(colspan:9, [*Enfants*], stroke: none),
             ),
             table.cell(
                 rowspan:10,
@@ -578,33 +574,33 @@ Comparons alors nos deux matrices, sur l'exemple de la filtration de @Filtration
                 rotate(-90deg, reflow: true)[
                 *Parents*
             ]),
-            [],  [4], [5], [6], [7], [8], [9], [10],
+            [],  [4], [5], [6], [7], [8], [9], 
             table.cell(
                 rowspan:10,
                 align: horizon,
                 stroke: none,
                 rotate(-90deg, reflow: true)[]
             ),
-            [0], [1], [], [], [1], [1], [], [],
-            [1], [1], [1], [], [], [], [], [],
-            [2], [], [1], [1], [], [1], [], [],
-            [3], [], [], [1], [1], [], [], [],
-            [4], [], [], [], [], [], [1], [],
-            [5], [], [], [], [], [], [1], [],
-            [6], [], [], [], [], [], [], [1],
-            [7], [], [], [], [], [], [], [1],
-            [8], [], [], [], [], [], [1], [1],
-            table.cell(colspan: 10, [], stroke:none),
-            table.cell(stroke:none, []), [*low*], [*1*], [*2*], [*3*], [*3*], [*2*], [*8*], [*8*], table.cell(stroke:none, [])
+            [0], [1], [], [], [1], [1], [], 
+            [1], [1], [1], [], [], [], [], 
+            [2], [], [1], [1], [], [1], [], 
+            [3], [], [], [1], [1], [], [], 
+            [4], [], [], [], [], [], [1], 
+            [5], [], [], [], [], [], [1], 
+            [6], [], [], [], [], [], [], 
+            [7], [], [], [], [], [], [], 
+            [8], [], [], [], [], [], [1],
+            table.cell(colspan: 9, [], stroke:none),
+            table.cell(stroke:none, []), [*low*], [*1*], [*2*], [*3*], [*3*], [*2*], [*8*], table.cell(stroke:none, [])
             ),
-            caption:"Matrice B"
+            caption:[Matrice $B$]
         ) <Bordure>        
     ],
     [
         #figure(
-            table(columns : 10,
+            table(columns : 9,
             table.header(
-                table.cell(colspan:10, [*Enfants*], stroke: none),
+                table.cell(colspan:9, [*Enfants*], stroke: none),
             ),
             table.cell(
                 rowspan:10,
@@ -614,26 +610,26 @@ Comparons alors nos deux matrices, sur l'exemple de la filtration de @Filtration
                 *Parents*
             ]
             ),
-            [],  [4], [5], [6], [7], [8], [9], [10],
+            [],  [4], [5], [6], [7], [8], [9],
             table.cell(
                 rowspan:10,
                 align: horizon,
                 stroke: none,
                 rotate(-90deg, reflow: true)[]
             ),
-            [0], [1], [], [], [], [], [], [],
-            [1], [1], [1], [], [], [], [], [],
-            [2], [], [1], [1], [], [], [], [],
-            [3], [], [], [1], [], [], [], [],
-            [4], [], [], [], [], [], [1], [1],
-            [5], [], [], [], [], [], [1], [1],
-            [6], [], [], [], [], [], [], [1],
-            [7], [], [], [], [], [], [], [1],
-            [8], [], [], [], [], [], [1], [],
-            table.cell(colspan: 10, [], stroke:none),
-            table.cell(stroke:none, []), [*low*], [*1*], [*2*], [*3*], [-1], [-1], [*8*], [*7*], table.cell(stroke:none, [])
+            [0], [1], [], [], [], [], [], 
+            [1], [1], [1], [], [], [], [], 
+            [2], [], [1], [1], [], [], [], 
+            [3], [], [], [1], [], [], [], 
+            [4], [], [], [], [], [], [1], 
+            [5], [], [], [], [], [], [1], 
+            [6], [], [], [], [], [], [], 
+            [7], [], [], [], [], [], [], 
+            [8], [], [], [], [], [], [1], 
+            table.cell(colspan: 9, [], stroke:none),
+            table.cell(stroke:none, []), [*low*], [*1*], [*2*], [*3*], [-1], [-1], [*8*], table.cell(stroke:none, [])
             ),
-            caption:[Matrice $overline(B)$, la matrice B après reduction]
+            caption:[Matrice $overline(B)$, $B$ après réduction]
         ) <BordureReduite>
     ]
 )
@@ -654,66 +650,55 @@ En revanche si $"low"_overline(B) (j) = -1$ alors l'apparition de $sigma_j$ cré
 
 C'est depuis cette matrice que nous sommes capables de déterminer $H_0$ et $H_1$, et donc de générer des représentations graphiques comme montré en @CarteResultat
 
-= Recherche d'optimisation
+= Recherche d'optimisation<optimisation>
 
 La motivation de cette section vient de l'observation suivante : pour 36 stations, il faut environ 10 secondes pour calculer les classes d'homologies. Sachant que ce temps d'exécution provient majoritairement de la complexité temporelle du standard algorithm, nous cherchons à optimiser la complexité de celui ci : $O(n^3) = O(2^(3|#ensPts|))$ ($n$ étant le nombre total de simplexes possibles $=2^(|#ensPts|)$).
 
 L'optimisation que l'on propose provient de deux observations :
-- $B$ est une matrice creuse (beaucoup de cases vides);
-- L'opération de somme de colonnes (ligne 3) agit seulement sur une matrice extraite ne dépendant que de la dimension des simplexes. 
+- $B$ est une matrice creuse ;
+- L'opération de somme de colonnes (ligne 3) agit seulement sur une matrice extraite $B_d$ ne dépendant que de la dimension des simplexes. 
 
-Le premier point influence le choix d'utilisation de listes d'adjacences à une matrice d'adjacence, en particulier des double listes chaînées ordonnées.
+Le premier point influence le choix d'utilisation de listes d'adjacences à une matrice d'adjacence, en particulier par des doubles listes chaînées ordonnées.
 
-Justifions maintenant le deuxième point, soit $d in [|0, |#ensPts| - 1|]$, considérons la matrice extraite :
-$ B_d = (B_(i,j))_(i,j in I) "telle que " I = {(i,j) in [|0,n-1|], dim(sigma_i) = d "et "dim(sigma_j)=d+1 } $
-
-On note $phi$ la correspondance entre les indices des deux matrices : $(B_d)_(phi(i,j)) = B_(i,j)$
-
-Supposons que l'on exécute la ligne 3 de l'algorithme, alors $"low"(j)="low"(i) = k$, on pose $sigma_i$, $sigma_j$ et $sigma_k$ les simplexes associés. Donc $sigma_k$ est une face de $sigma_i$ et $sigma_j$, donc par définition 
-$ dim(sigma_k) + 1 = dim(sigma_i) = dim(sigma_j) $
-
-La ligne $L_k$ ainsi que les deux colonnes $C_i$ et $C_j$ sont alors considérées dans $B_(d)$ ($d = dim(sigma_k)$). De plus, toutes les lignes ayant un coefficient non nul dans les colonnes $C_i$ ou $C_j$ le sont aussi puisqu'un coefficient non nul revient à être une face, donc de dimension $d$. 
-
-Ainsi l'opération de somme des colonnes $C_i + C_j$ dans $B$ (ligne 3) est équivalent à celle de $C_i' + C_j'$ dans $B_d$ avec $phi(i,j) = (i',j')$.
-
-Ainsi, au lieu d'exécuter l'algorithme sur la matrice creuse $B$, on peut l'exécuter sur les matrices extraites $B_d$ plus petites et moins creuses, on localise les modifications.
+La justification du second point se trouve en annexe.
 
 On en déduit cet algorithme où $B$ est modifié par effet de bords sur les $B_d$ : 
+
 
 #code("dims <- Tableau des simplexes où dims[i] contient la liste des simplexes de dim=i
 for toute dimension d à considérer:
     for chaque simplexe j de dims[d] de façon croissante
-        while il existe i tel que low[j] = low[k]:
+        while il existe i tel que low[j] = low[i]:
             ajouter colonne i de B à colonne j modulo 2
 ", title:"StandardAlgorithmUpgrade(B)")
 
-Le calcul de la complexité ne permettant pas d'avoir une meilleure borne, on note que cette algorithme est en $O(2^(3|#ensPts|))$ au pire, mais bien moins en utilisation. Voir @resultatOpti.
+Le calcul de la complexité ne permettant pas d'avoir une meilleure borne, on note que cette algorithme est en $O(2^(3|#ensPts|))$ au pire, mais bien moins en pratique, voir @resultatOpti.
 
 = Résultats et conclusion
 
 == Résultats de l'homologie persitante
-#figure(
-    table(
-        columns: (auto, auto, auto, auto),
-        inset: 10pt,
-        align: horizon,
-        table.header(
-        [*Ville*], [*Dimension*], [*Médiane*], [*Variance*],
-        ),
-        table.cell(rowspan: 2)[#mrs], 
-            "0D Homologie", "184.00s", "23.57s",
-            "1D Homologie", "223.50s", "10.5s",
-        table.cell(rowspan: 2)[#tls], 
-            "0D Homologie", "211.00s", "22.27s",
-            "1D Homologie", "318.00s", "58.62s",
+// #figure(
+//     table(
+//         columns: (auto, auto, auto, auto),
+//         inset: 10pt,
+//         align: horizon,
+//         table.header(
+//         [*Ville*], [*Dimension*], [*Médiane*], [*Variance*],
+//         ),
+//         table.cell(rowspan: 2)[#mrs], 
+//             "0D Homologie", "184.00s", "23.57s",
+//             "1D Homologie", "223.50s", "10.5s",
+//         table.cell(rowspan: 2)[#tls], 
+//             "0D Homologie", "211.00s", "22.27s",
+//             "1D Homologie", "318.00s", "58.62s",
 
 
-    ),
-    caption: [Tableau récapitulant les médianes ainsi que la variance des temps de mort des classes holomogiques pour chaque ville.]
+//     ),
+//     caption: [Tableau récapitulant les médianes ainsi que la variance des temps de mort des classes holomogiques pour chaque ville.]
 
-)
+// )
 
-On comprend que globalement il faut 200s (soit 3m20s) pour quelqu'un de se rendre d'une station à une autre (le minimum en temps entre la voiture et la marche) ce qui est effectivement cohérent avec la réalité. Les temps des classes pour la dimension 1 montrent le temps moyen de trajet entre les deux stations les plus éloignées d'un même cycle. Donc par exemple pour #tls, il faudra en moyenne 318s (5min20s) pour rejoindre une station depuis les zones les moins bien deservies.
+// On comprend que globalement il faut 200s (soit 3m20s) pour quelqu'un de se rendre d'une station à une autre (le minimum en temps entre la voiture et la marche) ce qui est effectivement cohérent avec la réalité. Les temps des classes pour la dimension 1 montrent le temps moyen de trajet entre les deux stations les plus éloignées d'un même cycle. Donc par exemple pour #tls, il faudra en moyenne 318s (5min20s) pour rejoindre une station depuis les zones les moins bien deservies.
 
 #align(center)[
     #grid(
@@ -745,18 +730,33 @@ Nous devons revenir à la définition de notre distance : celle ci prend en comp
     image("../images/analyse_cmpx.png"),
     image("../images/analyse_cmpx_log.png")
     ),
-    caption: "Temps d'exécution des deux algorithmes précédents, avec une échelle linéaire à gauche et logarithmique à droite."
+    caption: "Temps d'exécution des deux algorithmes précédents, avec une ordonnée linéaire à gauche et logarithmique à droite."
 )<resultatOpti>
 
-On observe une nette amélioration entre la version avant optimisation et celle après, cependant, même si la figure de gauche montre la différence ressentie lors de l'exécution, celle de droite montre que nous restons quand même en complexité exponentiel en le nombre d'éléments de #ensPts.
+On observe sur la @resultatOpti une nette amélioration entre la version avant optimisation et celle après, cependant, même si la figure de gauche montre la différence ressentie lors de l'exécution, celle de droite montre que nous restons quand même en complexité "quasi"-exponentiel en le nombre d'éléments de #ensPts.
 
-Notons que le stockage en liste d'adjacence permet un plus grand nombres d'éléments tandis que la matrice d'adjacence pose beaucoup plus de problèmes. Ici, l'étude s'arrête pour un nombre d'éléments égale à 65 puisqu'il faut plus de 16go de ram pour stocker la matrice à une taille au dessus (ma limite physique).
+Notons que le stockage en liste d'adjacence permet un plus grand nombres d'éléments tandis que la matrice d'adjacence pose beaucoup plus de problèmes. Ici, l'étude s'arrête pour un nombre d'éléments égale à 65 puisqu'il faut plus de 16go de ram pour stocker la matrice d'une taille supérieure (ma limite physique).
 
 L'homologie persistante est donc une méthode nous permettant de mettre en lumière des zones mal desservies en prenant en compte des realités plus complexes que seul le temps de trajet. Par exemple, nous prenons en compte les temps d'attente en station mais nous aurions pu aussi prendre en compte la densité de population autour de ces stations. Cette caractéristique peut être une possibilité d'ouverture de ce sujet car celle ci joue intuitivement un rôle dans le temps d'attente en station et donc dans la difficulté de prendre un métro.
 
 #bibliography("../bibliography.yml", style: "american-physics-society", title:"Bibliographie")
 
-// = Annexe
+= Annexe
+
+Justifions le deuxième point annoncé dans @optimisation, soit $d in [|0, |#ensPts| - 1|]$, considérons la matrice extraite :
+$ B_d = (B_(i,j))_((i,j) in I) "telle que " I = {(i,j) in [|0,n-1|], dim(sigma_i) = d "et "dim(sigma_j)=d+1 } $
+
+On note $phi$ la correspondance entre les indices des deux matrices : $(B_d)_(phi(i,j)) = B_(i,j)$
+
+Supposons que l'on exécute la ligne 3 de l'algorithme, alors $"low"(j)="low"(i) = k$, on pose $sigma_i$, $sigma_j$ et $sigma_k$ les simplexes associés. Donc $sigma_k$ est une face de $sigma_i$ et $sigma_j$, donc par définition 
+$ dim(sigma_k) + 1 = dim(sigma_i) = dim(sigma_j) $
+
+La ligne $L_k$ ainsi que les deux colonnes $C_i$ et $C_j$ sont alors considérées dans $B_(d)$ ($d = dim(sigma_k)$). De plus, toutes les lignes ayant un coefficient non nul dans les colonnes $C_i$ ou $C_j$ le sont aussi puisqu'un coefficient non nul revient à être une face, donc de dimension $d$. 
+
+Ainsi l'opération de somme des colonnes $C_i + C_j$ dans $B$ (ligne 3) est équivalent à celle de $C_i' + C_j'$ dans $B_d$ avec $phi(i,j) = (i',j')$.
+
+Ainsi, au lieu d'exécuter l'algorithme sur la matrice creuse $B$, on peut l'exécuter sur les matrices extraites $B_d$ plus petites et moins creuses, on localise ainsi les modifications.
+
 // _Partie temporaire pour plus de compréhension_
 // == Théorème des invariants <annexe_inv>
 // Source de @ComputingPH : 
