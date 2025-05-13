@@ -21,14 +21,14 @@ l'homologie persistante et optimisation.}
 \maketitle
 
 \begin{frame}
-    \frametitle{La méthode}    
+    \frametitle{Le déroulement}    
     \textbf{Trouver les zones les moins biens desservies par un réseau de métros.}
     
     Les principales étapes : 
     \itemize{
         \item Convertir les données géographique en espace métrique
-        \item Trouver les trous dans cet espace
-        \item Afficher ces zones 
+        \item Créer une suite de formes géométriques à partir de cet espace
+        \item Trouver les trous de ces formes
     }
 
     % \begin{figure}
@@ -41,8 +41,8 @@ l'homologie persistante et optimisation.}
 \end{frame}
 
 \begin{frame}
-    \frametitle{Plus en détail, reconnaitre un trou : l'homologie persistante}
-    Chercher à faire des chemins, puis reduire ces chemins sans jamais le rompre  
+    \frametitle{Plus en détail, reconnaitre un trou : l'idée du lasso}
+    Chercher à enrouler au lasso, puis reduire ces lassos sans jamais le rompre ou déchirer la forme.  
     \begin{figure}
         \begin{tikzpicture}
             \begin{axis}[
@@ -61,21 +61,21 @@ l'homologie persistante et optimisation.}
             \end{axis}
         \end{tikzpicture}
         \begin{tikzpicture}
-            \shade[ball color = gray!40, opacity = 0.4] (0,0) circle (2cm);
-            \draw (0,0) circle (2cm);
-            \draw (-2,0) arc (180:360:2 and 0.6);
-            \draw[dashed] (2,0) arc (0:180:2 and 0.6);
+            \shade[ball color = gray!40, opacity = 0.4] (0,0) circle (1.5cm);
+            \draw (0,0) circle (1.5cm);
+            \draw (-1.5,0) arc (180:360:1.5 and 0.6);
+            \draw[dashed] (1.5,0) arc (0:180:1.5 and 0.6);
             \fill[fill=black] (0,0) circle (1pt);
         \end{tikzpicture}
         \centering
-        \caption{Un tore contenant deux trous et un cercle contenant 0 trou}
+        \caption{Un tore contenant deux trous et une sphère contenant 0 trou.}
     \end{figure}
 \end{frame}
 
 \begin{frame}
     \frametitle{Définitions}
     \begin{block}{Simplexe}
-        Un simplexe $\sigma$ de dimension $k$ (ou $k$-simplexe) correspond à l'enveloppe convexe de $k+1$ points de $X$ non inclus dans un sous-espace affine de dimension $k-1$.
+        Un simplexe $\sigma$ de dimension $k$ (ou $k$-simplexe) correspond à l'enveloppe convexe de $k+1$ vecteurs non inclus dans un sous-espace affine de dimension $k-1$.
     \end{block}
 
     \begin{block}{Face}
@@ -97,20 +97,19 @@ l'homologie persistante et optimisation.}
 \begin{frame}
     \frametitle{Définitions}
     \begin{block}{Filtration}
-        Suite croissante pour l'inclusion de complexes simpliciaux
+        Suite croissante pour l'inclusion de complexes simpliciaux.
     \end{block}
 
     \begin{figure}
         \includegraphics[width=0.5\textwidth]{../images/filtration_ex.png}
         \centering
-        \caption{Exemple de filtration}
+        \caption{Exemple de filtration.}
     \end{figure}
 \end{frame}
 \begin{frame}
     \frametitle{Définitions}
     \begin{block}{Classe d'homologie}
-        Intuitivement, elle représente un trou en dimension $n$
-
+        Elle représente un trou en dimension $n$.
     \end{block}
 
     \begin{figure}
@@ -130,14 +129,14 @@ l'homologie persistante et optimisation.}
                 {3 * sin(x)});
             \end{axis}
         \end{tikzpicture}
-        \caption{Exemple de classes d'homologies}
+        \caption{Le tore possède deux classes d'homologies, celle du trou au centre et celle formée par le cylindre.}
     \end{figure}
 \end{frame}
 
 \begin{frame}
-    \frametitle{Plan d'attaque}
+    \frametitle{La méthode de l'homologie persistante}
     \itemize{
-        \item Construire une filtration à partir d'un ensemble discret de points
+        \item Construire une filtration à partir d'un ensemble de points
         \item Application de l'algorithme \textit{standard}
         \item Récupération des classes d'homologies
     }
@@ -150,6 +149,10 @@ l'homologie persistante et optimisation.}
     \begin{block}{Distance}
         On définit la distance $d$ entre deux stations de metro $x$ et $y$ : 
         $$ d(x,y) = \frac{1}{2}(min(t_{pied}(x,y), t_{voit}(x,y)) + min(t_{pied}(y,x), t_{voit}(y,x)))$$
+    \end{block}
+
+    \begin{block}{Poids d'une station}
+        La moyenne sur une semaine du temps d'attente en station.
     \end{block}
 \end{frame}
 
@@ -173,7 +176,7 @@ l'homologie persistante et optimisation.}
 \end{frame}
 
 \begin{frame}
-    \frametitle{Préparatif de l'algorithme : Ordre total sur les simplexes}
+    \frametitle{Préparatif de l'algorithme (1/2): Ordre total sur les simplexes}
     Soient une filtration $K_0 \subset K_1 \subset ... \subset K_p$ et l'ensemble $S$ de tous les simplexes apparaissant dans la filtration. On indice $S$ de sorte que pour tout $\sigma_i$ et $\sigma_j$ de $S$: 
 
     $$ 
@@ -183,11 +186,15 @@ l'homologie persistante et optimisation.}
     \end{rcases}\Rightarrow i < j 
     $$
     L'ordre total est déduit de cet indiçage.
+    \begin{figure}
+        \includegraphics[width=0.8\textwidth]{../images/filtration_horizontal.png}
+        \caption{Indiçage de la filtration}
+    \end{figure}
 \end{frame}
 
 
 \begin{frame}
-    \frametitle{Préparatif de l'algorithme : Matrice de brodure}
+    \frametitle{Préparatif de l'algorithme (2/2): Matrice de brodure}
     \fontsize{8}{10}\selectfont
     \begin{figure}[h]
         \centering
@@ -196,29 +203,29 @@ l'homologie persistante et optimisation.}
             \includegraphics[width=0.6\textwidth]{"../images/notationSimplexe.png"} 
         \end{minipage}
         \hfill
-        \begin{tabular}{ c | c | c | c | c | c | c | c }
-                & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\ \hline
-            0   & 1 &   &   & 1 & 1 &   &    \\ \hline
-            1   & 1 & 1 &   &   &   &   &    \\ \hline
-            2   &   & 1 & 1 &   & 1 &   &    \\ \hline
-            3   &   &   & 1 & 1 &   &   &    \\ \hline
-            4   &   &   &   &   &   & 1 &    \\ \hline
-            5   &   &   &   &   &   & 1 &    \\ \hline
-            6   &   &   &   &   &   &   & 1  \\ \hline
-            7   &   &   &   &   &   &   & 1  \\ \hline
-            8   &   &   &   &   &   & 1 & 1  \\ \hline
+        \begin{tabular}{ c | c | c | c | c | c | c }
+                & 4 & 5 & 6 & 7 & 8 & 9 \\ \hline
+            0   & 1 &   &   & 1 & 1 &   \\ \hline
+            1   & 1 & 1 &   &   &   &   \\ \hline
+            2   &   & 1 & 1 &   & 1 &   \\ \hline
+            3   &   &   & 1 & 1 &   &   \\ \hline
+            4   &   &   &   &   &   & 1 \\ \hline
+            5   &   &   &   &   &   & 1 \\ \hline
+            6   &   &   &   &   &   &   \\ \hline
+            7   &   &   &   &   &   &   \\ \hline
+            8   &   &   &   &   &   & 1 \\ \hline
             \textbf{low} & \textbf{1} & \textbf{2} & \textbf{3} & 
-            \textbf{3} & \textbf{2} & \textbf{8} & \textbf{8}
+            \textbf{3} & \textbf{2} & \textbf{8}
         \end{tabular}
         
-        \caption{Exemple de matrice de bordure associé à un ordre total}
+        \caption{Exemple de matrice de bordure $B$ associé à un ordre total}
     \end{figure}
 \end{frame}
 
 
 \begin{frame}[fragile]
     \frametitle{Application de l'algorithme}
-    \begin{block}{Algorithme Standard}
+    \begin{block}{Algorithme Standard($B \in M_n(\{0,1\})$)}
         \fontsize{9.5}{10}\selectfont
         \begin{lstlisting}
 for j allant de 0 a n-1:
@@ -231,41 +238,45 @@ for j allant de 0 a n-1:
 
 \begin{frame}
     \frametitle{Compréhension du résultat en sortie}
-    \fontsize{8}{10}\selectfont
     \begin{figure}
+        \fontsize{6}{8}\selectfont
         \begin{math}
         \begin{array}{cc}
-            \begin{tabular}{ c | c | c | c | c | c | c | c }
-                  & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\ \hline
-                0 & 1 &   &   & 1 & 1 &   &    \\ \hline
-                1 & 1 & 1 &   &   &   &   &    \\ \hline
-                2 &   & 1 & 1 &   & 1 &   &    \\ \hline
-                3 &   &   & 1 & 1 &   &   &    \\ \hline
-                4 &   &   &   &   &   & 1 &    \\ \hline
-                5 &   &   &   &   &   & 1 &    \\ \hline
-                6 &   &   &   &   &   &   & 1  \\ \hline
-                7 &   &   &   &   &   &   & 1  \\ \hline
-                8 &   &   &   &   &   & 1 & 1  \\ \hline
+            \begin{tabular}{ c | c | c | c | c | c | c }
+                  & 4 & 5 & 6 & 7 & 8 & 9 \\ \hline
+                0 & 1 &   &   & 1 & 1 &   \\ \hline
+                1 & 1 & 1 &   &   &   &   \\ \hline
+                2 &   & 1 & 1 &   & 1 &   \\ \hline
+                3 &   &   & 1 & 1 &   &   \\ \hline
+                4 &   &   &   &   &   & 1 \\ \hline
+                5 &   &   &   &   &   & 1 \\ \hline
+                6 &   &   &   &   &   &   \\ \hline
+                7 &   &   &   &   &   &   \\ \hline
+                8 &   &   &   &   &   & 1 \\ \hline
                 \textbf{low} & \textbf{1} & \textbf{2} & \textbf{3} & 
-                \textbf{3} & \textbf{2} & \textbf{8} & \textbf{8}
+                \textbf{3} & \textbf{2} & \textbf{8}
             \end{tabular} & 
-            \begin{tabular}{ c | c | c | c | c | c | c | c }
-                  & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\ \hline
-                0 & 1 &   &   &   &   &   &    \\ \hline
-                1 & 1 & 1 &   &   &   &   &    \\ \hline
-                2 &   & 1 & 1 &   &   &   &    \\ \hline
-                3 &   &   & 1 &   &   &   &    \\ \hline
-                4 &   &   &   &   &   & 1 & 1  \\ \hline
-                5 &   &   &   &   &   & 1 & 1  \\ \hline
-                6 &   &   &   &   &   &   & 1  \\ \hline
-                7 &   &   &   &   &   &   & 1  \\ \hline
-                8 &   &   &   &   &   & 1 &     \\ \hline
+            \begin{tabular}{ c | c | c | c | c | c | c }
+                  & 4 & 5 & 6 & 7 & 8 & 9 \\ \hline
+                0 & 1 &   &   &   &   &   \\ \hline
+                1 & 1 & 1 &   &   &   &   \\ \hline
+                2 &   & 1 & 1 &   &   &   \\ \hline
+                3 &   &   & 1 &   &   &   \\ \hline
+                4 &   &   &   &   &   & 1 \\ \hline
+                5 &   &   &   &   &   & 1 \\ \hline
+                6 &   &   &   &   &   &   \\ \hline
+                7 &   &   &   &   &   &   \\ \hline
+                8 &   &   &   &   &   & 1  \\ \hline
                 \textbf{low} & \textbf{1} & \textbf{2} & \textbf{3} & 
-                \textbf{-1} & \textbf{-1} & \textbf{8} & \textbf{7}
+                \textbf{-1} & \textbf{-1} & \textbf{8}
             \end{tabular}
         \end{array}
         \end{math}
-        \caption{Matrice initiale et reduite}
+        \caption{Matrice $B$ et réduite $\overline{B}$}
+    \end{figure}
+    \begin{figure}
+        \includegraphics[width=0.7\textwidth]{../images/filtration_horizontal.png}
+        \caption{Filtration et utilisée}
     \end{figure}
 \end{frame}
 
@@ -279,20 +290,20 @@ for j allant de 0 a n-1:
 
     Modifications apportées :
     \begin{itemize}
-        \item Représentation de la matrice en liste d'adjacence
-        \item Application de l'algorithme sur des matrices extraites et non la totale : Programmation dynamique
+        \item Représentation de la matrice en liste d'adjacence (double liste chaînée ordonnée) ;
+        \item Application de l'algorithme sur des matrices extraites et non la totale.
     \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
     \frametitle{Algorithme optimisé}
-    \begin{block}{Algorithme Standard optimisé}
+    \begin{block}{Algorithme Standard optimisé($B \in M_n(\{0,1\})$)}
         \fontsize{9.5}{10}\selectfont
         \begin{lstlisting}
 dims <- Tableau des simplexes ou dims[i] contient la liste des simplexes de dimension i
 for toute dimension d a considerer:
     for chaque simplexe j de dims[d]
-        while (il existe i tel que low[j] = low[i]):
+        while (il existe i dans dims[d] tel que low[j] = low[i]):
             ajouter colonne i de B a colonne j modulo 2
       \end{lstlisting}
     \end{block}
@@ -338,9 +349,6 @@ for toute dimension d a considerer:
 
 \begin{frame}
     \frametitle{Annexe : Définition}
-    \begin{block}{Définition d'une variété}
-        
-    \end{block}
     \begin{block}{Définition d'un cycle}
         Un cycle est une sous-variété fermée.
     \end{block}

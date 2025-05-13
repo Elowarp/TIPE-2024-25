@@ -1,11 +1,11 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 12-05-2025 08:28:15
- *  Last modified : 12-05-2025 09:06:46
+ *  Last modified : 13-05-2025 16:01:39
  *  File : filtrationimg.typ
  */
 #import "@preview/cetz:0.3.4"
-#set page(width:200pt, height: 200pt, fill: none, margin: 2pt)
+#set page(width:395pt, height: 105pt, fill: none, margin: 2pt)
 #cetz.canvas({
         import cetz.draw: *
         set-style(text: (size:10pt))
@@ -83,7 +83,7 @@
         })
 
         group(name: "K_2", {
-            let origin = (0, -3.5)
+            let origin = (7, 0)
             for i in range(4) {
                 let (p, v) = pts(origin).at(str(i))
                 draw_point(str(i), (p, v), drawtext: true)
@@ -99,7 +99,7 @@
         })
 
         group(name: "K_3", {
-            let origin = (3.5, -3.5)
+            let origin = (10.5, 0)
 
             for i in range(8, 3, step:-1) {
                 draw_line(i, lines(origin).at(str(i)), drawtext: false)

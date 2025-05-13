@@ -1,7 +1,7 @@
 /*
  *  Contact : Elowan - elowarp@gmail.com
  *  Creation : 12-05-2025 09:35:05
- *  Last modified : 12-05-2025 09:40:08
+ *  Last modified : 13-05-2025 16:03:45
  *  File : notationSimplexe.typ
  */
 #import "@preview/cetz:0.3.4"
@@ -81,7 +81,7 @@
             group(name: "K_3", {
                 let origin = (0, 0)
 
-                for i in range(10, 3, step:-1) {
+                for i in range(9, 3, step:-1) {
                     draw_line(i, lines(origin).at(str(i)))
                 }
 
