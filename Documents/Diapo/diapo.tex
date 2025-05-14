@@ -13,7 +13,7 @@
 
 \begin{document}
 
-\title{Étude de couvertures de réseaux de métros, application de 
+\title{Étude de couvertures de réseaux de métro, application de 
 l'homologie persistante et optimisation.}
 \author{Elowan ; 10381}
 \date{\today}
@@ -21,21 +21,21 @@ l'homologie persistante et optimisation.}
 \maketitle
 
 \begin{frame}
-    \frametitle{Le déroulement}    
-    \textbf{Trouver les zones les moins biens desservies par un réseau de métros.}
-    
+    \frametitle{Trouver les zones les moins biens desservies par un réseau de métro}    
     Les principales étapes : 
     \itemize{
-        \item Convertir les données géographique en espace métrique
-        \item Créer une suite de formes géométriques à partir de cet espace
-        \item Trouver les trous de ces formes
+        \item \textit{Convertir} les données géographiques en espace métrique ;
+        \item Créer une suite de formes géométriques à partir de cet espace ;
+        \item Trouver les trous de ces formes.
     }
 
-    % \begin{figure}
-    %     % \includegraphics[width=\textwidth]{filtration}
-    %     \centering
-    %     \caption{Carte avec pts metros vers repr avec triangles}
-    % \end{figure}
+    \begin{figure}
+        \includegraphics[width=0.4\textwidth]{../images/marseille_blank.png}
+        \hfill
+        \includegraphics[width=0.4\textwidth]{../images/toulouse_blank.png}
+        \centering
+        \caption{Lignes de métros (Marseille et Toulouse)}
+    \end{figure}
     
     
 \end{frame}
@@ -45,20 +45,20 @@ l'homologie persistante et optimisation.}
     Chercher à enrouler au lasso, puis reduire ces lassos sans jamais le rompre ou déchirer la forme.  
     \begin{figure}
         \begin{tikzpicture}
-            \begin{axis}[
-                axis equal image,
-                axis lines=middle,
-                xmax=18,zmax=5,
-                ticks=none,
-                clip bounding box=upper bound,
-                colormap/blackwhite
-                ]
+            % \begin{axis}[
+            %     axis equal image,
+            %     axis lines=middle,
+            %     xmax=18,zmax=5,
+            %     ticks=none,
+            %     clip bounding box=upper bound,
+            %     colormap/blackwhite
+            %     ]
 
-                \addplot3[domain=0:360,y domain=0:320, samples=50,surf,z buffer=sort]
-                ({(12 + 3 * cos(x)) * cos(y)} ,
-                {(12 + 3 * cos(x)) * sin(y)},
-                {3 * sin(x)});
-            \end{axis}
+            %     \addplot3[domain=0:360,y domain=0:320, samples=50,surf,z buffer=sort]
+            %     ({(12 + 3 * cos(x)) * cos(y)} ,
+            %     {(12 + 3 * cos(x)) * sin(y)},
+            %     {3 * sin(x)});
+            % \end{axis}
         \end{tikzpicture}
         \begin{tikzpicture}
             \shade[ball color = gray!40, opacity = 0.4] (0,0) circle (1.5cm);
@@ -114,20 +114,20 @@ l'homologie persistante et optimisation.}
 
     \begin{figure}
         \begin{tikzpicture}
-            \begin{axis}[
-                axis equal image,
-                axis lines=middle,
-                xmax=18,zmax=5,
-                ticks=none,
-                clip bounding box=upper bound,
-                colormap/blackwhite
-                ]
+            % \begin{axis}[
+            %     axis equal image,
+            %     axis lines=middle,
+            %     xmax=18,zmax=5,
+            %     ticks=none,
+            %     clip bounding box=upper bound,
+            %     colormap/blackwhite
+            %     ]
 
-                \addplot3[domain=0:360,y domain=0:320, samples=50,surf,z buffer=sort]
-                ({(12 + 3 * cos(x)) * cos(y)} ,
-                {(12 + 3 * cos(x)) * sin(y)},
-                {3 * sin(x)});
-            \end{axis}
+            %     \addplot3[domain=0:360,y domain=0:320, samples=50,surf,z buffer=sort]
+            %     ({(12 + 3 * cos(x)) * cos(y)} ,
+            %     {(12 + 3 * cos(x)) * sin(y)},
+            %     {3 * sin(x)});
+            % \end{axis}
         \end{tikzpicture}
         \caption{Le tore possède deux classes d'homologies, celle du trou au centre et celle formée par le cylindre.}
     \end{figure}
@@ -136,10 +136,18 @@ l'homologie persistante et optimisation.}
 \begin{frame}
     \frametitle{La méthode de l'homologie persistante}
     \itemize{
-        \item Construire une filtration à partir d'un ensemble de points
-        \item Application de l'algorithme \textit{standard}
-        \item Récupération des classes d'homologies
+        \item Construire une filtration à partir d'un ensemble de points ;
+        \item Application de l'algorithme \textit{standard} ;
+        \item Récupération des classes d'homologies.
     }
+
+    \begin{figure}
+        \includegraphics[width=0.4\textwidth]{../images/marseille_blank.png}
+        \hfill
+        \includegraphics[width=0.4\textwidth]{../images/toulouse_blank.png}
+        \centering
+        \caption{Lignes de métros (Marseille et Toulouse)}
+    \end{figure}
 
 \end{frame}
 
@@ -194,7 +202,7 @@ l'homologie persistante et optimisation.}
 
 
 \begin{frame}
-    \frametitle{Préparatif de l'algorithme (2/2): Matrice de brodure}
+    \frametitle{Préparatif de l'algorithme (2/2): Matrice de bordure}
     \fontsize{8}{10}\selectfont
     \begin{figure}[h]
         \centering

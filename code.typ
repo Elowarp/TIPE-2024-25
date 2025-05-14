@@ -21,7 +21,8 @@
 )
 
 #let files = (
-    "src": ("geometry.c", "geometry.h", "misc.c", "misc.h", "persDiag.c", "persDiag.h"),
+    "src": ("geometry.c", "geometry.h", "list.c", "list.h", "misc.c", "misc.h", "persDiag.c", "persDiag.h", "reduc.c", "reduc.h"),
+    "prgms": ("analyse_cplx.c", "analyse_cplx.py"),
     "tests": (),
     "": ("main.c","repr.py", "retrieve_data.py")
   )
@@ -32,10 +33,15 @@
   it.body
 }
 
+#show heading: it => {
+  set text(25pt)
+  pagebreak(weak: true)
+  it
+}
+
 #for (dir, names) in files {
-    [= #dir]
     for name in names{
-      [== #name]
+      [= #dir/#name]
       let txt = read("Code/"+dir+"/"+name)
       let (_, ext) = name.split(".")
       let lang = (

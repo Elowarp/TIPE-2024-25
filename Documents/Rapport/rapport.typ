@@ -95,7 +95,7 @@ Nous nous proposons ici d'étudier les différentes disparités dans les réseau
 
 L'homologie persistante est une _méthode de calcul_  qui, à partir d'une discrétisation, cherche à fournir une description des caractéristiques que l'on pourrait distinguer de cet ensemble. 
     
-Nous chercherons ici seulement à caractériser les "trous" dans un espace, afin de détecter les trous de couverture dans un réseau métropolitain, ici modélisé comme un nuage de points de $bb(R)^2$, dont chaque élément est une station de métro.
+Nous chercherons seulement à caractériser les "trous" dans un espace, afin de détecter les trous de couverture dans un réseau métropolitain, ici modélisé comme un nuage de points de $bb(R)^2$, dont chaque élément est une station de métro.
 
 Afin d'utiliser l'homologie persistante, nous devons définir certaines notions géométriques, nous noterons dans la suite #ensPts l'ensemble des points de $bb(R)^2$ que l'on considère.
 
@@ -106,7 +106,7 @@ Afin d'utiliser l'homologie persistante, nous devons définir certaines notions 
 // ]
 
 #def[
-    Un simplexe $sigma$ de dimension $k$ (ou _$k$-simplexe_) correspond à l'enveloppe convexe de $k+1$ points de #ensPts non inclus dans un sous-espace affine de dimension $k-1$.
+    Un _simplexe_ $sigma$ de dimension $k$ (ou _$k$-simplexe_) correspond à l'enveloppe convexe de $k+1$ points de #ensPts non inclus dans un sous-espace affine de dimension $k-1$.
 
     On définit un simplexe de dimension 0 comme un point de #ensPts.
 ]
@@ -131,7 +131,7 @@ _Remarque : On dit que $sigma_i$ est une face de $sigma_j$ si et seulement si $s
         }
         trièdre
     }),
-caption: [Ce trièdre est un simplexe $sigma$ de dimension 3, où le triangle rouge représente un simplexe $tau$ de dimension 2 mais aussi une face de $sigma$ dans le sens de la remarque précédente. Notons que l'arête en gras est un simplexe de dimension 1 et est une face de $sigma$ et de $tau$.]
+caption: [Ce trièdre est un simplexe $sigma$ de dimension 3, où le triangle rouge représente un simplexe $tau$ de dimension 2 mais aussi une face de $sigma$ dans le sens de la remarque précédente. Notons que l'arête en gras est un simplexe de dimension 1 et est une face de $tau$ et non de $sigma$.]
 )
 
 
@@ -265,22 +265,21 @@ Observons sur la @Filtration_ex les notions précédemment définies. Chaque $K_
                 pad(top: 1em, text($K_#i$))
             )
         }
-        
-
     }),
     caption: [Représentation d'une filtration où $K_0 subset K_1 subset K_2 subset K_3$ et où chaque simplexe a été nommé : $p_i$ pour les simplexes de dimension 0, $sigma_j$ pour la dimension 1 et $tau_k$ pour la dimension 2.]
 )<Filtration_ex>
 
 // Grâce à cette definition, nous sommes capables de quantifier les changements d'un complexe à l'autre, comme la création de cycles (dans $K_2$, il apparait un cycle $(0,1,2,3, 0)$ après avoir rajouté $(0,3)$ à $K_1$) ou la destruction de composantes connexes (dans $K_0$, tous les simplexes 0D sont dans des composantes connexes différentes alors que dans $K_1$ ils sont tous dans la même, on a "tué" les composantes connexes de 1, 2 et 3).
 
-Nous observons qu'une filtration permet d'ajouter une notion de "temporalité" dans un ensemble de points. Nous sommes capable de noter quels événements surviennent entre deux complexes à la suite, par exemple l'apparition d'un cycle entre $K_1$ et $K_2$ (le cycle $(sigma_4, sigma_5, sigma_6, sigma_7)$) ou l'apparition d'un simplexe de dimension 2 entre $K_2$ et $K_3$ (la face rouge).
+Nous observons qu'une filtration permet d'ajouter une notion de "temporalité" dans un ensemble de points. Nous sommes capable de noter quels événements surviennent entre deux complexes à la suite, par exemple l'apparition du cycle $(sigma_4, sigma_5, sigma_8)$ entre $K_1$ et $K_2$.
 
-On introduit de plus un ordre total $prec.curly.eq$ sur l'ensemble des simplexes d'une filtration. 
+On introduit de plus un ordre total $prec.curly.eq$ sur l'ensemble des simplexes d'une filtration :
 
 #def[
     Soient une filtration $K_0 subset K_1 subset ... subset K_p$ et l'ensemble $S$ de tous les simplexes apparaissant dans la filtration. On indice $S$ de sorte que pour tout $sigma_i$ et $sigma_j$ de $S$: 
 
-    $ cases("Si" sigma_i in K_k_i "et" sigma_j in K_k_j "avec" k_i < k_j,"Sinon si" sigma_i "est une face de" sigma_j, ) => i < j $
+    #set math.cases(reverse: true)
+    $ cases("Si" sigma_i in K_k_i "et" sigma_j in K_k_j "avec" k_i < k_j,"Sinon si" sigma_i "est une face de" sigma_j) => i < j $
 
     Si aucun des deux cas n'est réalisé alors le choix de l'ordre entre les deux simplexes est arbitraire. 
     
@@ -292,25 +291,23 @@ Observons sur la @Filtration_ex l'indexation des simplexes suivant l'ordre préc
 Il y a un problème : nous voulons analyser un ensemble de points discrets, et non une filtration déjà existante, il nous faut alors créer une filtration depuis un ensemble de points. Nous faisons cela via une construction incrémentale de complexes simpliciaux avec les complexes de Vietoris-Rips pondérés. Ainsi d'après @PH_resource_coverage :
 
 #def[
-    Soient un ensemble $#ensPts = (x_i)_(i=0)^n$ de points associés à des poids $(w_i)_(i=0)^n$ et une distance $d$, on définit le complexe simplicial pondéré de Vietoris-Rips au rang $r$, noté $V_r (#ensPts, d)$, comme l'ensemble des simplexes $(x_i_0, ..., x_i_k)$ tels que : 
+    Soient un ensemble $#ensPts = (x_i)_(i=0)^n$ de points associés à des poids $(w_i)_(i=0)^n$ et une distance $d$, on définit le complexe simplicial pondéré de Vietoris-Rips au rang $t$, noté $V_t (#ensPts, d)$, comme l'ensemble des simplexes $(x_i_0, ..., x_i_k)$ tels que : 
     #align(center)[
         $
         cases(
-            forall j in [|0, k|]\, w_i_j < r,
-            forall (j,l) in [|0, k|]^2\, d(x_i_j, x_i_l) + w_i_j + w_i_l < 2r
+            forall j in [|0, k|]\, w_i_j < t,
+            forall (j,l) in [|0, k|]^2\, d(x_i_j, x_i_l) + w_i_j + w_i_l < 2t
         )
         $
     ]  
 ]
 
-Ainsi plus on augmente $r$, plus le complexe possède des simplexes, on en donne une représentation @VR. Pour chaque $r$ qui augmente le nombre de simplexes du complexe simplicial, nous ajoutons $V_r (#ensPts, d)$ à la filtration que l'on est en train de créer.
+Ainsi plus on augmente $t$, plus le complexe possède des simplexes, on en donne une représentation @VR. Pour chaque $t$ qui augmente le nombre de simplexes du complexe simplicial, nous ajoutons $V_r (#ensPts, d)$ à la filtration que l'on est en train de créer.
 
 #figure(
     image("../images/cech.png"),
-    caption: [Construction d'un complexe simplicial avec un $r$ grandissant de gauche à droite, tiré de @PH_resource_coverage]
+    caption: [Construction d'un complexe simplicial avec un rayon $t$ grandissant de gauche à droite. Un simplexe est considéré dès lors que les boules associées à ces sommets ont une intersection non vide. Tiré de @PH_resource_coverage]
 ) <VR>
-
-Ici, $r$ est le rayon des boules bleues, et un simplexe est considéré dès lors que les boules associées à ces sommets se rencontrent.
 
 Pour définir formellement des "trous", nous devons définir les opérateurs de bords. Ainsi selon @CoursHomologie :
 
@@ -334,11 +331,170 @@ Pour définir formellement des "trous", nous devons définir les opérateurs de 
     Celle-ci représente les "trous" en dimension $k$.
 ]
 
-On peut voir que $H_0$ représente les composantes connexes de $#ensPts$, $H_1$ représente un trou qui est entouré par un chemin fermé de points connectés (comme le cycle $(sigma_4, sigma_5, sigma_6, sigma_7)$ dans $K_2$ dans @Filtration_ex par exemple) et $H_2$ représenterait par exemple un trièdre d'intérieur vide. 
+On peut voir que $H_0$ premet de différentier les composantes connexes de $#ensPts$, $H_1$ représente un trou qui est entouré par un chemin fermé de points connectés (comme le cycle $(sigma_4, sigma_5, sigma_8)$ dans $K_2$ dans la @Filtration_homologie).
 
-_Exemple à faire_
+#let pat1 = tiling(size: (4pt, 7pt))[
+    #place(line(start: (0%, 0%), end: (0%, 100%)))
+]
 
-Pour notre usage, nous voulons calculer $H_0$, les temps moyens pour se rendre à une station de métros, et $H_1$ qui représente les zones critiques de couverture du réseau.
+#let pat2 = tiling(size: (7pt, 4pt))[
+    #place(line(start: (0%, 0%), end: (100%, 0%), stroke: 1pt))
+]
+
+#figure(
+    cetz.canvas({
+        import cetz.draw: *
+        set-style(text: (size:10pt))
+        let lines((x, y)) = {
+            let p0 = (1+x, 0+y)
+            let p1 = (0+x, 1+y)
+            let p2 = (-1+x, 0+y)
+            let p3 = (0+x, -1+y)
+            (
+                "9": line(p0, p1, p2, fill: red.transparentize(75%), name:"9"), 
+                "4": line(p0, p1, name:"4"), 
+                "5": line(p1, p2, name:"5"), 
+                "6": line(p2, p3, name:"6"), 
+                "7": line(p3, p0, name:"7"), 
+                "8": line(p0, p2, name:"8"), 
+            )
+        }
+
+        let H0((x,y)) = {
+            let p0 = (1+x, 0+y)
+            let p1 = (0+x, 1+y)
+            let p2 = (-1+x, 0+y)
+            let p3 = (0+x, -1+y)
+            (
+                "4": line(p0, p1, stroke:(dash:"dashed")),
+                "5": line(p1, p2, stroke:(dash:"dashed")), 
+                "6": line(p2, p3, stroke:(dash:"dashed")), 
+                "7": line(p3, p0, stroke:(dash:"dashed")), 
+                "8": line(p0, p2, stroke:(dash:"dashed")), 
+            )
+        }
+
+        
+
+        let H1((x,y)) = {
+            let p0 = (1+x, 0+y)
+            let p1 = (0+x, 1+y)
+            let p2 = (-1+x, 0+y)
+            let p3 = (0+x, -1+y)
+            (
+                "9" : line(p0, p1, p2, fill: pat1),
+                "10": line(p0, p3, p2, fill: pat2)
+            )
+        }
+
+        let pts((x,y)) = {
+            let p0 = (1+x, 0+y)
+            let p1 = (0+x, 1+y)
+            let p2 = (-1+x, 0+y)
+            let p3 = (0+x, -1+y)
+            (
+                "0": (p0, "south-west"), 
+                "1": (p1, "south-west"), 
+                "2": (p2, "north-east"), 
+                "3": (p3, "north-east")
+            )
+        }
+
+        let draw_point(name, (p, anchor), drawtext:true) = {
+            circle(p, radius: (0.05), fill: black, name:name)
+            if drawtext {
+                if anchor == "north-east"{
+                    content(name, anchor:anchor, pad(right: .7em, text($p_name$)))
+                } else {
+                    content(name, anchor:anchor, pad(left: .7em, text($p_name$)))
+                }
+
+            }
+        }
+
+        let draw_line(id, l, drawtext:true) = {
+            l
+            if drawtext {
+                if (id > 8) {
+                    content(str(id), anchor: "mid", text($tau_id$))
+                } else {
+                    set-style(content: (frame: "circle", stroke:none, fill:white,))
+                    content(str(id), anchor: "mid", text($sigma_id$))
+                }
+            }
+        }
+
+        group(name: "K_0", {
+            let origin = (0, 0)
+            for i in range(4) {
+                let (p, v) = pts(origin).at(str(i))
+                draw_point(str(i), (p, v))
+                H0(origin).at(str(4+i))
+            }
+
+        })
+
+        group(name: "K_1", {
+            let origin = (3.5, 0)
+            for i in range(4) {
+                let (p, v) = pts(origin).at(str(i))
+                draw_point(str(i), (p, v), drawtext: true)
+            }
+
+            H0(origin).at("7")
+            for i in range(4, 7) {
+                draw_line(i, lines(origin).at(str(i)))
+            }
+
+        })
+
+        group(name: "K_2", {
+            let origin = (7, 0)
+            for i in range(4) {
+                let (p, v) = pts(origin).at(str(i))
+                draw_point(str(i), (p, v), drawtext: true)
+            }
+            H1(origin).at("9")
+            H1(origin).at("10")
+
+            for i in range(4,7) {
+                draw_line(i, lines(origin).at(str(i)), drawtext: false)
+            }
+
+            draw_line(7, lines(origin).at("7"))
+            draw_line(8, lines(origin).at("8"))
+
+
+        })
+
+        group(name: "K_3", {
+            let origin = (10.5, 0)
+
+            H1(origin).at("10")
+
+            for i in range(8, 3, step:-1) {
+                draw_line(i, lines(origin).at(str(i)), drawtext: false)
+            }
+            
+            draw_line(9, lines(origin).at("9"))
+            
+            for i in range(4) {
+                let (p, v) = pts(origin).at(str(i))
+                draw_point(str(i), (p, v), drawtext: true)
+            }
+        })
+
+        for i in range(4){
+            content(("K_",str(i),".south").join(""), 
+                anchor:"north", 
+                pad(top: 1em, text($K_#i$))
+            )
+        }
+    }),
+    caption:[Les éléments de $H_0$ en poitillé et ceux de $H_1$ achuré.]
+)<Filtration_homologie>
+
+Pour notre usage, $H_1$ qui représente les zones critiques de couverture du réseau.
 
 // Ainsi, grâce à ces définitions, nous sommes capables, depuis un ensemble $X = {x_i}$ de points fini de poids $(w_i)_i$, de créer une filtration et de l'étudier afin de trouver $H_1$ qui représentent, pour notre cas d'usage, les zones critiques de couverture.
 
@@ -384,7 +540,7 @@ Définissons dès lors nos objets :
     Un point $x_i$, représentant une station de métro, est défini par la donnée de sa position géographique (latitude/longitude) ainsi que son poids $w_i$. Le poids $w_i$ est égal à la moyenne du temps d'attente entre deux métros en station $x_i$ sur une semaine entière.
 ]
 
-Les temps de passage des métros en station étant plus ou moins constant sur la semaine, il est cohérent d'utiliser une moyenne.
+// Les temps de passage des métros en station étant plus ou moins constant sur la semaine, il est cohérent d'utiliser une moyenne.
 
 // De plus, dans un premier temps, nous définissons similairement à @PH_resource_coverage une distance non symétrique entre deux stations $x$ et $y$ :
 
@@ -410,13 +566,13 @@ Ainsi en revenant aux boules des complexes simplicaux de Vietoris-Rips, la dista
 
 = Méthode
 
-Pour trouver les zones critiques, nous utiliserons la méthode de l'homologie persistante décrite dans @PH_resource_coverage (dans le cas de notre réseau de métros). Celle ci se décompose en 3 étapes :
+Pour trouver les zones critiques, nous utiliserons la méthode de _l'homologie persistante_ décrite dans @PH_resource_coverage (dans le cas de notre réseau de métros). Celle ci se décompose en 3 étapes :
 
-- Transformation de l'ensemble de $bb(R)^2$ des stations de métros $x_i$ de poids $w_i$ en une filtration;
+- Transformation de l'ensemble des points (les stations de métro) $x_i$ de poids $w_i$ en une filtration;
 - Création et réduction de la matrice de bordure (définie dans la suite);
 - Récupération des simplexes "tueurs" de classes d'homologies
 
-On suppose que l'étape une, malgré la difficulté technique qu'elle pose à implémenter, est déjà réalisée suivant la @Definitions.
+On suppose que l'étape une est déjà réalisée suivant la @Definitions.
 
 // Notre but final étant de créer un diagramme de persistance, nous devons réussir à convertir notre filtration en celui ci, cela se fait grâce au théorème centrale dû à Crawley-Boevey @PH_invitation. En définissant un espace filtré comme la donnée d'un espace topologique ainsi qu'une de ses filtration, on a :
 
@@ -431,9 +587,10 @@ Ainsi à partir de cette filtration, nous pouvons obtenir les classes d'homologi
     $ H_k (X) tilde.eq plus.circle.big_(i=1)^p P_k (X) \/ d_i P_k (X) $
 
     en notant $P_k (#ensPts)$ l'ensemble des parties à $k+1$ éléments de #ensPts, formant donc un complexe simplicial constitué uniquement de $k$-simplexes. Cet ensemble est appelé _code barre_ de $H_k$
+
+    \#Jesaispascequejemanipule
     ]
 )
-_A reprendre_
 // _Note : Je ne suis pas sûr de comprendre ce que je manipule notamment les types du quotient... Les extraits sont ici : #underline(link("https://fr.wikipedia.org/wiki/Th%C3%A9or%C3%A8me_des_facteurs_invariants#A-modules_de_type_fini","Source")) et @annexe_inv. _
 
 Informatiquement, selon @PH_roadmap, on calcule ce code barre en créant une matrice de bordure $B$ après avoir défini un ordre total sur les simplexes respectant les propriétés énoncées @Definitions.
@@ -447,9 +604,9 @@ _Note : D'après @ComputingPH, $B$ peut être vu comme la somme des matrice des 
 
 Un exemple d'une telle matrice est donnée en @Bordure.
 
-Après avoir calculé $B$, nous voulons la _réduire_ à un code barre, dans le sens où par lecture matricielle, grâce au théorème précédement, nous pouvons donner un temps de vie à chaque simplexe par l'attribution d'un unique antécédent à chacun de ceux-ci. Le terme de _réduction_ fait ici référence à la réduction de $B$ en forme normale de Smith. Nous pouvons observer ce résultat en @BordureReduite.
+Après avoir calculé $B$, nous voulons la _réduire_ à un code barre, dans le sens où par lecture matricielle, grâce au théorème précédent, nous pouvons donner un temps de vie à chaque simplexe par l'attribution d'un unique antécédent à chacun de ceux-ci. Le terme de _réduction_ fait ici référence à la réduction de $B$ en forme normale de Smith. Nous pouvons observer ce résultat en @BordureReduite.
 
-Cet algorithme de réduction est nommé _standard algorithm_ et est décrit dans @PH_roadmap par, en posant $n$ le nombre de simplexes et $"low"_B (j) = max({i in [|0, n-1|], B[i][j] != 0}) in bb(N) union {-1}$ :
+Cet algorithme de réduction est nommé _standard algorithm_ et est décrit dans @PH_roadmap par, en posant $"low"_B (j) = max({i in [|0, n-1|], B[i][j] != 0}) in bb(N) union {-1}$ :
 
 #code("for j allant de 0 à n-1:
     while (il existe i < j avec low[i] = low[j]):
@@ -459,7 +616,7 @@ Cet algorithme de réduction est nommé _standard algorithm_ et est décrit dans
 
 _Notons que cet algorithme a pour complexité temporelle $O(n^3)$ au pire._ 
 
-Comparons alors nos deux matrices, sur l'exemple de la filtration de la @Filtration_ex (Les cases vides remplacent les zeros pour plus de lisibilité et les colonnes/lignes vides ont été omises), avec ici notre ordre total sur les simplexes :
+Comparons alors nos deux matrices, sur l'exemple de la filtration de la @Filtration_ex (les cases vides remplacent les zéros pour plus de lisibilité et les colonnes/lignes vides ont été omises), avec ici notre ordre total sur les simplexes :
 
 #grid(
     columns: (50%, 45%),
@@ -552,9 +709,14 @@ Comparons alors nos deux matrices, sur l'exemple de la filtration de la @Filtrat
     )   
     ],
     [
-        En regardant la matrice $overline(B)$, nous remarquons que l'opération de réduction à permis d'avoir la ligne low sans répétion de nombre positifs, autrement dit, on accorde la naissance d'un simplexe à un unique autre simplexe. Ainsi le simplexe 1 donne naissance au simplexe 4, 8 donne naissance à 9 et 7 donne naissance à 10. 
+        En regardant la matrice $overline(B)$, nous remarquons que l'opération de réduction a permis d'avoir la ligne _low_ sans répétion de nombres positifs cela se comprenant comme ce qu'il suit :
     ]
 )
+
+Si $"low"_overline(B) (j) = i != -1$ alors on a une paire de simplexes $(sigma_i, sigma_j)$ telle que l'apparition de $sigma_i$ fait apparaitre une nouvelle classe d'homologie. Et au contraire, $sigma_j$ va la _tuer_ en apparaissant. Prenons comme exemple la filtration de la @Filtration_ex : dans $K_2$, $sigma_8$ cause l'apparition d'une classe dans $H_1$ (car elle crée un cycle) cependant l'apparition du simplexe $tau_9$ dans $K_3$ tue la classe de $sigma_8$ dans $H_1$ (car elle "remplit" le contenu du cycle).
+
+En revanche si $"low"_overline(B) (j) = -1$ alors l'apparition de $sigma_j$ crée une classe d'homologie : s'il existe $k$ tel que $"low"_overline(B) (k) = j$ on est dans le cas précédent, sinon la classe d'homologie n'est jamais tuée.
+
 
 #set table(inset: (right:1em, left: 1em))
 
@@ -568,7 +730,7 @@ Comparons alors nos deux matrices, sur l'exemple de la filtration de la @Filtrat
                 table.cell(colspan:9, [*Enfants*], stroke: none),
             ),
             table.cell(
-                rowspan:10,
+                rowspan:8,
                 align: horizon,
                 stroke: none,
                 rotate(-90deg, reflow: true)[
@@ -576,7 +738,7 @@ Comparons alors nos deux matrices, sur l'exemple de la filtration de la @Filtrat
             ]),
             [],  [4], [5], [6], [7], [8], [9], 
             table.cell(
-                rowspan:10,
+                rowspan:8,
                 align: horizon,
                 stroke: none,
                 rotate(-90deg, reflow: true)[]
@@ -587,11 +749,9 @@ Comparons alors nos deux matrices, sur l'exemple de la filtration de la @Filtrat
             [3], [], [], [1], [1], [], [], 
             [4], [], [], [], [], [], [1], 
             [5], [], [], [], [], [], [1], 
-            [6], [], [], [], [], [], [], 
-            [7], [], [], [], [], [], [], 
             [8], [], [], [], [], [], [1],
             table.cell(colspan: 9, [], stroke:none),
-            table.cell(stroke:none, []), [*low*], [*1*], [*2*], [*3*], [*3*], [*2*], [*8*], table.cell(stroke:none, [])
+            table.cell(stroke:none, []), [*_low_*], [*1*], [*2*], [*3*], [*3*], [*2*], [*8*], table.cell(stroke:none, [])
             ),
             caption:[Matrice $B$]
         ) <Bordure>        
@@ -603,7 +763,7 @@ Comparons alors nos deux matrices, sur l'exemple de la filtration de la @Filtrat
                 table.cell(colspan:9, [*Enfants*], stroke: none),
             ),
             table.cell(
-                rowspan:10,
+                rowspan:8,
                 align: horizon,
                 stroke: none,
                 rotate(-90deg, reflow: true)[
@@ -612,7 +772,7 @@ Comparons alors nos deux matrices, sur l'exemple de la filtration de la @Filtrat
             ),
             [],  [4], [5], [6], [7], [8], [9],
             table.cell(
-                rowspan:10,
+                rowspan:8,
                 align: horizon,
                 stroke: none,
                 rotate(-90deg, reflow: true)[]
@@ -623,20 +783,14 @@ Comparons alors nos deux matrices, sur l'exemple de la filtration de la @Filtrat
             [3], [], [], [1], [], [], [], 
             [4], [], [], [], [], [], [1], 
             [5], [], [], [], [], [], [1], 
-            [6], [], [], [], [], [], [], 
-            [7], [], [], [], [], [], [], 
             [8], [], [], [], [], [], [1], 
             table.cell(colspan: 9, [], stroke:none),
-            table.cell(stroke:none, []), [*low*], [*1*], [*2*], [*3*], [-1], [-1], [*8*], table.cell(stroke:none, [])
+            table.cell(stroke:none, []), [*_low_*], [*1*], [*2*], [*3*], [-1], [-1], [*8*], table.cell(stroke:none, [])
             ),
             caption:[Matrice $overline(B)$, $B$ après réduction]
         ) <BordureReduite>
     ]
 )
-
-Par exemple, si $"low"_overline(B) (j) = i != -1$ alors on a une paire de simplexes $(sigma_i, sigma_j)$ telle que l'apparition de $sigma_i$ fait apparaitre une nouvelle classe d'homologie. Et au contraire, $sigma_j$ va la _tuer_ en apparaissant. Prenons comme exemple la filtration @Filtration_ex : dans $K_2$, $sigma_7$ cause l'apparition d'une classe dans $H_1$ (car elle crée un cycle) cependant l'apparition du simplexe $tau_10$ dans $K_4$ tue la classe de $sigma_7$ dans $H_1$ (car elle "remplit" le contenu du cycle)
-
-En revanche si $"low"_overline(B) (j) = -1$ alors l'apparition de $sigma_j$ crée une classe d'homologie : s'il existe $k$ tel que $"low"_overline(B) (k) = j$ on est dans le cas précédent, sinon la classe d'homologie n'est jamais tuée.
 
 // C'est depuis cette matrice $overline(B)$ réduite que l'on construit notre diagramme de persistance comme il suit : 
 
@@ -648,11 +802,11 @@ En revanche si $"low"_overline(B) (j) = -1$ alors l'apparition de $sigma_j$ cré
 
 // C'est grâce à cette définition que nous arrivons au diagramme de persistance donnée en @PD_ex
 
-C'est depuis cette matrice que nous sommes capables de déterminer $H_0$ et $H_1$, et donc de générer des représentations graphiques comme montré en @CarteResultat
+C'est depuis cette matrice que nous sommes capables de déterminer toutes les classes d'homologies ainsi que leur durée de vie, et donc de générer des représentations graphiques comme montré en @CarteResultat
 
 = Recherche d'optimisation<optimisation>
 
-La motivation de cette section vient de l'observation suivante : pour 36 stations, il faut environ 10 secondes pour calculer les classes d'homologies. Sachant que ce temps d'exécution provient majoritairement de la complexité temporelle du standard algorithm, nous cherchons à optimiser la complexité de celui ci : $O(n^3) = O(2^(3|#ensPts|))$ ($n$ étant le nombre total de simplexes possibles $=2^(|#ensPts|)$).
+La motivation de cette section vient de l'observation de la complexité du standard algorithm : $O(n^3) = O(2^(3|#ensPts|))$ ($n$ étant le nombre total de simplexes possibles $=2^(|#ensPts|)$). Nous cherchons donc à optimiser la complexité de celui ci.
 
 L'optimisation que l'on propose provient de deux observations :
 - $B$ est une matrice creuse ;
@@ -668,7 +822,7 @@ On en déduit cet algorithme où $B$ est modifié par effet de bords sur les $B_
 #code("dims <- Tableau des simplexes où dims[i] contient la liste des simplexes de dim=i
 for toute dimension d à considérer:
     for chaque simplexe j de dims[d] de façon croissante
-        while il existe i tel que low[j] = low[i]:
+        while (il existe i dans dims[d] tel que low[j] = low[i]):
             ajouter colonne i de B à colonne j modulo 2
 ", title:"StandardAlgorithmUpgrade(B)")
 
@@ -702,7 +856,8 @@ Le calcul de la complexité ne permettant pas d'avoir une meilleure borne, on no
 
 #align(center)[
     #grid(
-        columns: (50%, 50%),
+        columns: (48%, 48%),
+        gutter: 4%,
         [
             #figure(
                 image("../../Code/images/marseille.png", width: 100%),
@@ -717,7 +872,6 @@ Le calcul de la complexité ne permettant pas d'avoir une meilleure borne, on no
         ],
     )
 ]
-_Visuels à changer pour supprimer le nom des villes et rendre plus joli les triangles_
 
 Les triangles ici représentés montrent les zones où il est le plus difficile de rejoindre une station de métro. Pour les plus gros triangles, il peut être cohérent de croire qu'il est difficile de se rendre à ces stations de métros. En revanche, l'interprétation est plus dure pour les plus petits triangles.
 

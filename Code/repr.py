@@ -1,7 +1,7 @@
 '''
  Contact : Elowan - elowarp@gmail.com
  Creation : 10-09-2024 17:13:53
- Last modified : 17-12-2024 17:36:38
+ Last modified : 14-05-2025 13:50:22
  File : repr.py
 '''
 
@@ -103,7 +103,7 @@ def repr_map(filename):
     # Affichage des tracés des lignes
     for key, value in lines.items():
         fig.add_trace(go.Scattermap(lon=value["lon"], lat=value["lat"], 
-            mode="lines", name="Ligne {}".format(key), line=dict(color = value["color"])))
+            mode="lines", line=dict(color = value["color"]), name="Ligne {}".format(key)))
 
 
     fig.update_layout(
@@ -116,8 +116,10 @@ def repr_map(filename):
                 "lat" :float(np.mean(lat))
             },
             pitch=0,
-            zoom=11.8
+            zoom=12
         ),
+        margin=dict(l=0, r=0, t=0, b=0),
+        showlegend=False
     )
 
     if not os.path.exists("images"):
