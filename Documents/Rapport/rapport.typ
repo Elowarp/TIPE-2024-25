@@ -324,14 +324,14 @@ Pour définir formellement des "trous", nous devons définir les opérateurs de 
 ]
 
 #def[
-    On définit alors les _classes d'homologie de dimension $k$_ comme le groupe de Ker$(delta_k)$ quotienté par Im$(delta_(k+1))$:
+    On définit alors les _classes d'homologies de dimension $k$_ comme le groupe de Ker$(delta_k)$ quotienté par Im$(delta_(k+1))$:
 
     $ H_k = "Ker"(delta_k) \/ "Im"(delta_(k+1)) $
 
     Celle-ci représente les "trous" en dimension $k$.
 ]
 
-On peut voir que $H_0$ premet de différentier les composantes connexes de $#ensPts$, $H_1$ représente un trou qui est entouré par un chemin fermé de points connectés (comme le cycle $(sigma_4, sigma_5, sigma_8)$ dans $K_2$ dans la @Filtration_homologie).
+On peut voir que les éléments de $H_0$ premettent de différentier les composantes connexes de $#ensPts$ et ceux de $H_1$ représentent des trous qui sont entourés par un chemin fermé de points connectés (comme le cycle $(sigma_4, sigma_5, sigma_8)$ dans $K_2$ dans la @Filtration_homologie).
 
 #let pat1 = tiling(size: (4pt, 7pt))[
     #place(line(start: (0%, 0%), end: (0%, 100%)))
@@ -528,7 +528,7 @@ Pour notre usage, $H_1$ qui représente les zones critiques de couverture du ré
 
     On choisit de se baser uniquement sur des vraies villes, que l'on nommera #mrs et #tls par la suite, pour tester notre approche. De plus, toutes les informations relatives aux stations de métros ainsi que les temps de passages sont trouvables sur #link("https://transport.data.gouv.fr").
 
-    Ces informations servent à définir nos points et notre pondération, en revanche elles ne permettent pas d'obtenir les distances entre les stations, pour cela nous utiliserons alors #link("https://www.geoapify.com")[geoapify] qui nous permet d'estimer des temps de trajet en voiture et à pied.
+    Ces informations servent à définir nos points et notre pondération, en revanche elles ne permettent pas d'obtenir les distances entre les stations, pour cela nous utiliserons alors #link("https://www.geoapify.com") qui nous permet d'estimer des temps de trajet en voiture et à pied.
 
 ]
 
@@ -587,8 +587,6 @@ Ainsi à partir de cette filtration, nous pouvons obtenir les classes d'homologi
     $ H_k (X) tilde.eq plus.circle.big_(i=1)^p P_k (X) \/ d_i P_k (X) $
 
     en notant $P_k (#ensPts)$ l'ensemble des parties à $k+1$ éléments de #ensPts, formant donc un complexe simplicial constitué uniquement de $k$-simplexes. Cet ensemble est appelé _code barre_ de $H_k$
-
-    \#Jesaispascequejemanipule
     ]
 )
 // _Note : Je ne suis pas sûr de comprendre ce que je manipule notamment les types du quotient... Les extraits sont ici : #underline(link("https://fr.wikipedia.org/wiki/Th%C3%A9or%C3%A8me_des_facteurs_invariants#A-modules_de_type_fini","Source")) et @annexe_inv. _
@@ -600,7 +598,7 @@ Informatiquement, selon @PH_roadmap, on calcule ce code barre en créant une mat
     $ forall (i,j) in [|0, n-1|]^2, B[i][j] = cases("1 si" sigma_i "est une face de" sigma_j, "0 sinon") $
 ]<BordureDef>
 
-_Note : D'après @ComputingPH, $B$ peut être vu comme la somme des matrice des $delta_k$ dans la base concaténée des bases des $C_k$._
+// _Note : D'après @ComputingPH, $B$ peut être vu comme la somme des matrice des $delta_k$ dans la base concaténée des bases des $C_k$._
 
 Un exemple d'une telle matrice est donnée en @Bordure.
 
@@ -713,11 +711,6 @@ Comparons alors nos deux matrices, sur l'exemple de la filtration de la @Filtrat
     ]
 )
 
-Si $"low"_overline(B) (j) = i != -1$ alors on a une paire de simplexes $(sigma_i, sigma_j)$ telle que l'apparition de $sigma_i$ fait apparaitre une nouvelle classe d'homologie. Et au contraire, $sigma_j$ va la _tuer_ en apparaissant. Prenons comme exemple la filtration de la @Filtration_ex : dans $K_2$, $sigma_8$ cause l'apparition d'une classe dans $H_1$ (car elle crée un cycle) cependant l'apparition du simplexe $tau_9$ dans $K_3$ tue la classe de $sigma_8$ dans $H_1$ (car elle "remplit" le contenu du cycle).
-
-En revanche si $"low"_overline(B) (j) = -1$ alors l'apparition de $sigma_j$ crée une classe d'homologie : s'il existe $k$ tel que $"low"_overline(B) (k) = j$ on est dans le cas précédent, sinon la classe d'homologie n'est jamais tuée.
-
-
 #set table(inset: (right:1em, left: 1em))
 
 #grid(
@@ -792,6 +785,12 @@ En revanche si $"low"_overline(B) (j) = -1$ alors l'apparition de $sigma_j$ cré
     ]
 )
 
+Si $"low"_overline(B) (j) = i != -1$ alors on a une paire de simplexes $(sigma_i, sigma_j)$ telle que l'apparition de $sigma_i$ fait apparaitre une nouvelle classe d'homologie. Et au contraire, $sigma_j$ va la _tuer_ en apparaissant. Prenons comme exemple la filtration de la @Filtration_ex : dans $K_2$, $sigma_8$ cause l'apparition d'une classe dans $H_1$ (car elle crée un cycle) cependant l'apparition du simplexe $tau_9$ dans $K_3$ tue la classe de $sigma_8$ dans $H_1$ (car elle "remplit" le contenu du cycle).
+
+En revanche si $"low"_overline(B) (j) = -1$ alors l'apparition de $sigma_j$ crée une classe d'homologie : s'il existe $k$ tel que $"low"_overline(B) (k) = j$ on est dans le cas précédent, sinon la classe d'homologie n'est jamais tuée.
+
+C'est depuis cette matrice que nous sommes capables de déterminer toutes les classes d'homologies ainsi que leur durée de vie, et donc de générer des représentations graphiques comme montré en @CarteResultat
+
 // C'est depuis cette matrice $overline(B)$ réduite que l'on construit notre diagramme de persistance comme il suit : 
 
 // #def[
@@ -802,7 +801,6 @@ En revanche si $"low"_overline(B) (j) = -1$ alors l'apparition de $sigma_j$ cré
 
 // C'est grâce à cette définition que nous arrivons au diagramme de persistance donnée en @PD_ex
 
-C'est depuis cette matrice que nous sommes capables de déterminer toutes les classes d'homologies ainsi que leur durée de vie, et donc de générer des représentations graphiques comme montré en @CarteResultat
 
 = Recherche d'optimisation<optimisation>
 

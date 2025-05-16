@@ -4,6 +4,7 @@
 \usepackage{mathtools}
 \usepackage{appendixnumberbeamer}
 \usepackage{pgfplots}
+\usepackage{mathtools}
 \pgfplotsset{compat=newest}
 \lstset{basicstyle=\ttfamily,breaklines=true}
 \graphicspath{ {../images/} }
@@ -113,23 +114,26 @@ l'homologie persistante et optimisation.}
     \end{block}
 
     \begin{figure}
+        \centering
         \begin{tikzpicture}
-            % \begin{axis}[
-            %     axis equal image,
-            %     axis lines=middle,
-            %     xmax=18,zmax=5,
-            %     ticks=none,
-            %     clip bounding box=upper bound,
-            %     colormap/blackwhite
-            %     ]
+            \begin{axis}[
+                axis equal image,
+                axis lines=middle,
+                xmax=18,zmax=5,
+                ticks=none,
+                clip bounding box=upper bound,
+                colormap/blackwhite
+                ]
 
-            %     \addplot3[domain=0:360,y domain=0:320, samples=50,surf,z buffer=sort]
-            %     ({(12 + 3 * cos(x)) * cos(y)} ,
-            %     {(12 + 3 * cos(x)) * sin(y)},
-            %     {3 * sin(x)});
-            % \end{axis}
+                \addplot3[domain=0:360,y domain=0:320, samples=50,surf,z buffer=sort]
+                ({(12 + 3 * cos(x)) * cos(y)} ,
+                {(12 + 3 * cos(x)) * sin(y)},
+                {3 * sin(x)});
+            \end{axis}
         \end{tikzpicture}
-        \caption{Le tore possède deux classes d'homologies, celle du trou au centre et celle formée par le cylindre.}
+        \hfill
+        \includegraphics[width=0.4\textwidth]{../images/filtrationHomo.png}
+        \caption{Le tore avec ces deux classes d'homologies et la filtration d'exemple avec en pointillé les classes d'homologies de dimension 0 et en hachuré celles de dimension 1.}
     \end{figure}
 \end{frame}
 
@@ -177,6 +181,7 @@ l'homologie persistante et optimisation.}
     \end{block}
 
     \begin{figure}
+        \centering
         \includegraphics[width=0.8\textwidth]{../images/cech.png}
         \caption{Image repr les vietoris rips, tiré de \textit{Persitent homology for resource coverage: A case study of access to polling sites}}
     \end{figure}
@@ -195,6 +200,7 @@ l'homologie persistante et optimisation.}
     $$
     L'ordre total est déduit de cet indiçage.
     \begin{figure}
+        \centering
         \includegraphics[width=0.8\textwidth]{../images/filtration_horizontal.png}
         \caption{Indiçage de la filtration}
     \end{figure}
@@ -283,6 +289,7 @@ for j allant de 0 a n-1:
         \caption{Matrice $B$ et réduite $\overline{B}$}
     \end{figure}
     \begin{figure}
+        \centering
         \includegraphics[width=0.7\textwidth]{../images/filtration_horizontal.png}
         \caption{Filtration et utilisée}
     \end{figure}
@@ -339,15 +346,16 @@ for toute dimension d a considerer:
 \begin{frame}
     \frametitle{Résultats}
     \begin{figure}[h]
+        \centering
         \begin{minipage}[c]{.42\linewidth}
             \centering
-            \includegraphics[width=1.3\textwidth]{../../Code/images/marseille.png}
+            \includegraphics[width=1.1\textwidth]{../../Code/images/marseille.png}
             \caption{Marseille}
         \end{minipage}
         \hfill
         \begin{minipage}[c]{.42\linewidth}
             \centering
-            \includegraphics[width=1.3\textwidth]{../../Code/images/toulouse.png}
+            \includegraphics[width=1.1\textwidth]{../../Code/images/toulouse.png}
             \caption{Toulouse}
         \end{minipage}
     \end{figure}
@@ -357,19 +365,29 @@ for toute dimension d a considerer:
 
 \begin{frame}
     \frametitle{Annexe : Définition}
-    \begin{block}{Définition d'un cycle}
-        Un cycle est une sous-variété fermée.
+    \begin{block}{Complexe de chaînes}
+        On définit un \textit{complexe de chaînes} comme la donnée d'une suite 
+    
+        $$... \xrightarrow{\delta_{k+2}} C_{k+1} \xrightarrow{\delta_{k+1}} C_k \xrightarrow{\delta_k} C_{k-1} \xrightarrow{\delta_{k-1}} ...$$
+
+        Où chaque $C_k$ est un groupe abélien libre qui a pour base les $k$-simplexes de $X$ et $\delta_k$ est une morphisme de groupes tel que $\delta_k \circ \delta_{k+1} = 0$
+        
+        On appelle $\delta_k$ un \textit{opérateur de bords}.
+
     \end{block}
-    \begin{block}{Définition d'une limite}
-        Une limite est un cycle qui est également la limite d'une
-        sous-variété 
+    \begin{block}{Classes d'homologies $H_k$}
+    On définit alors les \textit{classes d'homologie de dimension $k$} comme le groupe de $Ker(\delta_k)$ quotienté par $Im(\delta_{k+1})$:
+
+    $$H_k = Ker(\delta_k) / Im(\delta_{k+1})$$
     \end{block}
-    \begin{block}{Définition d'une classe d'homologie}
-        Une classe d'homologie est une classe d'équivalence de 
-        cycles modulo une limite : elle est donc représentée par un
-        cycle qui n'est la limite d'aucune sous-variété, il représente 
-        donc un trou, une variété dont la limite serait ce cycle, mais qui n'est pas là
-    \end{block}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Annexe : Théorème des facteurs invariants}
+    Il existe un unique ensemble ${d_1, ..., d_p}$ d'éléments de $H_k$ définis à des inversibles près, tel que :
+    $$H_k (X) \simeq \bigoplus_{i=1}^p P_k (X) / d_i P_k (X)$$
+
+    en notant $P_k(X)$ l'ensemble des parties à $k+1$ éléments de X, formant donc un complexe simplicial constitué uniquement de $k$-simplexes. Cet ensemble est appelé \textit{code barre} de $H_k$.
 \end{frame}
 
 \begin{frame}
@@ -381,6 +399,7 @@ for toute dimension d a considerer:
     % \end{figure}
 
     \begin{figure}[h]
+        \centering
         \begin{minipage}[c]{.45\linewidth}
             \centering
             \includegraphics[width=1\textwidth]{../../Code/images/pd_marseille.png}
