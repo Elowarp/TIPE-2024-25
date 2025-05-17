@@ -12,7 +12,7 @@
     header: context [
         #set align(right)
         #set text(9pt)
-        Étude de couvertures de réseaux de métros
+        Étude de couverture de réseaux de métro
 
     ],
     footer: context [
@@ -77,12 +77,23 @@
 #let tls = "Ville B"
 
 #align(center, text(17pt)[
-    *TIPE : Étude de couvertures de réseaux de métros, application de l'homologie persistante et optimisation*
+    *TIPE : Étude de couverture de réseaux de métro, application de l'homologie persistante et optimisation*
 ])
 
-#align(center)[Elowan H\
+#align(center)[H Elowan\
 // #link("mailto:elowarp@gmail.com")
 ]
+
+#show outline.entry: it => {
+    link(
+        it.element.location(),
+        grid(
+            columns: (1fr, 1fr),
+            align:(left, right),
+            [#it.indented(it.prefix(), it.body())], [#it.page()]
+        )
+    )
+}
 
 #outline(
     title: [Sommaire]
@@ -97,7 +108,7 @@ L'homologie persistante est une _méthode de calcul_  qui, à partir d'une discr
     
 Nous chercherons seulement à caractériser les "trous" dans un espace, afin de détecter les trous de couverture dans un réseau métropolitain, ici modélisé comme un nuage de points de $bb(R)^2$, dont chaque élément est une station de métro.
 
-Afin d'utiliser l'homologie persistante, nous devons définir certaines notions géométriques, nous noterons dans la suite #ensPts l'ensemble des points de $bb(R)^2$ que l'on considère.
+Afin d'utiliser l'homologie persistante, nous devons définir certaines notions géométriques, nous noterons dans la suite #ensPts l'ensemble des points que l'on considère.
 
 // Voyons désormais comment formaliser cela, commençons par définir tous nos outils : 
 
@@ -288,7 +299,7 @@ On introduit de plus un ordre total $prec.curly.eq$ sur l'ensemble des simplexes
 
 Observons sur la @Filtration_ex l'indexation des simplexes suivant l'ordre précédemment défini : les simplexes $sigma_8$ et $sigma_7$ sont plus grands au sens de $prec.curly.eq$ que tous les autres $sigma_i$ et $p_i$ parce qu'ils apparaissent plus tard dans la filtration. De plus, si $sigma_8$ était apparu dans $K_3$, l'ordre aurait toujours été respecté puisque $sigma_8$ est une face de $tau_9$.
 
-Il y a un problème : nous voulons analyser un ensemble de points discrets, et non une filtration déjà existante, il nous faut alors créer une filtration depuis un ensemble de points. Nous faisons cela via une construction incrémentale de complexes simpliciaux avec les complexes de Vietoris-Rips pondérés. Ainsi d'après @PH_resource_coverage :
+Il y a cependant un problème : nous voulons analyser un ensemble de points, et non une filtration déjà existante, il nous faut alors créer une filtration depuis l'ensemble que l'on considère. Nous faisons cela via une construction incrémentale de complexes simpliciaux avec les complexes de Vietoris-Rips pondérés. Ainsi d'après @PH_resource_coverage :
 
 #def[
     Soient un ensemble $#ensPts = (x_i)_(i=0)^n$ de points associés à des poids $(w_i)_(i=0)^n$ et une distance $d$, on définit le complexe simplicial pondéré de Vietoris-Rips au rang $t$, noté $V_t (#ensPts, d)$, comme l'ensemble des simplexes $(x_i_0, ..., x_i_k)$ tels que : 
@@ -302,7 +313,7 @@ Il y a un problème : nous voulons analyser un ensemble de points discrets, et n
     ]  
 ]
 
-Ainsi plus on augmente $t$, plus le complexe possède des simplexes, on en donne une représentation @VR. Pour chaque $t$ qui augmente le nombre de simplexes du complexe simplicial, nous ajoutons $V_r (#ensPts, d)$ à la filtration que l'on est en train de créer.
+Ainsi plus on augmente $t$, plus le complexe possède des simplexes, on en donne une représentation @VR. Pour chaque $t$ qui augmente le nombre de simplexes du complexe simplicial, nous ajoutons $V_t (#ensPts, d)$ à la filtration que l'on est en train de créer.
 
 #figure(
     image("../images/cech.png"),
@@ -491,10 +502,10 @@ On peut voir que les éléments de $H_0$ premettent de différentier les composa
             )
         }
     }),
-    caption:[Les éléments de $H_0$ en poitillé et ceux de $H_1$ achuré.]
+    caption:[Les éléments de $H_0$ en pointillés et ceux de $H_1$ achurés.]
 )<Filtration_homologie>
 
-Pour notre usage, $H_1$ qui représente les zones critiques de couverture du réseau.
+Pour notre usage, $H_1$ représente les zones critiques de couverture du réseau.
 
 // Ainsi, grâce à ces définitions, nous sommes capables, depuis un ensemble $X = {x_i}$ de points fini de poids $(w_i)_i$, de créer une filtration et de l'étudier afin de trouver $H_1$ qui représentent, pour notre cas d'usage, les zones critiques de couverture.
 
@@ -526,7 +537,7 @@ Pour notre usage, $H_1$ qui représente les zones critiques de couverture du ré
 #[
     #show link: underline
 
-    On choisit de se baser uniquement sur des vraies villes, que l'on nommera #mrs et #tls par la suite, pour tester notre approche. De plus, toutes les informations relatives aux stations de métros ainsi que les temps de passages sont trouvables sur #link("https://transport.data.gouv.fr").
+    On choisit de se baser uniquement sur des vraies villes, que l'on nommera #mrs et #tls par la suite, pour tester notre approche. De plus, toutes les informations relatives aux stations de métro ainsi que les temps de passages sont trouvables sur #link("https://transport.data.gouv.fr").
 
     Ces informations servent à définir nos points et notre pondération, en revanche elles ne permettent pas d'obtenir les distances entre les stations, pour cela nous utiliserons alors #link("https://www.geoapify.com") qui nous permet d'estimer des temps de trajet en voiture et à pied.
 
@@ -566,27 +577,27 @@ Ainsi en revenant aux boules des complexes simplicaux de Vietoris-Rips, la dista
 
 = Méthode
 
-Pour trouver les zones critiques, nous utiliserons la méthode de _l'homologie persistante_ décrite dans @PH_resource_coverage (dans le cas de notre réseau de métros). Celle ci se décompose en 3 étapes :
+Pour trouver les zones critiques, nous utiliserons la méthode de _l'homologie persistante_ décrite dans @PH_resource_coverage (dans le cas de notre réseau de métro). Celle ci se décompose en 3 étapes :
 
 - Transformation de l'ensemble des points (les stations de métro) $x_i$ de poids $w_i$ en une filtration;
 - Création et réduction de la matrice de bordure (définie dans la suite);
 - Récupération des simplexes "tueurs" de classes d'homologies
 
-On suppose que l'étape une est déjà réalisée suivant la @Definitions.
+On suppose que la première étape est déjà réalisée suivant la @Definitions.
 
 // Notre but final étant de créer un diagramme de persistance, nous devons réussir à convertir notre filtration en celui ci, cela se fait grâce au théorème centrale dû à Crawley-Boevey @PH_invitation. En définissant un espace filtré comme la donnée d'un espace topologique ainsi qu'une de ses filtration, on a :
 
 // Depuis cette filtration, nous voulons obtenir les classes d'homologies, c'est donc le théorème suivant qui justifie entièrement cette recherche.
 
-Ainsi à partir de cette filtration, nous pouvons obtenir les classes d'homologie grâce au théorème qui suit :
+Ainsi à partir de cette filtration, nous pouvons obtenir les classes d'homologies grâce au théorème qui suit :
 
 #th(
     "des facteurs invariants",
     [
     D'après @PH_invitation et @ComputingPH, il existe un unique ensemble ${d_1, ..., d_p}$ d'éléments de $H_k$ définis à des inversibles près, tel que :
-    $ H_k (X) tilde.eq plus.circle.big_(i=1)^p P_k (X) \/ d_i P_k (X) $
+    $ H_k tilde.eq plus.circle.big_(i=1)^p P_k \/ d_i P_k $
 
-    en notant $P_k (#ensPts)$ l'ensemble des parties à $k+1$ éléments de #ensPts, formant donc un complexe simplicial constitué uniquement de $k$-simplexes. Cet ensemble est appelé _code barre_ de $H_k$
+    en notant $P_k$ l'ensemble des parties à $k+1$ éléments de #ensPts, formant donc un complexe simplicial constitué uniquement de $k$-simplexes. Cet ensemble est appelé _code barre_ de $H_k$
     ]
 )
 // _Note : Je ne suis pas sûr de comprendre ce que je manipule notamment les types du quotient... Les extraits sont ici : #underline(link("https://fr.wikipedia.org/wiki/Th%C3%A9or%C3%A8me_des_facteurs_invariants#A-modules_de_type_fini","Source")) et @annexe_inv. _
@@ -614,7 +625,7 @@ Cet algorithme de réduction est nommé _standard algorithm_ et est décrit dans
 
 _Notons que cet algorithme a pour complexité temporelle $O(n^3)$ au pire._ 
 
-Comparons alors nos deux matrices, sur l'exemple de la filtration de la @Filtration_ex (les cases vides remplacent les zéros pour plus de lisibilité et les colonnes/lignes vides ont été omises), avec ici notre ordre total sur les simplexes :
+Comparons alors nos deux matrices en @Bordure et @BordureReduite, sur l'exemple de la @Filtration_ex, où les cases vides remplacent les zéros et où les colonnes/lignes vides ont été omises.
 
 #grid(
     columns: (50%, 45%),
@@ -704,10 +715,10 @@ Comparons alors nos deux matrices, sur l'exemple de la filtration de la @Filtrat
             })
         }),
         caption: [Rappel du nommage des simplexes ($p_i$ pour la dimension 0, $sigma_j$ pour la dimension 1, $tau_k$ pour la dimension 2)]
-    )   
+    )<filtration_nommage>   
     ],
     [
-        En regardant la matrice $overline(B)$, nous remarquons que l'opération de réduction a permis d'avoir la ligne _low_ sans répétion de nombres positifs cela se comprenant comme ce qu'il suit :
+        En regardant la matrice $overline(B)$, nous remarquons que l'opération de réduction a permis d'avoir la ligne _low_ sans répétion de nombres positifs. Cette propriété s'interprète comme il suit :
     ]
 )
 
@@ -785,11 +796,13 @@ Comparons alors nos deux matrices, sur l'exemple de la filtration de la @Filtrat
     ]
 )
 
-Si $"low"_overline(B) (j) = i != -1$ alors on a une paire de simplexes $(sigma_i, sigma_j)$ telle que l'apparition de $sigma_i$ fait apparaitre une nouvelle classe d'homologie. Et au contraire, $sigma_j$ va la _tuer_ en apparaissant. Prenons comme exemple la filtration de la @Filtration_ex : dans $K_2$, $sigma_8$ cause l'apparition d'une classe dans $H_1$ (car elle crée un cycle) cependant l'apparition du simplexe $tau_9$ dans $K_3$ tue la classe de $sigma_8$ dans $H_1$ (car elle "remplit" le contenu du cycle).
+Si $"low"_overline(B) (j) = i != -1$, alors la paire de simplexes $(sigma_i, sigma_j)$ représente le temps de vie d'une classe d'homologie : l'apparition de $sigma_i$ fait apparaitre une nouvelle classe d'homologie tandis que  $sigma_j$ va la _tuer_ en apparaissant. 
 
-En revanche si $"low"_overline(B) (j) = -1$ alors l'apparition de $sigma_j$ crée une classe d'homologie : s'il existe $k$ tel que $"low"_overline(B) (k) = j$ on est dans le cas précédent, sinon la classe d'homologie n'est jamais tuée.
+Ainsi, sur la @Filtration_ex : dans $K_2$, $sigma_8$ cause l'apparition d'une classe dans $H_1$ (car elle crée un cycle) cependant l'apparition du simplexe $tau_9$ dans $K_3$ tue la classe de $sigma_8$ dans $H_1$ (car elle "remplit" le contenu du cycle).
 
-C'est depuis cette matrice que nous sommes capables de déterminer toutes les classes d'homologies ainsi que leur durée de vie, et donc de générer des représentations graphiques comme montré en @CarteResultat
+En revanche, si $"low"_overline(B) (j) = -1$, alors l'apparition de $sigma_j$ crée une classe d'homologie : s'il existe $k$ tel que $"low"_overline(B) (k) = j$ on est dans le cas précédent, sinon la classe d'homologie n'est jamais tuée.
+
+C'est depuis cette matrice que nous sommes capables de déterminer toutes les classes d'homologies ainsi que leur durée de vie, et donc de générer des représentations graphiques comme montré en @CarteResultatMrs et @CarteResultatTls.
 
 // C'est depuis cette matrice $overline(B)$ réduite que l'on construit notre diagramme de persistance comme il suit : 
 
@@ -828,7 +841,7 @@ Le calcul de la complexité ne permettant pas d'avoir une meilleure borne, on no
 
 = Résultats et conclusion
 
-== Résultats de l'homologie persitante
+== Résultats de l'homologie persistante
 // #figure(
 //     table(
 //         columns: (auto, auto, auto, auto),
@@ -852,6 +865,11 @@ Le calcul de la complexité ne permettant pas d'avoir une meilleure borne, on no
 
 // On comprend que globalement il faut 200s (soit 3m20s) pour quelqu'un de se rendre d'une station à une autre (le minimum en temps entre la voiture et la marche) ce qui est effectivement cohérent avec la réalité. Les temps des classes pour la dimension 1 montrent le temps moyen de trajet entre les deux stations les plus éloignées d'un même cycle. Donc par exemple pour #tls, il faudra en moyenne 318s (5min20s) pour rejoindre une station depuis les zones les moins bien deservies.
 
+
+Les triangles représentés en @CarteResultatMrs et @CarteResultatTls montrent les zones où il est le plus difficile de rejoindre une station de métro. Pour les plus gros triangles, il peut être cohérent de croire qu'il est difficile de se rendre à ces stations de métro. En revanche, l'interprétation est plus dure pour les plus petits triangles.
+
+Nous devons revenir à la définition de notre distance : celle ci prend en compte le temps minimal entre un trajet en voiture et le même trajet à pied. Les plus petites zones, comme à gauche sur la ligne bleue dans la #mrs ou en bout de ligne rouge dans la #tls, correspondent en fait à des espaces uniquement piétons dont le temps de trajet est plus court à pied qu'en voiture. Ainsi, les plus petites zones indiquent donc la même information (difficulté d'accès à ces stations) que les grandes mais à une échelle différente.
+
 #align(center)[
     #grid(
         columns: (48%, 48%),
@@ -860,21 +878,16 @@ Le calcul de la complexité ne permettant pas d'avoir une meilleure borne, on no
             #figure(
                 image("../../Code/images/marseille.png", width: 100%),
                 caption:[Carte de #mrs]
-            )<CarteResultat>
+            )<CarteResultatMrs>
         ],
         [
             #figure(
                 image("../../Code/images/toulouse.png", width:100%),
                 caption:[Carte de #tls]
-            )
+            )<CarteResultatTls>
         ],
     )
 ]
-
-Les triangles ici représentés montrent les zones où il est le plus difficile de rejoindre une station de métro. Pour les plus gros triangles, il peut être cohérent de croire qu'il est difficile de se rendre à ces stations de métros. En revanche, l'interprétation est plus dure pour les plus petits triangles.
-
-Nous devons revenir à la définition de notre distance : celle ci prend en compte le temps minimal entre un trajet en voiture et le même trajet à pied. Les plus petites zones, comme à gauche sur la ligne bleue dans la #mrs ou en bout de ligne rouge dans la #tls, correspondent en fait à des espaces uniquement piétons dont le temps de trajet est plus court à pied qu'en voiture. Ainsi, les plus petites zones indiquent donc la même information (difficulté d'accès à ces stations) que les grandes mais à une échelle différente.
-
 == Résultat de l'optimisation
 
 #figure(
@@ -885,9 +898,9 @@ Nous devons revenir à la définition de notre distance : celle ci prend en comp
     caption: "Temps d'exécution des deux algorithmes précédents, avec une ordonnée linéaire à gauche et logarithmique à droite."
 )<resultatOpti>
 
-On observe sur la @resultatOpti une nette amélioration entre la version avant optimisation et celle après, cependant, même si la figure de gauche montre la différence ressentie lors de l'exécution, celle de droite montre que nous restons quand même en complexité "quasi"-exponentiel en le nombre d'éléments de #ensPts.
+On observe sur la @resultatOpti une nette amélioration entre la version avant optimisation et celle après, cependant, même si la figure de gauche montre la différence ressentie lors de l'exécution, celle de droite montre que nous restons quand même avec une complexité "de même forme" en le nombre d'éléments de #ensPts.
 
-Notons que le stockage en liste d'adjacence permet un plus grand nombres d'éléments tandis que la matrice d'adjacence pose beaucoup plus de problèmes. Ici, l'étude s'arrête pour un nombre d'éléments égale à 65 puisqu'il faut plus de 16go de ram pour stocker la matrice d'une taille supérieure (ma limite physique).
+Notons que le stockage en liste d'adjacence permet un plus grand nombres d'éléments tandis que la matrice d'adjacence pose beaucoup plus de problèmes. Ici, l'étude s'arrête pour un nombre d'éléments égal à 65 puisqu'il faut plus de 16go de ram pour stocker la matrice d'une taille supérieure (ma limite physique).
 
 L'homologie persistante est donc une méthode nous permettant de mettre en lumière des zones mal desservies en prenant en compte des realités plus complexes que seul le temps de trajet. Par exemple, nous prenons en compte les temps d'attente en station mais nous aurions pu aussi prendre en compte la densité de population autour de ces stations. Cette caractéristique peut être une possibilité d'ouverture de ce sujet car celle ci joue intuitivement un rôle dans le temps d'attente en station et donc dans la difficulté de prendre un métro.
 
