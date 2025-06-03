@@ -2,29 +2,20 @@
 #set document(
   title: "TIPE : Persistance homologique (Code)"
 )
-#set page(
-    header: context [
-        #set align(right)
-        #set text(9pt)
-        TIPE : Persistance homologique (Code)
-
-    ],
-    footer: context [
+#set page("presentation-4-3", columns: 2, margin: 25pt, footer: context [
         #set align(center)
         #counter(page).display(
             "1 sur 1",
             both: true
         )
-    ],
-    flipped: true,
-    columns: 2
-)
+    ])
+#set text(size:13pt)
 
 #let files = (
     "src": ("geometry.c", "geometry.h", "list.c", "list.h", "misc.c", "misc.h", "persDiag.c", "persDiag.h", "reduc.c", "reduc.h"),
-    "prgms": ("analyse_cplx.c", "analyse_cplx.py"),
-    "tests": (),
-    "": ("main.c","repr.py", "retrieve_data.py")
+    "prgms": ("analyse_cplx.c", ),
+    "tests": ("tests_geometry.c", "tests_list.c", "tests_persDiag.c", "tests_reduc.c"),
+    "": ("main.c", "retrieve_data.py")
   )
 
 #show raw.line: it => {

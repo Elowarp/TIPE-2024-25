@@ -120,6 +120,8 @@ Afin d'utiliser l'homologie persistante, nous devons définir certaines notions 
     Un _simplexe_ $sigma$ de dimension $k$ (ou _$k$-simplexe_) correspond à l'enveloppe convexe de $k+1$ points de #ensPts non inclus dans un sous-espace affine de dimension $k-1$.
 
     On définit un simplexe de dimension 0 comme un point de #ensPts.
+
+    On note $sigma = [p_0, ..., p_k]$ avec les $k+1$ points définissant le $k$-simplexe. 
 ]
 
 Par exemple, un simplexe de dimension 1 est un segment et un simplexe de dimension 3 est un trièdre.
@@ -302,11 +304,12 @@ Observons sur la @Filtration_ex l'indexation des simplexes suivant l'ordre préc
 Il y a cependant un problème : nous voulons analyser un ensemble de points, et non une filtration déjà existante, il nous faut alors créer une filtration depuis l'ensemble que l'on considère. Nous faisons cela via une construction incrémentale de complexes simpliciaux avec les complexes de Vietoris-Rips pondérés. Ainsi d'après @PH_resource_coverage :
 
 #def[
-    Soient un ensemble $#ensPts = (x_i)_(i=0)^n$ de points associés à des poids $(w_i)_(i=0)^n$ et une distance $d$, on définit le complexe simplicial pondéré de Vietoris-Rips au rang $t$, noté $V_t (#ensPts, d)$, comme l'ensemble des simplexes $(x_i_0, ..., x_i_k)$ tels que : 
+    Soient un ensemble $#ensPts = (x_i)_(i=0)^n$ de points associés à des poids $(w_i)_(i=0)^n$ et une distance $d$, on définit le complexe simplicial pondéré de Vietoris-Rips au rang $t$, noté $V_t (#ensPts, d)$, comme l'ensemble des simplexes ${sigma_i_0, ..., sigma_i_k}$ tels que : 
     #align(center)[
         $
+        forall r in [|0, k|], sigma_(i_r)=[x_i_1, ..., x_i_l] "où" 
         cases(
-            forall j in [|0, k|]\, w_i_j < t,
+            forall j in [|0, l|]\, w_i_j < t,
             forall (j,l) in [|0, k|]^2\, d(x_i_j, x_i_l) + w_i_j + w_i_l < 2t
         )
         $
@@ -316,8 +319,8 @@ Il y a cependant un problème : nous voulons analyser un ensemble de points, et 
 Ainsi plus on augmente $t$, plus le complexe possède des simplexes, on en donne une représentation @VR. Pour chaque $t$ qui augmente le nombre de simplexes du complexe simplicial, nous ajoutons $V_t (#ensPts, d)$ à la filtration que l'on est en train de créer.
 
 #figure(
-    image("../images/cech.png"),
-    caption: [Construction d'un complexe simplicial avec un rayon $t$ grandissant de gauche à droite. Un simplexe est considéré dès lors que les boules associées à ces sommets ont une intersection non vide. Tiré de @PH_resource_coverage]
+    image("../images/VR_complex.png", width: 200pt),
+    caption: [Exemple de complexe simplicial de Vietoris-Rips pour un rayon $t$ où les arêtes noires sont des simplexes de dimension 1; les triangles bleu clair des simplexes de dimension 2 et les pyramides bleu foncé de dimension 3. (Wikipédia)]
 ) <VR>
 
 Pour définir formellement des "trous", nous devons définir les opérateurs de bords. Ainsi selon @CoursHomologie :
@@ -325,7 +328,7 @@ Pour définir formellement des "trous", nous devons définir les opérateurs de 
 #def[
     On définit un _complexe de chaînes_ comme la donnée d'une suite 
     
-    $ ... attach(arrow, t:delta_(k+2)) C_(k+1) attach(arrow, t:delta_(k+1)) C_k attach(arrow, t:delta_(k)) C_(k-1) attach(arrow, t:delta_(k-1)) ... $
+    $ ... attach(arrow, t:delta_(k+2)) C_(k+1) attach(arrow, t:delta_(k+1)) C_k attach(arrow, t:delta_(k)) C_(k-1) attach(arrow, t:delta_(k-1)) ... attach(arrow, t:delta_0) {0} $
 
     Où chaque $C_k$ est un groupe abélien libre qui a pour base les $k$-simplexes de #ensPts et $delta_k$ est une morphisme de groupes tel que $delta_k compose delta_(k+1) = 0$
     
@@ -339,7 +342,7 @@ Pour définir formellement des "trous", nous devons définir les opérateurs de 
 
     $ H_k = "Ker"(delta_k) \/ "Im"(delta_(k+1)) $
 
-    Celle-ci représente les "trous" en dimension $k$.
+    Ces éléments représentent les "trous" en dimension $k$.
 ]
 
 On peut voir que les éléments de $H_0$ premettent de différentier les composantes connexes de $#ensPts$ et ceux de $H_1$ représentent des trous qui sont entourés par un chemin fermé de points connectés (comme le cycle $(sigma_4, sigma_5, sigma_8)$ dans $K_2$ dans la @Filtration_homologie).
@@ -577,7 +580,7 @@ Ainsi en revenant aux boules des complexes simplicaux de Vietoris-Rips, la dista
 
 = Méthode
 
-Pour trouver les zones critiques, nous utiliserons la méthode de _l'homologie persistante_ décrite dans @PH_resource_coverage (dans le cas de notre réseau de métro). Celle ci se décompose en 3 étapes :
+Pour trouver les zones critiques, nous utiliserons la méthode de _l'homologie persistante_ décrite dans @PH_resource_coverage (dans le cas de notre réseau de métro). Celle-ci se décompose en 3 étapes :
 
 - Transformation de l'ensemble des points (les stations de métro) $x_i$ de poids $w_i$ en une filtration;
 - Création et réduction de la matrice de bordure (définie dans la suite);
@@ -594,10 +597,10 @@ Ainsi à partir de cette filtration, nous pouvons obtenir les classes d'homologi
 #th(
     "des facteurs invariants",
     [
-    D'après @PH_invitation et @ComputingPH, il existe un unique ensemble ${d_1, ..., d_p}$ d'éléments de $H_k$ définis à des inversibles près, tel que :
-    $ H_k tilde.eq plus.circle.big_(i=1)^p P_k \/ d_i P_k $
+    D'après @PH_invitation et @ComputingPH, il existe un unique ensemble ${d_1, ..., d_p}$ d'éléments de $bb(Z)$ définis à des inversibles près et $beta in bb(N)$ tels que :
+    $ H_k tilde.eq bb(Z)^beta plus.circle.big_(i=1)^p bb(Z) \/ d_i bb(Z) $
 
-    en notant $P_k$ l'ensemble des parties à $k+1$ éléments de #ensPts, formant donc un complexe simplicial constitué uniquement de $k$-simplexes. Cet ensemble est appelé _code barre_ de $H_k$
+    Où $beta$ est le rang de la partie libre du $bb(Z)$-module de type fini $H_k$ (celui ci est de plus le nombre de trous de dimension $k$, appelé _nombre de Betty_). L'ensemble est appelé _code barre_ de $H_k$.
     ]
 )
 // _Note : Je ne suis pas sûr de comprendre ce que je manipule notamment les types du quotient... Les extraits sont ici : #underline(link("https://fr.wikipedia.org/wiki/Th%C3%A9or%C3%A8me_des_facteurs_invariants#A-modules_de_type_fini","Source")) et @annexe_inv. _

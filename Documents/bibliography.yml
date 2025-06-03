@@ -55,3 +55,10 @@ FormeSmith:
   title: Forme Normale de Smith
   author: Yoann Demesmay
   url: https://agreg-maths.fr/uploads/versions/4367/Forme%20normale%20de%20Smith.pdf
+
+# HomologieSimpliciale:
+#   type: misc
+#   title: Algèbre et analyse tensorielle deuxième partie Cours 4 : L'Homolologie simpliciale
+#   author: Ph. Durand
+#   date: 2007
+#   url: https://maths.cnam.fr/IMG/pdf/tenseur2cr3.pdf

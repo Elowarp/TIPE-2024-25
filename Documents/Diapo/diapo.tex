@@ -4,6 +4,7 @@
 \usepackage{mathtools}
 \usepackage{appendixnumberbeamer}
 \usepackage{pgfplots}
+\usepackage[frenchkw,linesnumbered,lined,commentsnumbered]{algorithm2e}
 \usepackage{mathtools}
 \pgfplotsset{compat=newest}
 \lstset{basicstyle=\ttfamily,breaklines=true}
@@ -46,20 +47,20 @@ l'homologie persistante et optimisation.}
     Chercher à enrouler au lasso, puis reduire ces lassos sans jamais le rompre ou déchirer la forme.  
     \begin{figure}
         \begin{tikzpicture}
-            % \begin{axis}[
-            %     axis equal image,
-            %     axis lines=middle,
-            %     xmax=18,zmax=5,
-            %     ticks=none,
-            %     clip bounding box=upper bound,
-            %     colormap/blackwhite
-            %     ]
+            \begin{axis}[
+                axis equal image,
+                axis lines=middle,
+                xmax=18,zmax=5,
+                ticks=none,
+                clip bounding box=upper bound,
+                colormap/blackwhite
+                ]
 
-            %     \addplot3[domain=0:360,y domain=0:320, samples=50,surf,z buffer=sort]
-            %     ({(12 + 3 * cos(x)) * cos(y)} ,
-            %     {(12 + 3 * cos(x)) * sin(y)},
-            %     {3 * sin(x)});
-            % \end{axis}
+                \addplot3[domain=0:360,y domain=0:320, samples=50,surf,z buffer=sort]
+                ({(12 + 3 * cos(x)) * cos(y)} ,
+                {(12 + 3 * cos(x)) * sin(y)},
+                {3 * sin(x)});
+            \end{axis}
         \end{tikzpicture}
         \begin{tikzpicture}
             \shade[ball color = gray!40, opacity = 0.4] (0,0) circle (1.5cm);
@@ -171,18 +172,18 @@ l'homologie persistante et optimisation.}
 \begin{frame}
     \frametitle{Définition des complexes pondérés de Vietoris-Rips}
     \begin{block}{Complexe Simplicial pondéré de Vietoris-Rips}
-        On le définit au rang $r$, comme l'ensemble des simplexes $(x_{i_0}, ..., x_{i_k})$ tels que : 
+        On le définit au rang $r$, comme l'ensemble des simplexes $(\sigma_{i_0}, ..., \sigma_{i_k})$ sur les points tels que $\forall q \in [|0, k|], \sigma_q = [p_{i_0}, ...,p_{i_l}],$ 
         $$
             \begin{cases}
-                \forall j \in [|0, k|], poids_{i_j} < r\\
-                \forall (j,l) \in [|0, k|]^2, d(x_{i_j}, x_{i_l}) + poids_{i_j} + poids_{i_l} < 2r
+                \forall j \in [|0, l|], poids_{i_j} < r\\
+                \forall (j,k) \in [|0, l|]^2, d(p_{i_j}, p_{i_k}) + poids_{i_j} + poids_{i_k} < 2r
             \end{cases}
         $$
     \end{block}
 
     \begin{figure}
         \centering
-        \includegraphics[width=0.8\textwidth]{../images/cech.png}
+        \includegraphics[width=0.3\textwidth]{../images/VR_complex.png}
         \caption{Image repr les vietoris rips, tiré de \textit{Persitent homology for resource coverage: A case study of access to polling sites}}
     \end{figure}
     
@@ -239,14 +240,29 @@ l'homologie persistante et optimisation.}
 
 \begin{frame}[fragile]
     \frametitle{Application de l'algorithme}
-    \begin{block}{Algorithme Standard($B \in M_n(\{0,1\})$)}
-        \fontsize{9.5}{10}\selectfont
-        \begin{lstlisting}
-for j allant de 0 a n-1:
-    while (il existe i < j avec low[i] = low[j]):
-        ajouter colonne i de B a colonne j modulo 2
-      \end{lstlisting}
-    \end{block}
+        \begin{algorithm}[H]
+        \SetKwFor{For}{Pour}{Faire}{Fin pour tout}
+        \SetKwFor{While}{Tant que}{Faire}{Fin pour tout}
+        \SetKwInOut{Input}{Entrée}\SetKwInOut{Output}{Sortie}
+        \Input{$B \in M_n(\{0, 1\})$ la matrice à reduire ($(C_i)_{i=1}^n$ ses colonnes)}
+        \Output{$\overline{B}$ matrice réduite}
+        \BlankLine
+        \For{j=0 à n-1}{
+            \While{$\exists i < j$ tel que low[j] = low[i]}{
+                $C_j \leftarrow (C_i + C_j)$ mod 2\\
+            }
+
+        }
+    \end{algorithm}
+
+%     \begin{block}{Algorithme Standard($B \in M_n(\{0,1\})$)}
+%         \fontsize{9.5}{10}\selectfont
+%         \begin{lstlisting}
+% for j allant de 0 a n-1:
+%     while (il existe i < j avec low[i] = low[j]):
+%         ajouter colonne i de B a colonne j modulo 2
+%       \end{lstlisting}
+%     \end{block}
 \end{frame}
 
 
@@ -312,16 +328,33 @@ for j allant de 0 a n-1:
 
 \begin{frame}[fragile]
     \frametitle{Algorithme optimisé}
-    \begin{block}{Algorithme Standard optimisé($B \in M_n(\{0,1\})$)}
-        \fontsize{9.5}{10}\selectfont
-        \begin{lstlisting}
-dims <- Tableau des simplexes ou dims[i] contient la liste des simplexes de dimension i
-for toute dimension d a considerer:
-    for chaque simplexe j de dims[d]
-        while (il existe i dans dims[d] tel que low[j] = low[i]):
-            ajouter colonne i de B a colonne j modulo 2
-      \end{lstlisting}
-    \end{block}
+    \begin{algorithm}[H]
+        \SetKwFor{ForAll}{Pour tout}{Faire}{Fin pour tout}
+        \SetKwFor{While}{Tant que}{Faire}{Fin pour tout}
+        \SetKwInOut{Input}{Entrée}\SetKwInOut{Output}{Sortie}
+        \Input{$B \in M_n(\{0, 1\})$ la matrice à reduire ($(C_i)_{i=1}^n$ ses colonnes)}
+        \Output{$\overline{B}$ matrice réduite}
+        \BlankLine
+        dims $\leftarrow$ Tableau des simplexes où dims[i] contient la liste des simplexes de dimension i\\
+        \ForAll{dimension d à considérer}{
+            \ForAll{j $\in$ dims[d]}{
+                \While{$\exists i < j$ dans dims[d] tel que low[j] = low[i]}{
+                    $C_j$ $\leftarrow$ $(C_i + C_j)$ mod 2\\
+                }
+
+            }
+        }
+    \end{algorithm}
+    % \begin{block}{Algorithme Standard optimisé($B \in M_n(\{0,1\})$)}
+        % \fontsize{9.5}{10}\selectfont
+%         \begin{lstlisting}
+% dims <- Tableau des simplexes ou dims[i] contient la liste des simplexes de dimension i
+% for toute dimension d a considerer:
+%     for chaque simplexe j de dims[d]
+%         while (il existe i dans dims[d] tel que low[j] = low[i]):
+%             ajouter colonne i de B a colonne j modulo 2
+%       \end{lstlisting}
+    % \end{block}
 \end{frame}
 
 \begin{frame}
@@ -385,9 +418,8 @@ for toute dimension d a considerer:
 \begin{frame}
     \frametitle{Annexe : Théorème des facteurs invariants}
     Il existe un unique ensemble ${d_1, ..., d_p}$ d'éléments de $H_k$ définis à des inversibles près, tel que :
-    $$H_k (X) \simeq \bigoplus_{i=1}^p P_k (X) / d_i P_k (X)$$
-
-    en notant $P_k(X)$ l'ensemble des parties à $k+1$ éléments de X, formant donc un complexe simplicial constitué uniquement de $k$-simplexes. Cet ensemble est appelé \textit{code barre} de $H_k$.
+    $$H_k \simeq \mathbb{Z}^\beta \bigoplus_{i=1}^p \mathbb{Z} / d_i \mathbb{Z}$$
+    Cet ensemble est appelé \textit{code barre} de $H_k$.
 \end{frame}
 
 \begin{frame}
@@ -420,4 +452,5 @@ for toute dimension d a considerer:
 
     Pour la récupération des stations et des temps d'attentes moyens : transport.data.gouv.fr
 \end{frame}
+
 \end{document}
