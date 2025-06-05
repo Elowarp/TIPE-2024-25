@@ -58,6 +58,12 @@
     cadre("Théorème " + name, content, "#0F084B")
 }
 
+#let prop(content) = {
+    cadre("Propriété", content, "#0F084B")
+}
+
+// #show figure: it => {}
+
 #let code(source, title:"Func", lang:"python") = {
     rect(stroke: (left: gray + 0.2em))[
         #text(title, font:"DejaVu Sans Mono", size:0.8em)\
@@ -75,6 +81,10 @@
 #let ensPts = $X$
 #let mrs = "Ville A"
 #let tls = "Ville B"
+
+// #show text: it => {}
+// #show figure: it => {}
+// #show math.equation: set text(size: 0.1pt)
 
 #align(center, text(17pt)[
     *TIPE : Étude de couverture de réseaux de métro, application de l'homologie persistante et optimisation*
@@ -100,7 +110,7 @@
 )
 
 #align(center)[*Résumé*]
-Nous nous proposons ici d'étudier les différentes disparités dans les réseaux métropolitains de plusieurs grandes villes, nous allons détecter les zones spatiales les plus en déficit de transports en commun. Pour cela, nous adopterons une approche analytique utilisant la topologie : _l'homologie persistante_.
+Nous nous proposons ici d'étudier les différentes disparités dans les réseaux métropolitains de plusieurs grandes villes, nous allons détecter les zones spatiales les plus en déficit de transports en commun. Pour cela, nous adopterons une approche analytique utilisant la topologie : _l'homologie persistante_. Nous proposerons de plus une amélioration de l'algorithme utilisé.
 
 = Définitions <Definitions>
 
@@ -307,10 +317,10 @@ Il y a cependant un problème : nous voulons analyser un ensemble de points, et 
     Soient un ensemble $#ensPts = (x_i)_(i=0)^n$ de points associés à des poids $(w_i)_(i=0)^n$ et une distance $d$, on définit le complexe simplicial pondéré de Vietoris-Rips au rang $t$, noté $V_t (#ensPts, d)$, comme l'ensemble des simplexes ${sigma_i_0, ..., sigma_i_k}$ tels que : 
     #align(center)[
         $
-        forall r in [|0, k|], sigma_(i_r)=[x_i_1, ..., x_i_l] "où" 
+        forall r in [|0, k|], sigma_(i_r)=[x_i_0, ..., x_i_l] "et" 
         cases(
             forall j in [|0, l|]\, w_i_j < t,
-            forall (j,l) in [|0, k|]^2\, d(x_i_j, x_i_l) + w_i_j + w_i_l < 2t
+            forall (p,q) in [|0, k|]^2\, d(x_i_p, x_i_q) + w_i_p + w_i_q < 2t
         )
         $
     ]  
@@ -319,8 +329,64 @@ Il y a cependant un problème : nous voulons analyser un ensemble de points, et 
 Ainsi plus on augmente $t$, plus le complexe possède des simplexes, on en donne une représentation @VR. Pour chaque $t$ qui augmente le nombre de simplexes du complexe simplicial, nous ajoutons $V_t (#ensPts, d)$ à la filtration que l'on est en train de créer.
 
 #figure(
-    image("../images/VR_complex.png", width: 200pt),
-    caption: [Exemple de complexe simplicial de Vietoris-Rips pour un rayon $t$ où les arêtes noires sont des simplexes de dimension 1; les triangles bleu clair des simplexes de dimension 2 et les pyramides bleu foncé de dimension 3. (Wikipédia)]
+    cetz.canvas({
+        import cetz.draw: *
+        let pts = {
+            let p0 = (0, 4)
+            let p1 = (0, 5)
+            let p2 = (0.5, 4.5)
+            let p3 = (1, 4.5)
+            let p4 = (2, 3)
+            let p5 = (2, 2)
+            let p6 = (2, 6)
+            let p7 = (2, 6.5)
+            let p8 = (3, 5.5)
+            let p9 = (4, 2)
+            let p10 = (4, 3)
+            let p11 = (5.5, 2.5)
+            let p12 = (4, 4.5)
+            (p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
+        }
+
+        line(pts.at(0), pts.at(1), pts.at(3), pts.at(0), fill: blue.transparentize(50%))
+
+        line(pts.at(11), pts.at(10), pts.at(9), pts.at(11), fill: red.transparentize(75%))
+        line(pts.at(11), pts.at(10), pts.at(12), pts.at(11), fill: red.transparentize(75%))
+        line(pts.at(6), pts.at(7), pts.at(8), pts.at(6), fill: red.transparentize(75%))
+
+
+        line(pts.at(3), pts.at(6))
+        line(pts.at(0), pts.at(2))
+        line(pts.at(1), pts.at(2))
+        line(pts.at(3), pts.at(2))
+        line(pts.at(3), pts.at(4))
+        line(pts.at(4), pts.at(5))
+        line(pts.at(4), pts.at(10))
+        line(pts.at(5), pts.at(9))
+        line(pts.at(10), pts.at(9))
+        line(pts.at(10), pts.at(11))
+        line(pts.at(9), pts.at(11))
+        line(pts.at(12), pts.at(11))
+        line(pts.at(12), pts.at(10))
+        line(pts.at(12), pts.at(8))
+        line(pts.at(7), pts.at(8))
+        line(pts.at(7), pts.at(6))
+        line(pts.at(8), pts.at(6))
+        
+
+        let draw_point(p) = {
+            circle(p, radius: (0.05), fill: black)
+        }
+       
+        for i in range(13) {
+            let p = pts.at(i)
+            draw_point(p)
+        }
+
+        // lines.at(0)
+        
+    }),
+    caption: [Exemple de complexe simplicial de Vietoris-Rips pour un rang $t$ où les arêtes noires sont des simplexes de dimension 1; les triangles rouges des simplexes de dimension 2 et la pyramide bleue de dimension 3.]
 ) <VR>
 
 Pour définir formellement des "trous", nous devons définir les opérateurs de bords. Ainsi selon @CoursHomologie :
@@ -330,7 +396,7 @@ Pour définir formellement des "trous", nous devons définir les opérateurs de 
     
     $ ... attach(arrow, t:delta_(k+2)) C_(k+1) attach(arrow, t:delta_(k+1)) C_k attach(arrow, t:delta_(k)) C_(k-1) attach(arrow, t:delta_(k-1)) ... attach(arrow, t:delta_0) {0} $
 
-    Où chaque $C_k$ est un groupe abélien libre qui a pour base les $k$-simplexes de #ensPts et $delta_k$ est une morphisme de groupes tel que $delta_k compose delta_(k+1) = 0$
+    Où chaque $C_k$ est un _groupe abélien libre_ qui a pour base les $k$-simplexes de #ensPts et $delta_k$ est une morphisme de groupes tel que $delta_k compose delta_(k+1) = 0$
     
     On appelle $delta_k$ un _opérateur de bords_.
 
@@ -533,44 +599,8 @@ Pour notre usage, $H_1$ représente les zones critiques de couverture du réseau
 
 // C'est exactement ce qui nous intéresse : ces zones décritent par les cycles représentent les zones critiques où les personnes sont le moins bien deservies par le réseau de métros, où c'est le plus compliqué de se rendre à une station de métro en prenant en compte le déplacement vers la station (pied ou voiture) et le temps d'attente moyen en station. 
 
-= Les données <Data>
+Pour cette situation sur les stations de métros, on définit la distance similairement à @PH_resource_coverage: 
 
-== Sources
-
-#[
-    #show link: underline
-
-    On choisit de se baser uniquement sur des vraies villes, que l'on nommera #mrs et #tls par la suite, pour tester notre approche. De plus, toutes les informations relatives aux stations de métro ainsi que les temps de passages sont trouvables sur #link("https://transport.data.gouv.fr").
-
-    Ces informations servent à définir nos points et notre pondération, en revanche elles ne permettent pas d'obtenir les distances entre les stations, pour cela nous utiliserons alors #link("https://www.geoapify.com") qui nous permet d'estimer des temps de trajet en voiture et à pied.
-
-]
-
-== Points et distances <Construction>
-
-Définissons dès lors nos objets :
-
-#def[
-    Un point $x_i$, représentant une station de métro, est défini par la donnée de sa position géographique (latitude/longitude) ainsi que son poids $w_i$. Le poids $w_i$ est égal à la moyenne du temps d'attente entre deux métros en station $x_i$ sur une semaine entière.
-]
-
-// Les temps de passage des métros en station étant plus ou moins constant sur la semaine, il est cohérent d'utiliser une moyenne.
-
-// De plus, dans un premier temps, nous définissons similairement à @PH_resource_coverage une distance non symétrique entre deux stations $x$ et $y$ :
-
-// $ tilde(d)(x,y) = min(t_"marche" (x,y), t_"voiture" (x,y)) $
-
-// Avec $t_"marche" (x,y)$ le temps qu'il faut en marchant pour aller de la station x à la station y, de même en voiture pour $t_"voiture" (x,y)$.
-
-On définit la distance similairement à @PH_resource_coverage: 
-
-// #def[
-//     On définit la distance entre deux stations de métros $x$ et $y$ comme :
-//     $ d(x,y) = 1 / P (P(x)tilde(d)(x,y) + P(y)tilde(d)(y,x)) $
-//     En notant $P(x)$ la population de l'arrondissement de la station $x$, et $P = P(x) + P(y)$ la somme des population des arrondissement de $x$ et $y$.
-
-//     _(Temporairement P(x) = 1 $forall x$, donc $d = tilde(d)$)_
-// ]
 #def[
     On définit la distance entre deux stations de métro $x$ et $y$ comme :
     $ d(x,y) = 1 / 2 (min(t_"marche" (x,y), t_"voiture" (x,y)) + min(t_"marche" (y,x), t_"voiture" (y,x))) $
@@ -578,11 +608,50 @@ On définit la distance similairement à @PH_resource_coverage:
 
 Ainsi en revenant aux boules des complexes simplicaux de Vietoris-Rips, la distance modélise le coût temporel d'un trajet "porte à porte" entre les stations (en voiture ou à pied).
 
+
+// = Les données <Data>
+
+// == Sources
+
+// #[
+//     #show link: underline
+
+//     On choisit de se baser uniquement sur des vraies villes, que l'on nommera #mrs et #tls par la suite, pour tester notre approche. De plus, toutes les informations relatives aux stations de métro ainsi que les temps de passages sont trouvables sur #link("https://transport.data.gouv.fr").
+
+//     Ces informations servent à définir nos points et notre pondération, en revanche elles ne permettent pas d'obtenir les distances entre les stations, pour cela nous utiliserons alors #link("https://www.geoapify.com") qui nous permet d'estimer des temps de trajet en voiture et à pied.
+
+// ]
+
+// == Points et distances <Construction>
+
+// Définissons dès lors nos objets :
+
+// #def[
+//     Un point $x_i$, représentant une station de métro, est défini par la donnée de sa position géographique (latitude/longitude) ainsi que son poids $w_i$. Le poids $w_i$ est égal à la moyenne du temps d'attente entre deux métros en station $x_i$ sur une semaine entière.
+// ]
+
+// // Les temps de passage des métros en station étant plus ou moins constant sur la semaine, il est cohérent d'utiliser une moyenne.
+
+// // De plus, dans un premier temps, nous définissons similairement à @PH_resource_coverage une distance non symétrique entre deux stations $x$ et $y$ :
+
+// // $ tilde(d)(x,y) = min(t_"marche" (x,y), t_"voiture" (x,y)) $
+
+// // Avec $t_"marche" (x,y)$ le temps qu'il faut en marchant pour aller de la station x à la station y, de même en voiture pour $t_"voiture" (x,y)$.
+
+
+// // #def[
+// //     On définit la distance entre deux stations de métros $x$ et $y$ comme :
+// //     $ d(x,y) = 1 / P (P(x)tilde(d)(x,y) + P(y)tilde(d)(y,x)) $
+// //     En notant $P(x)$ la population de l'arrondissement de la station $x$, et $P = P(x) + P(y)$ la somme des population des arrondissement de $x$ et $y$.
+
+// //     _(Temporairement P(x) = 1 $forall x$, donc $d = tilde(d)$)_
+// // ]
+
 = Méthode
 
 Pour trouver les zones critiques, nous utiliserons la méthode de _l'homologie persistante_ décrite dans @PH_resource_coverage (dans le cas de notre réseau de métro). Celle-ci se décompose en 3 étapes :
 
-- Transformation de l'ensemble des points (les stations de métro) $x_i$ de poids $w_i$ en une filtration;
+- Transformation de l'ensemble des points $x_i$ (les stations de métro) de poids $w_i$ (égale à la moyenne de temps d'attente en station sur une semaine) en une filtration;
 - Création et réduction de la matrice de bordure (définie dans la suite);
 - Récupération des simplexes "tueurs" de classes d'homologies
 
@@ -592,7 +661,7 @@ On suppose que la première étape est déjà réalisée suivant la @Definitions
 
 // Depuis cette filtration, nous voulons obtenir les classes d'homologies, c'est donc le théorème suivant qui justifie entièrement cette recherche.
 
-Ainsi à partir de cette filtration, nous pouvons obtenir les classes d'homologies grâce au théorème qui suit :
+Ainsi à partir de cette filtration, nous pouvons calculer les classes d'homologies grâce au théorème qui suit :
 
 #th(
     "des facteurs invariants",
@@ -600,7 +669,7 @@ Ainsi à partir de cette filtration, nous pouvons obtenir les classes d'homologi
     D'après @PH_invitation et @ComputingPH, il existe un unique ensemble ${d_1, ..., d_p}$ d'éléments de $bb(Z)$ définis à des inversibles près et $beta in bb(N)$ tels que :
     $ H_k tilde.eq bb(Z)^beta plus.circle.big_(i=1)^p bb(Z) \/ d_i bb(Z) $
 
-    Où $beta$ est le rang de la partie libre du $bb(Z)$-module de type fini $H_k$ (celui ci est de plus le nombre de trous de dimension $k$, appelé _nombre de Betty_). L'ensemble est appelé _code barre_ de $H_k$.
+    Où $beta$ est le rang de la partie libre du groupe abélien de type fini $H_k$ (celui ci est de plus le nombre de trous de dimension $k$, appelé _nombre de Betty_).
     ]
 )
 // _Note : Je ne suis pas sûr de comprendre ce que je manipule notamment les types du quotient... Les extraits sont ici : #underline(link("https://fr.wikipedia.org/wiki/Th%C3%A9or%C3%A8me_des_facteurs_invariants#A-modules_de_type_fini","Source")) et @annexe_inv. _
@@ -616,9 +685,9 @@ Informatiquement, selon @PH_roadmap, on calcule ce code barre en créant une mat
 
 Un exemple d'une telle matrice est donnée en @Bordure.
 
-Après avoir calculé $B$, nous voulons la _réduire_ à un code barre, dans le sens où par lecture matricielle, grâce au théorème précédent, nous pouvons donner un temps de vie à chaque simplexe par l'attribution d'un unique antécédent à chacun de ceux-ci. Le terme de _réduction_ fait ici référence à la réduction de $B$ en forme normale de Smith. Nous pouvons observer ce résultat en @BordureReduite.
+Après avoir calculé $B$, nous voulons la _réduire_ à un _code barre_, dans le sens où par lecture matricielle, grâce au théorème précédent, nous pouvons donner un temps de vie à chaque simplexe par l'attribution d'un unique antécédent à chacun de ceux-ci. Nous pouvons observer ce résultat en @BordureReduite.
 
-Cet algorithme de réduction est nommé _standard algorithm_ et est décrit dans @PH_roadmap par, en posant $"low"_B (j) = max({i in [|0, n-1|], B[i][j] != 0}) in bb(N) union {-1}$ :
+Cet algorithme de réduction est nommé _Standard Algorithm_ et est décrit dans @PH_roadmap par, en posant $"low"_B (j) = max({i in [|0, n-1|], B[i][j] != 0}) in bb(N) union {-1}$ :
 
 #code("for j allant de 0 à n-1:
     while (il existe i < j avec low[i] = low[j]):
@@ -820,15 +889,30 @@ C'est depuis cette matrice que nous sommes capables de déterminer toutes les cl
 
 = Recherche d'optimisation<optimisation>
 
-La motivation de cette section vient de l'observation de la complexité du standard algorithm : $O(n^3) = O(2^(3|#ensPts|))$ ($n$ étant le nombre total de simplexes possibles $=2^(|#ensPts|)$). Nous cherchons donc à optimiser la complexité de celui ci.
+La motivation de cette section vient de l'observation de la complexité du _Standard Algorithm_ : $O(n^3) = O(2^(3|#ensPts|))$ ($n$ étant le nombre total de simplexes possibles $=2^(|#ensPts|)$). Nous cherchons donc à optimiser la complexité de celui ci.
 
-L'optimisation que l'on propose provient de deux observations :
-- $B$ est une matrice creuse ;
-- L'opération de somme de colonnes (ligne 3) agit seulement sur une matrice extraite $B_d$ ne dépendant que de la dimension des simplexes. 
+On propose une amélioration suite à la propriété suivante : 
 
-Le premier point influence le choix d'utilisation de listes d'adjacences à une matrice d'adjacence, en particulier par des doubles listes chaînées ordonnées.
+#prop([L'opération de somme de colonnes (ligne 3) agit seulement sur une matrice extraite $B_d$ ne dépendant que de la dimension des simplexes.])
 
-La justification du second point se trouve en annexe.
+_Preuve_ 
+
+Soit $d in [|0, |#ensPts| - 1|]$, considérons la matrice extraite :
+$ B_d = (B_(i,j))_((i,j) in I) "telle que " I = {(i,j) in [|0,n-1|], dim(sigma_i) = d "et "dim(sigma_j)=d+1 } $
+
+On note $phi$ la correspondance entre les indices des deux matrices : $(B_d)_(phi(i,j)) = B_(i,j)$
+
+Supposons que l'on exécute la ligne 3 de l'algorithme, alors $"low"(j)="low"(i) = k$, on pose $sigma_i$, $sigma_j$ et $sigma_k$ les simplexes associés. Donc $sigma_k$ est une face de $sigma_i$ et $sigma_j$, donc par définition 
+$ dim(sigma_k) + 1 = dim(sigma_i) = dim(sigma_j) $
+
+La ligne $L_k$ ainsi que les deux colonnes $C_i$ et $C_j$ sont alors considérées dans $B_(d)$ ($d = dim(sigma_k)$). De plus, toutes les lignes ayant un coefficient non nul dans les colonnes $C_i$ ou $C_j$ le sont aussi puisqu'un coefficient non nul revient à être une face, donc de dimension $d$. 
+
+Ainsi l'opération de somme des colonnes $C_i + C_j$ dans $B$ (ligne 3) est équivalent à celle de $C_i' + C_j'$ dans $B_d$ avec $phi(i,j) = (i',j')$.  #align(right)[#box(stroke: black, width: 8pt, height: 8pt, baseline: 0.3pt)]
+
+Ainsi, au lieu d'exécuter l'algorithme sur la matrice creuse $B$, on peut l'exécuter sur les matrices extraites $B_d$ plus petites et moins creuses, on localise ainsi les modifications. 
+
+Vu que la matrice est creuse, nous choisissons d'utiliser une liste d'adjacence pour représenter la matrice.
+
 
 On en déduit cet algorithme où $B$ est modifié par effet de bords sur les $B_d$ : 
 
@@ -909,21 +993,6 @@ L'homologie persistante est donc une méthode nous permettant de mettre en lumi�
 
 #bibliography("../bibliography.yml", style: "american-physics-society", title:"Bibliographie")
 
-= Annexe
-
-Justifions le deuxième point annoncé dans @optimisation, soit $d in [|0, |#ensPts| - 1|]$, considérons la matrice extraite :
-$ B_d = (B_(i,j))_((i,j) in I) "telle que " I = {(i,j) in [|0,n-1|], dim(sigma_i) = d "et "dim(sigma_j)=d+1 } $
-
-On note $phi$ la correspondance entre les indices des deux matrices : $(B_d)_(phi(i,j)) = B_(i,j)$
-
-Supposons que l'on exécute la ligne 3 de l'algorithme, alors $"low"(j)="low"(i) = k$, on pose $sigma_i$, $sigma_j$ et $sigma_k$ les simplexes associés. Donc $sigma_k$ est une face de $sigma_i$ et $sigma_j$, donc par définition 
-$ dim(sigma_k) + 1 = dim(sigma_i) = dim(sigma_j) $
-
-La ligne $L_k$ ainsi que les deux colonnes $C_i$ et $C_j$ sont alors considérées dans $B_(d)$ ($d = dim(sigma_k)$). De plus, toutes les lignes ayant un coefficient non nul dans les colonnes $C_i$ ou $C_j$ le sont aussi puisqu'un coefficient non nul revient à être une face, donc de dimension $d$. 
-
-Ainsi l'opération de somme des colonnes $C_i + C_j$ dans $B$ (ligne 3) est équivalent à celle de $C_i' + C_j'$ dans $B_d$ avec $phi(i,j) = (i',j')$.
-
-Ainsi, au lieu d'exécuter l'algorithme sur la matrice creuse $B$, on peut l'exécuter sur les matrices extraites $B_d$ plus petites et moins creuses, on localise ainsi les modifications.
 
 // _Partie temporaire pour plus de compréhension_
 // == Théorème des invariants <annexe_inv>
