@@ -3,6 +3,7 @@
 \usepackage{listingsutf8}
 \usepackage{mathtools}
 \usepackage{appendixnumberbeamer}
+\usepackage{colortbl}
 \usepackage{pgfplots}
 \usepackage[frenchkw,linesnumbered,lined,commentsnumbered]{algorithm2e}
 \usepackage{mathtools}
@@ -16,7 +17,7 @@
 \begin{document}
 
 \title{Étude de couvertures de réseaux de métro, application de 
-l'homologie persistante et optimisation.}
+l'homologie persistante et proposition d'optimisation de l'algorithme.}
 \author{Elowan ; 10381}
 \date{\today}
 
@@ -36,7 +37,7 @@ l'homologie persistante et optimisation.}
         \hfill
         \includegraphics[width=0.4\textwidth]{../images/toulouse_blank.png}
         \centering
-        \caption{Lignes de métros (Marseille et Toulouse)}
+        \caption{Lignes de métros (Ville A et Ville B)}
     \end{figure}
     
     
@@ -151,7 +152,7 @@ l'homologie persistante et optimisation.}
         \hfill
         \includegraphics[width=0.4\textwidth]{../images/toulouse_blank.png}
         \centering
-        \caption{Lignes de métros (Marseille et Toulouse)}
+        \caption{Lignes de métros (Ville A et Ville B)}
     \end{figure}
 
 \end{frame}
@@ -172,19 +173,19 @@ l'homologie persistante et optimisation.}
 \begin{frame}
     \frametitle{Définition des complexes pondérés de Vietoris-Rips}
     \begin{block}{Complexe Simplicial pondéré de Vietoris-Rips}
-        On le définit au rang $r$, comme l'ensemble des simplexes $(\sigma_{i_0}, ..., \sigma_{i_k})$ sur les points tels que $\forall q \in [|0, k|], \sigma_q = [p_{i_0}, ...,p_{i_l}],$ 
+        On le définit au rang $t$, comme l'ensemble des simplexes $(\sigma_{i_0}, ..., \sigma_{i_k})$ sur les points tels que $\forall q \in [|0, k|], \sigma_q = [p_{i_0}, ...,p_{i_l}],$ 
         $$
             \begin{cases}
-                \forall j \in [|0, l|], poids_{i_j} < r\\
-                \forall (j,k) \in [|0, l|]^2, d(p_{i_j}, p_{i_k}) + poids_{i_j} + poids_{i_k} < 2r
+                \forall j \in [|0, l|], poids_{i_j} < t\\
+                \forall (j,k) \in [|0, l|]^2, d(p_{i_j}, p_{i_k}) + poids_{i_j} + poids_{i_k} < 2t
             \end{cases}
         $$
     \end{block}
 
     \begin{figure}
         \centering
-        \includegraphics[width=0.3\textwidth]{../images/VR_complex.png}
-        \caption{Image repr les vietoris rips, tiré de \textit{Persitent homology for resource coverage: A case study of access to polling sites}}
+        \includegraphics[width=0.3\textwidth]{../images/filtrationVR.png}
+        \caption{Création d'un complexe de Vietoris Rips au rang t, simplexes de dimension 0 et 1 en noir, dimension 2 en rouge et 3 en bleu.}
     \end{figure}
     
 \end{frame}
@@ -321,7 +322,7 @@ l'homologie persistante et optimisation.}
 
     Modifications apportées :
     \begin{itemize}
-        \item Représentation de la matrice en liste d'adjacence (double liste chaînée ordonnée) ;
+        \item Représentation de la matrice en liste d'adjacence (listes chaînées) ;
         \item Application de l'algorithme sur des matrices extraites et non la totale.
     \end{itemize}
 \end{frame}
@@ -383,13 +384,13 @@ l'homologie persistante et optimisation.}
         \begin{minipage}[c]{.42\linewidth}
             \centering
             \includegraphics[width=1.1\textwidth]{../../Code/images/marseille.png}
-            \caption{Marseille}
+            \caption{Ville A}
         \end{minipage}
         \hfill
         \begin{minipage}[c]{.42\linewidth}
             \centering
             \includegraphics[width=1.1\textwidth]{../../Code/images/toulouse.png}
-            \caption{Toulouse}
+            \caption{Ville B}
         \end{minipage}
     \end{figure}
 \end{frame}
@@ -419,7 +420,6 @@ l'homologie persistante et optimisation.}
     \frametitle{Annexe : Théorème des facteurs invariants}
     Il existe un unique ensemble ${d_1, ..., d_p}$ d'éléments de $H_k$ définis à des inversibles près, tel que :
     $$H_k \simeq \mathbb{Z}^\beta \bigoplus_{i=1}^p \mathbb{Z} / d_i \mathbb{Z}$$
-    Cet ensemble est appelé \textit{code barre} de $H_k$.
 \end{frame}
 
 \begin{frame}
@@ -451,6 +451,46 @@ l'homologie persistante et optimisation.}
     Pour le calcul des temps de trajet :  apidocs.geoapify.com
 
     Pour la récupération des stations et des temps d'attentes moyens : transport.data.gouv.fr
+\end{frame}
+
+\begin{frame}
+    \frametitle{Annexe : Illustration preuve d'optimisation}
+    \begin{figure}
+        \begin{tabular}{ c |c | c | c | c | c | c | c | c | c | c }
+              & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\ \hline
+            0 &   &   &   &   & \cellcolor{red!25}1 & \cellcolor{red!25}  & \cellcolor{red!25}  & \cellcolor{red!25}1 & \cellcolor{red!25}1 &   \\ \hline
+            1 &   &   &   &   & \cellcolor{red!25}1 & \cellcolor{red!25}1 & \cellcolor{red!25}  & \cellcolor{red!25}  & \cellcolor{red!25}  &   \\ \hline
+            2 &   &   &   &   & \cellcolor{red!25}  & \cellcolor{red!25}1 & \cellcolor{red!25}1 & \cellcolor{red!25}  & \cellcolor{red!25}1 &   \\ \hline
+            3 &   &   &   &   & \cellcolor{red!25}  & \cellcolor{red!25}  & \cellcolor{red!25}1 & \cellcolor{red!25}1 & \cellcolor{red!25}  &   \\ \hline
+            4 &   &   &   &   &   &   &   &   &   & \cellcolor{blue!25}1 \\ \hline
+            5 &   &   &   &   &   &   &   &   &   & \cellcolor{blue!25}1 \\ \hline
+            6 &   &   &   &   &   &   &   &   &   & \cellcolor{blue!25}  \\ \hline
+            7 &   &   &   &   &   &   &   &   &   & \cellcolor{blue!25}  \\ \hline
+            8 &   &   &   &   &   &   &   &   &   & \cellcolor{blue!25}1 \\ \hline
+            9 &   &   &   &   &   &   &   &   &   &   \\ \hline 
+            \textbf{low} & -1 & -1 & -1 & -1 & \textbf{1} & \textbf{2} & \textbf{3} & 
+            \textbf{3} & \textbf{2} & \textbf{8}
+        \end{tabular}
+        \centering
+        \caption{Illustration des matrices extraites par dimension}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Annexe : Preuve de correction 1/2}
+    Soit $d \in [|0, |X| - 1|]$, considérons la matrice extraite : $B_d = (B_{i,j})_{(i,j) \in I}$
+    telle que $$I = \{(i,j) \in [|0,n-1|], dim(\sigma_i) = d \text{ et } dim(\sigma_j)=d+1\}$$
+
+    On note $\phi$ la correspondance entre les indices des deux matrices : $(B_d)_{\phi(i,j)} = B_{i,j}$
+
+    Supposons que l'on exécute la ligne 3 de l'algorithme, alors $low(j)=low(i) = k$, on pose $\sigma_i$, $\sigma_j$ et $\sigma_k$ les simplexes associés. Donc $\sigma_k$ est une face de $\sigma_i$ et $\sigma_j$, donc par définition 
+    $ dim(\sigma_k) + 1 = dim(\sigma_i) = dim(\sigma_j) $
+\end{frame}
+\begin{frame}
+    \frametitle{Annexe : Preuve de correction 2/2}
+La ligne $L_k$ ainsi que les deux colonnes $C_i$ et $C_j$ sont alors considérées dans $B_d$ ($d = dim(\sigma_k)$). De plus, toutes les lignes ayant un coefficient non nul dans les colonnes $C_i$ ou $C_j$ le sont aussi puisqu'un coefficient non nul revient à être une face, donc de dimension $d$. 
+
+Ainsi l'opération de somme des colonnes $C_i + C_j$ dans $B$ (ligne 3) est équivalent à celle de $C_i' + C_j'$ dans $B_d$ avec $\phi(i,j) = (i',j')$.
 \end{frame}
 
 \end{document}
