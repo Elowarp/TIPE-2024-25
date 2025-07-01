@@ -1,4 +1,4 @@
-# TIPE 2024-25
+# TIPE 2024-25 : Homologie persistante et métros
 
 ## Rapides explications
 
@@ -6,9 +6,9 @@ Repo contenant tous mes fichiers pour mon TIPE 24-25 sur le thème "Transition, 
 
 Je maintiens un fichier `history.md` contenant toutes les modifications jours par jours ainsi que mes réfléxions sur ce tipe/code.
 
-Le sujet en étude est le suivant : Homologie persistante pour de la répartition de ressources : le cas des transports publics.
+Le sujet en étude est le suivant : **Etude de couverture de réseaux de métro, application de l'homologie persistante et optimisation.**
 
-La plus grande partie de mon travail peut être observée dans le fichier `rapport.pdf`. Celui ci condense tout mon travail pour l'instant, il n'est pas final mais assez fini pour en donner une première approche.
+Le fichier `rapport.pdf` est un document que j'ai rédigé pour les concours des Ecoles Normales Supérieures et s'apparente à un mini-document de recherche/thèse (sans vouloir plus le détailler).
 
 ## Utilisation
 
